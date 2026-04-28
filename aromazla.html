@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aromazla — Jewellery by Iván Alzamora</title>
+  <meta name="description" content="Aromazla — symbolic art forged in gold and set with certified precious stones. Wearable meaning, made once. By Iván Alzamora, Madrid." />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#0A0A0A" />
+
+  <meta property="og:title" content="Aromazla — Jewellery" />
+  <meta property="og:description" content="Symbolic art forged in gold and set with certified precious stones. Wearable meaning, made once." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ivan.es/aromazla" />
+  <meta property="og:locale" content="en_GB" />
+  <link rel="canonical" href="https://ivan.es/aromazla" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%230A0A0A'/><text x='32' y='42' font-family='Georgia,serif' font-size='28' font-weight='400' fill='%23F5F0E8' text-anchor='middle' letter-spacing='1'>IA</text></svg>" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── TOKENS ─── */
+    :root {
+      --ink:        #0A0A0A;
+      --ink-2:      #111111;
+      --ink-3:      #15140F;
+      --ink-card:   #18171A;
+      --bone:       #F5F0E8;
+      --bone-soft:  rgba(245, 240, 232, 0.72);
+      --bone-faint: rgba(245, 240, 232, 0.42);
+      --bone-line:  rgba(245, 240, 232, 0.10);
+      --gold:       #C9A84C;
+      --gold-soft:  rgba(201, 168, 76, 0.72);
+
+      --f-display: 'Cinzel', 'Trajan Pro', Georgia, serif;
+      --f-body:    'Inter', system-ui, sans-serif;
+      --f-mono:    'JetBrains Mono', ui-monospace, monospace;
+
+      --ease-out:  cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    html, body { overflow-x: hidden; }
+    body {
+      background: var(--ink);
+      color: var(--bone);
+      font-family: var(--f-body);
+      font-size: 16px;
+      line-height: 1.65;
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      min-height: 100dvh;
+    }
+    a { color: inherit; text-decoration: none; }
+    img, svg { display: block; max-width: 100%; }
+    ::selection { background: var(--gold); color: var(--ink); }
+
+    /* ─── GRAIN ─── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 90;
+      opacity: 0.035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 320 320' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      mix-blend-mode: screen;
+    }
+
+    /* ─── STICKY STACK (mobile default) ─── */
+    /* Each panel sticks at top:0 inside .stack with rising z-index. On desktop
+       (≥1024px) the same panels are taken out of this flow and laid out
+       horizontally inside .hpanels-track — see horizontal block below. */
+    .stack { display: block; }
+    .stack .panel {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      z-index: var(--z, 1);
+      isolation: isolate;
+      background: var(--ink);
+      max-width: none;
+      margin: 0;
+    }
+    /* Inner content centered within a max-width column inside each panel */
+    .panel-inner {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+    /* On mobile, .hpanels wrappers are layout-transparent so the panels
+       behave as direct children of .stack and stack vertically. */
+    @media (max-width: 1023px) {
+      .hpanels, .hpanels-track { display: contents; }
+    }
+
+    /* ─── HORIZONTAL SCROLL (desktop ≥1024px) ─── */
+    @media (min-width: 1024px) {
+      .hpanels {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+        background:
+          radial-gradient(ellipse 60% 70% at 50% 32%, rgba(50, 42, 28, 0.6) 0%, transparent 70%),
+          linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%);
+      }
+      .hpanels-track {
+        display: flex;
+        flex-wrap: nowrap;
+        height: 100%;
+        width: max-content;
+        will-change: transform;
+      }
+      /* Panels become transparent on desktop so the .hpanels backdrop shows
+         through unbroken — no seam between sections. */
+      .hpanels .panel { background: transparent; }
+      .hpanels .hpanel {
+        position: relative !important;
+        top: auto !important;
+        flex: 0 0 100vw;
+        width: 100vw;
+        height: 100vh;
+        min-height: 100vh;
+        z-index: auto !important;
+        overflow: hidden;
+      }
+      /* Vertically center the gallery + commission content inside their 100vh panels */
+      .hpanels .gallery,
+      .hpanels .commission {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* Compress the gallery grid so 6 pieces fit comfortably inside one 100vh panel */
+      .hpanels .gallery .panel-inner { max-width: 1100px; padding: 0 clamp(20px, 4vw, 48px); }
+      .hpanels .gallery-head { margin-bottom: 28px; }
+      .hpanels .gallery-grid { gap: 14px; }
+      .hpanels .gallery .piece { aspect-ratio: 1 / 1; }
+      .hpanels .gallery .piece.span-2 { grid-column: span 1; aspect-ratio: 1 / 1; }
+    }
+
+    /* ─── NAV (shared with index.html) ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      padding: 22px clamp(20px, 4vw, 48px);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      transition: background 600ms var(--ease-out), backdrop-filter 600ms;
+    }
+    /* Nav stays fully transparent at all times — no background, no blur, no border on scroll */
+    nav.scrolled { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
+    /* Logo is centered horizontally regardless of how many nav items sit on the right */
+    .nav-mark {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--f-display);
+      font-size: 0.94rem;
+      font-weight: 500;
+      letter-spacing: 0.36em;
+      color: var(--bone);
+      padding-left: 2px;
+    }
+    .nav-mark span { color: var(--gold); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--f-mono);
+      font-size: 0.74rem;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--bone-soft);
+      padding: 6px 0;
+      position: relative;
+      transition: color 240ms var(--ease-out);
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      bottom: -2px;
+      height: 1px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 360ms var(--ease-out);
+    }
+    .nav-links a:hover { color: var(--bone); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-links a.active { color: var(--bone); }
+    .nav-links a.active::after { transform: scaleX(1); }
+
+    .nav-card {
+      display: none;
+      width: 56px;
+      height: 36px;
+      perspective: 800px;
+      cursor: pointer;
+      background: transparent;
+      border: 0;
+      padding: 0;
+    }
+    .nav-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 720ms cubic-bezier(0.7, -0.1, 0.3, 1.1);
+      transform-style: preserve-3d;
+    }
+    .nav-card.open .nav-card-inner { transform: rotateY(180deg); }
+    .nav-card-face {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border: 1px solid var(--bone-line);
+      border-radius: 2px;
+      background: var(--ink-2);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    .nav-card-face strong {
+      font-family: var(--f-display);
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.32em;
+      color: var(--bone);
+      padding-left: 4px;
+    }
+    .nav-card-face em {
+      font-family: var(--f-mono);
+      font-style: normal;
+      font-size: 0.5rem;
+      letter-spacing: 0.24em;
+      color: var(--gold);
+    }
+    .nav-card-back {
+      transform: rotateY(180deg);
+      background: var(--bone);
+      border-color: var(--bone);
+    }
+    .nav-card-back span {
+      width: 6px; height: 1px; background: var(--ink); display: block;
+    }
+    .nav-card-back span + span { width: 14px; }
+    .nav-card-back span + span + span { width: 6px; }
+
+    .menu-sheet {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      background: var(--ink);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 38px;
+      padding: 96px 32px 64px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(-12px);
+      transition: opacity 420ms var(--ease-out), transform 540ms var(--ease-out);
+    }
+    .menu-sheet.open {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .menu-sheet a {
+      font-family: var(--f-display);
+      font-size: clamp(1.7rem, 7vw, 2.4rem);
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      color: var(--bone);
+      text-transform: uppercase;
+    }
+    .menu-sheet a:hover { color: var(--gold); }
+    .menu-sheet .menu-meta {
+      margin-top: 24px;
+      font-family: var(--f-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.24em;
+      color: var(--bone-faint);
+      text-transform: uppercase;
+    }
+
+    /* ─── PAGE HEAD ─── */
+    /* Top-anchored hero stack — mirrors index.html so the two pages feel like a pair.
+       AROMAZLA sits high in the panel, lede directly beneath it, scroll cue at the bottom. */
+    .page-head {
+      position: relative;
+      padding: clamp(120px, 18vh, 200px) clamp(20px, 4vw, 48px) clamp(80px, 10vh, 120px);
+      isolation: isolate;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      text-align: center;
+    }
+
+    .page-head-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    /* The H1 wraps the carved-text SVG; the visible glyphs come from <text> below.
+       The SVG itself does the heavy lifting (filter + animatable strokes/fills). */
+    .page-title {
+      width: 100%;
+      max-width: 620px;
+      display: block;
+      line-height: 0;
+      margin: 0;
+    }
+    .page-title svg {
+      width: 100%;
+      height: auto;
+      overflow: visible;
+    }
+    .page-title text {
+      font-family: var(--f-display);
+      font-weight: 500;
+      letter-spacing: 8px;
+      fill: var(--bone);
+      fill-opacity: 0;
+      stroke: var(--bone);
+      stroke-width: 0.8;
+      stroke-opacity: 1;
+    }
+    .page-lede {
+      font-family: var(--f-display);
+      font-size: clamp(1.05rem, 1.4vw, 1.2rem);
+      line-height: 1.65;
+      color: var(--bone-soft);
+      max-width: 44ch;
+      letter-spacing: 0.005em;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    .page-lede em { color: var(--gold); font-style: italic; }
+
+    /* Scroll cue — pinned to the bottom of the panel; mirrors index. */
+    .page-cue {
+      position: absolute;
+      left: 50%;
+      bottom: clamp(28px, 5vh, 56px);
+      transform: translateX(-50%);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--f-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.42em;
+      text-transform: uppercase;
+      color: var(--bone-faint);
+      pointer-events: none;
+      animation: page-cue-pulse 2.6s ease-in-out 0.2s infinite;
+    }
+    .page-cue .arrow {
+      display: inline-block;
+      width: 28px; height: 1px;
+      background: var(--bone-line);
+      position: relative;
+    }
+    .page-cue .arrow::after {
+      content: '';
+      position: absolute;
+      right: 0; top: 50%;
+      width: 6px; height: 6px;
+      border-right: 1px solid var(--gold-soft);
+      border-bottom: 1px solid var(--gold-soft);
+      transform: translateY(-50%) rotate(-45deg);
+    }
+    @media (max-width: 1023px) {
+      .page-cue { writing-mode: vertical-rl; bottom: clamp(20px, 4vh, 40px); }
+      .page-cue .arrow { width: 1px; height: 28px; }
+      .page-cue .arrow::after {
+        right: 50%; top: auto; bottom: 0;
+        transform: translateX(50%) rotate(45deg);
+      }
+    }
+    @keyframes page-cue-pulse {
+      0%, 100% { opacity: 0.55; }
+      50%      { opacity: 0.95; }
+    }
+
+    /* ─── GALLERY ─── */
+    .gallery {
+      padding: clamp(40px, 6vw, 80px) clamp(20px, 4vw, 48px) clamp(80px, 10vw, 120px);
+    }
+    .gallery-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: clamp(40px, 6vw, 64px);
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--bone-line);
+    }
+    .gallery-head h2 {
+      font-family: var(--f-display);
+      font-size: clamp(1.4rem, 2.4vw, 2rem);
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--bone);
+    }
+    .gallery-head .num {
+      font-family: var(--f-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.32em;
+      color: var(--bone-faint);
+      text-transform: uppercase;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .piece {
+      position: relative;
+      aspect-ratio: 4/5;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% 30%, rgba(201, 168, 76, 0.10) 0%, transparent 65%),
+        linear-gradient(160deg, var(--ink-card) 0%, var(--ink-2) 100%);
+      border: 1px solid var(--bone-line);
+      transition: transform 600ms var(--ease-out), border-color 600ms var(--ease-out);
+    }
+    .piece.span-2 { grid-column: span 2; aspect-ratio: 16/10; }
+    .piece:hover {
+      transform: translateY(-3px);
+      border-color: rgba(201, 168, 76, 0.32);
+    }
+    .piece::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.2;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 280 280' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      mix-blend-mode: screen;
+    }
+    .piece-emblem {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+    }
+    .piece-emblem svg {
+      width: 38%;
+      height: auto;
+      max-width: 140px;
+      stroke: var(--gold-soft);
+      stroke-width: 0.8;
+      fill: none;
+      opacity: 0.55;
+      transition: opacity 600ms var(--ease-out), transform 800ms var(--ease-out);
+    }
+    .piece:hover .piece-emblem svg { opacity: 0.9; transform: scale(1.04); }
+
+    .piece-meta {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      pointer-events: none;
+    }
+    .piece-num {
+      font-family: var(--f-mono);
+      font-size: 0.66rem;
+      letter-spacing: 0.32em;
+      color: var(--bone-faint);
+      text-transform: uppercase;
+    }
+    .piece-name {
+      font-family: var(--f-display);
+      font-size: 0.96rem;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--bone);
+    }
+    .piece-name em {
+      font-style: italic;
+      color: var(--gold);
+      font-weight: 400;
+    }
+
+    /* ─── ABOUT ─── */
+    .about {
+      padding: clamp(80px, 12vw, 140px) clamp(20px, 4vw, 48px);
+      max-width: 1080px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 0.6fr 1fr;
+      gap: clamp(48px, 8vw, 132px);
+      border-top: 1px solid var(--bone-line);
+    }
+    .about-label {
+      font-family: var(--f-mono);
+      font-size: 0.7rem;
+      font-weight: 400;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--gold);
+      align-self: start;
+      position: relative;
+      padding-top: 6px;
+    }
+    .about-label::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 32px; height: 1px;
+      background: var(--gold);
+    }
+    .about-body p {
+      font-family: var(--f-display);
+      font-size: clamp(1.2rem, 2.1vw, 1.7rem);
+      line-height: 1.5;
+      color: var(--bone);
+      font-weight: 400;
+      letter-spacing: 0.005em;
+    }
+    .about-body p + p { margin-top: 22px; }
+    .about-body em { font-style: italic; color: var(--gold); }
+    .about-body .quiet { color: var(--bone-soft); }
+    /* ─── COMMISSION ─── */
+    .commission {
+      position: relative;
+      padding: clamp(80px, 12vw, 140px) clamp(20px, 4vw, 48px);
+      max-width: 1080px;
+      margin: 0 auto;
+      text-align: center;
+      isolation: isolate;
+    }
+    .commission::before, .commission::after {
+      content: '';
+      position: absolute;
+      width: 14px; height: 14px;
+      border-color: var(--gold-soft);
+      border-style: solid;
+      pointer-events: none;
+    }
+    .commission::before { top: 24px; left: clamp(20px, 4vw, 48px); border-width: 1px 0 0 1px; }
+    .commission::after { bottom: 24px; right: clamp(20px, 4vw, 48px); border-width: 0 1px 1px 0; }
+
+    .commission-eyebrow {
+      font-family: var(--f-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.42em;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+    .commission-eyebrow::before, .commission-eyebrow::after {
+      content: '';
+      display: block;
+      width: 22px; height: 1px;
+      background: var(--gold);
+    }
+    .commission h2 {
+      font-family: var(--f-display);
+      font-size: clamp(2.2rem, 4.4vw, 3.6rem);
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+      color: var(--bone);
+      max-width: 22ch;
+      margin: 0 auto 22px;
+      text-transform: uppercase;
+    }
+    .commission h2 em { font-style: italic; color: var(--gold); }
+    .commission p {
+      font-family: var(--f-body);
+      max-width: 50ch;
+      margin: 0 auto 38px;
+      color: var(--bone-soft);
+      font-size: 1.02rem;
+      line-height: 1.7;
+    }
+    .commission .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      font-family: var(--f-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--bone);
+      padding: 18px 36px;
+      border: 1px solid var(--bone-line);
+      transition: border-color 360ms var(--ease-out), color 360ms var(--ease-out), background 360ms var(--ease-out);
+    }
+    .commission .cta:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(201, 168, 76, 0.04);
+    }
+    .commission .cta svg {
+      width: 18px; height: 12px;
+      transition: transform 360ms var(--ease-out);
+    }
+    .commission .cta:hover svg { transform: translateX(4px); }
+
+    /* ─── REVEAL ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 900ms var(--ease-out), transform 900ms var(--ease-out);
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .page-head-grid { grid-template-columns: 1fr; gap: 28px; }
+      .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+      .piece.span-2 { grid-column: span 2; aspect-ratio: 16/9; }
+    }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-card { display: inline-flex; }
+    }
+    @media (max-width: 540px) {
+      .gallery-grid { grid-template-columns: 1fr; }
+      .piece.span-2 { aspect-ratio: 4/5; }
+      .about-numbers { grid-template-columns: 1fr; }
+    }
+
+    a:focus-visible, button:focus-visible {
+      outline: 1px solid var(--gold);
+      outline-offset: 4px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .reveal { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <a href="index.html" class="nav-mark" aria-label="Iván Alzamora — home">I<span>·</span>A</a>
+    <ul class="nav-links">
+      <li><a href="aromazla.html" class="active">Aromazla</a></li>
+      <li><a href="https://visuanza.com" target="_blank" rel="noopener">Visuanza ↗</a></li>
+    </ul>
+    <button class="nav-card" id="navCard" aria-label="Open navigation" aria-expanded="false">
+      <span class="nav-card-inner">
+        <span class="nav-card-face nav-card-front">
+          <strong>IA</strong>
+          <em>·</em>
+        </span>
+        <span class="nav-card-face nav-card-back" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+      </span>
+    </button>
+  </nav>
+
+  <div class="menu-sheet" id="menuSheet" aria-hidden="true">
+    <a href="aromazla.html">Aromazla</a>
+    <a href="https://visuanza.com" target="_blank" rel="noopener">Visuanza ↗</a>
+    <span class="menu-meta">Madrid · 40°25′N 3°42′W</span>
+  </div>
+
+  <!-- STICKY STACK — page-head, gallery, commission, footer.
+       Each panel sticks at top:0 with rising z-index; later panels rise up and cover earlier ones. -->
+  <main class="stack">
+   <div class="hpanels" id="hpanels">
+    <div class="hpanels-track" id="hpanelsTrack">
+
+  <!-- PAGE HEAD -->
+  <header class="page-head panel hpanel" style="--z:1;">
+   <div class="panel-inner">
+    <div class="page-head-grid">
+      <h1 class="page-title" aria-label="Aromazla">
+        <svg viewBox="0 0 600 90" preserveAspectRatio="xMidYMid meet" role="img" aria-hidden="true">
+          <defs>
+            <!-- Same carved recipe as index.html — flood opacities start at 0 so the filter is a no-op
+                 until phase 3 of the timeline drives them up. -->
+            <filter id="carvedAroma" x="-10%" y="-10%" width="120%" height="120%">
+              <feFlood id="aromaShadowFlood" flood-color="#000000" flood-opacity="0" result="sFlood"/>
+              <feComposite in="sFlood" in2="SourceAlpha" operator="out" result="sOut"/>
+              <feOffset in="sOut" dx="1.4" dy="1.8" result="sOff"/>
+              <feGaussianBlur in="sOff" stdDeviation="1.2" result="sBlur"/>
+              <feComposite in="sBlur" in2="SourceAlpha" operator="in" result="shadow"/>
+
+              <feFlood id="aromaLightFlood" flood-color="#FFFFFF" flood-opacity="0" result="lFlood"/>
+              <feComposite in="lFlood" in2="SourceAlpha" operator="out" result="lOut"/>
+              <feOffset in="lOut" dx="-1.0" dy="-1.3" result="lOff"/>
+              <feGaussianBlur in="lOff" stdDeviation="0.85" result="lBlur"/>
+              <feComposite in="lBlur" in2="SourceAlpha" operator="in" result="light"/>
+
+              <feMerge>
+                <feMergeNode in="SourceGraphic"/>
+                <feMergeNode in="light"/>
+                <feMergeNode in="shadow"/>
+              </feMerge>
+            </filter>
+          </defs>
+          <text id="aromaText" x="300" y="64"
+                text-anchor="middle"
+                font-size="56"
+                filter="url(#carvedAroma)">AROMAZLA</text>
+        </svg>
+      </h1>
+      <p class="page-lede">Symbolic art forged in gold and set with certified precious stones. <em>Wearable meaning, made once.</em></p>
+    </div>
+   </div>
+   <div class="page-cue" aria-hidden="true">
+     <span>Pieces</span>
+     <span class="arrow"></span>
+   </div>
+  </header>
+
+  <!-- GALLERY -->
+  <section class="gallery panel hpanel" style="--z:2;">
+   <div class="panel-inner">
+    <header class="gallery-head reveal">
+      <h2>Pieces</h2>
+      <span class="num">selected · ongoing</span>
+    </header>
+
+    <div class="gallery-grid">
+      <article class="piece span-2 reveal" style="--i:0;">
+        <span class="piece-emblem" aria-hidden="true">
+          <svg viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="70" />
+            <circle cx="100" cy="100" r="44" />
+            <line x1="100" y1="30" x2="100" y2="170" />
+            <line x1="30" y1="100" x2="170" y2="100" />
+          </svg>
+        </span>
+        <div class="piece-meta">
+          <span class="piece-num">No. 001</span>
+          <span class="piece-name">Eclipse <em>·</em> brass</span>
+        </div>
+      </article>
+
+      <article class="piece reveal" style="--i:1;">
+        <span class="piece-emblem" aria-hidden="true">
+          <svg viewBox="0 0 200 200">
+            <path d="M100 30 L160 80 L140 170 L60 170 L40 80 Z" />
+          </svg>
+        </span>
+        <div class="piece-meta">
+          <span class="piece-num">No. 002</span>
+          <span class="piece-name">Pentagon · silver</span>
+        </div>
+      </article>
+
+      <article class="piece reveal" style="--i:2;">
+        <span class="piece-emblem" aria-hidden="true">
+          <svg viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="60" />
+            <path d="M100 40 L100 160 M40 100 L160 100 M55 55 L145 145 M55 145 L145 55" />
+          </svg>
+        </span>
+        <div class="piece-meta">
+          <span class="piece-num">No. 003</span>
+          <span class="piece-name">Sun-wheel</span>
+        </div>
+      </article>
+
+      <article class="piece reveal" style="--i:3;">
+        <span class="piece-emblem" aria-hidden="true">
+          <svg viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="50" />
+            <circle cx="100" cy="100" r="78" stroke-dasharray="3 5" />
+          </svg>
+        </span>
+        <div class="piece-meta">
+          <span class="piece-num">No. 004</span>
+          <span class="piece-name">Halo · brass</span>
+        </div>
+      </article>
+
+      <article class="piece reveal" style="--i:4;">
+        <span class="piece-emblem" aria-hidden="true">
+          <svg viewBox="0 0 200 200">
+            <path d="M40 160 L100 40 L160 160 Z" />
+            <path d="M70 160 L100 100 L130 160 Z" />
+          </svg>
+        </span>
+        <div class="piece-meta">
+          <span class="piece-num">No. 005</span>
+          <span class="piece-name">Monolith</span>
+        </div>
+      </article>
+
+      <article class="piece span-2 reveal" style="--i:5;">
+        <span class="piece-emblem" aria-hidden="true">
+          <svg viewBox="0 0 200 200">
+            <path d="M30 100 Q 100 30 170 100 Q 100 170 30 100 Z" />
+            <circle cx="100" cy="100" r="22" />
+          </svg>
+        </span>
+        <div class="piece-meta">
+          <span class="piece-num">No. 006</span>
+          <span class="piece-name">Vesica <em>·</em> piscis</span>
+        </div>
+      </article>
+    </div>
+   </div>
+  </section>
+
+  <!-- STONES — loose stones, mirrors the Pieces grid -->
+  <section class="gallery panel hpanel" style="--z:3;">
+   <div class="panel-inner">
+    <header class="gallery-head reveal">
+      <h2>Stones</h2>
+      <span class="num">loose · certified</span>
+    </header>
+
+    <div class="gallery-grid">
+      <!-- emerald cut -->
+      <article class="piece span-2 reveal" style="--i:0;">
+        <span class="piece-emblem" aria-hidden="true">
+          <svg viewBox="0 0 200 200">
+            <path d="M58 50 L142 50 L168 76 L168 124 L142 150 L58 150 L32 124 L32 76 Z" />
+            <path d="M70 65 L130 65 L150 85 L150 115 L130 135 L70 135 L50 115 L50 85 Z" />
+            <line x1="32" y1="76" x2="50" y2="85" />
+            <line x1="168" y1="76" x2="150" y2="85" />
+            <line x1="32" y1="124" x2="50" y2="115" />
+            <line x1="168" y1="124" x2="150" y2="115" />
+          </svg>
+        </span>
+        <div class="piece-meta">
+          <span class="piece-num">No. S01</span>
+          <span class="piece-name">Citrine <em>·</em> emerald</span>
+        </div>
+      </article>
+
+      <!-- oval -->
+      <article class="piece reveal" style="--i:1;">
+        <span class="piece-emblem" aria-hidden="true">
+          <svg viewBox="0 0 200 200">
+            <ellipse cx="100" cy="100" rx="62" ry="40" />
+            <ellipse cx="100" cy="100" rx="42" ry="22" />
+            <line x1="38" y1="100" x2="58" y2="100" />
+            <line x1="142" y1="100" x2="162" y2="100" />
+          </svg>
+        </span>
+        <div class="piece-meta">
+          <span class="piece-num">No. S02</span>
+          <span class="piece-name">Amethyst · oval</span>
+        </div>
+      </article>
+
+      <!-- round brilliant -->
+      <article class="piece reveal" style="--i:2;">
+        <span class="piece-emblem" aria-hidden="true">
+          <svg viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="62" />
+            <circle cx="100" cy="100" r="38" />
+            <line x1="100" y1="38" x2="100" y2="62" />
+            <line x1="100" y1="138" x2="100" y2="162" />
+            <line x1="38" y1="100" x2="62" y2="100" />
+            <line x1="138" y1="100" x2="162" y2="100" />
+            <line x1="56" y1="56" x2="74" y2="74" />
+            <line x1="144" y1="56" x2="126" y2="74" />
+            <line x1="56" y1="144" x2="74" y2="126" />
+            <line x1="144" y1="144" x2="126" y2="126" />
+          </svg>
+        </span>
+        <div class="piece-meta">
+          <span class="piece-num">No. S03</span>
+          <span class="piece-name">Brilliant</span>
+        </div>
+      </article>
+
+      <!-- cushion -->
+      <article class="piece reveal" style="--i:3;">
+        <span class="piece-emblem" aria-hidden="true">
+          <svg viewBox="0 0 200 200">
+            <path d="M48 60 Q 40 40 60 40 L 140 40 Q 160 40 152 60 L 152 140 Q 160 160 140 160 L 60 160 Q 40 160 48 140 Z" />
+            <path d="M62 75 L138 75 L138 125 L62 125 Z" />
+          </svg>
+        </span>
+        <div class="piece-meta">
+          <span class="piece-num">No. S04</span>
+          <span class="piece-name">Topaz · cushion</span>
+        </div>
+      </article>
+
+      <!-- pear -->
+      <article class="piece reveal" style="--i:4;">
+        <span class="piece-emblem" aria-hidden="true">
+          <svg viewBox="0 0 200 200">
+            <path d="M100 30 Q 60 70 60 120 Q 60 162 100 168 Q 140 162 140 120 Q 140 70 100 30 Z" />
+            <path d="M100 60 Q 80 90 80 120 Q 80 144 100 148 Q 120 144 120 120 Q 120 90 100 60 Z" />
+          </svg>
+        </span>
+        <div class="piece-meta">
+          <span class="piece-num">No. S05</span>
+          <span class="piece-name">Pear</span>
+        </div>
+      </article>
+
+      <!-- marquise / navette -->
+      <article class="piece span-2 reveal" style="--i:5;">
+        <span class="piece-emblem" aria-hidden="true">
+          <svg viewBox="0 0 200 200">
+            <path d="M30 100 Q 100 50 170 100 Q 100 150 30 100 Z" />
+            <path d="M55 100 Q 100 78 145 100 Q 100 122 55 100 Z" />
+            <line x1="100" y1="62" x2="100" y2="138" />
+          </svg>
+        </span>
+        <div class="piece-meta">
+          <span class="piece-num">No. S06</span>
+          <span class="piece-name">Sapphire <em>·</em> marquise</span>
+        </div>
+      </article>
+    </div>
+   </div>
+  </section>
+
+  <!-- COMMISSION -->
+  <section class="commission panel hpanel" id="commission" style="--z:4;">
+   <div class="panel-inner">
+    <span class="commission-eyebrow">Commission · per request</span>
+    <h2>Custom pieces, made <em>to order</em>.</h2>
+    <p>If you want a custom piece, get in touch. Commissions usually take six to eight weeks.</p>
+    <a href="mailto:hola@ivan.es?subject=Aromazla%20commission" class="cta">
+      Write to commission
+      <svg viewBox="0 0 24 12" fill="none" stroke="currentColor" stroke-width="1.2" aria-hidden="true">
+        <path d="M0 6h22M16 0l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+   </div>
+  </section>
+
+    </div><!-- /.hpanels-track -->
+   </div><!-- /.hpanels -->
+  </main>
+  <!-- end .stack — no footer; aromazla mirrors index's two-/three-panel horizontal-scroll layout -->
+
+
+  <!-- GSAP + ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script>
+    const navEl = document.getElementById('nav');
+    const onScroll = () => navEl.classList.toggle('scrolled', window.scrollY > 30);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    const card = document.getElementById('navCard');
+    const sheet = document.getElementById('menuSheet');
+    const setOpen = (open) => {
+      card.classList.toggle('open', open);
+      sheet.classList.toggle('open', open);
+      card.setAttribute('aria-expanded', open ? 'true' : 'false');
+      sheet.setAttribute('aria-hidden', open ? 'false' : 'true');
+      document.body.style.overflow = open ? 'hidden' : '';
+    };
+    card.addEventListener('click', () => setOpen(!card.classList.contains('open')));
+    sheet.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && card.classList.contains('open')) setOpen(false);
+    });
+
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.18, rootMargin: '0px 0px -8% 0px' });
+    document.querySelectorAll('.reveal').forEach((el) => obs.observe(el));
+
+    // ─── AROMAZLA hero — same draw → fill → carve sequence as index.html ───
+    // SVG <text> doesn't expose getTotalLength(), so the dasharray uses a fixed
+    // overestimate of the glyph perimeter. 3000 is comfortably above what the
+    // 8 Cinzel glyphs at font-size 56 actually need, so the stroke draws fully.
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const aromaText = document.getElementById('aromaText');
+    const aromaShadowFlood = document.getElementById('aromaShadowFlood');
+    const aromaLightFlood = document.getElementById('aromaLightFlood');
+    const aromaLede = document.querySelector('.page-lede');
+
+    if (aromaText && window.gsap && !reduce) {
+      const len = 3000;
+      gsap.set(aromaText, {
+        strokeDasharray: len,
+        strokeDashoffset: len,
+        fillOpacity: 0,
+        strokeOpacity: 1,
+      });
+
+      const tl = gsap.timeline();
+      // 1. Draw the stroke.
+      tl.to(aromaText, { strokeDashoffset: 0, duration: 4, ease: 'power1.inOut' }, 0.6);
+      // 2. Fill catches the draw early; stroke crossfades down across the same window.
+      tl.to(aromaText, { fillOpacity: 1, duration: 1.6, ease: 'sine.inOut' }, '-=3.4');
+      tl.to(aromaText, { strokeOpacity: 0, duration: 1.6, ease: 'sine.inOut' }, '<');
+      // Lede rides the same beat as the fill — the role "aut viam inveniam aut faciam" plays on index.
+      if (aromaLede) {
+        tl.to(aromaLede, { opacity: 1, y: 0, duration: 1.2, ease: 'sine.out' }, '<');
+      }
+      // 3. Carve — fill darkens to taupe and the floods rise.
+      tl.to(aromaText, { fill: '#A89F90', duration: 1.0, ease: 'sine.inOut' }, '-=2.6');
+      if (aromaShadowFlood) {
+        tl.to(aromaShadowFlood, { attr: { 'flood-opacity': 0.92 }, duration: 1.0, ease: 'sine.inOut' }, '<');
+      }
+      if (aromaLightFlood) {
+        tl.to(aromaLightFlood, { attr: { 'flood-opacity': 0.42 }, duration: 1.0, ease: 'sine.inOut' }, '<');
+      }
+    } else if (aromaText) {
+      aromaText.style.fillOpacity = 1;
+      aromaText.style.fill = '#A89F90';
+      aromaText.style.strokeOpacity = 0;
+      if (aromaShadowFlood) aromaShadowFlood.setAttribute('flood-opacity', '0.92');
+      if (aromaLightFlood) aromaLightFlood.setAttribute('flood-opacity', '0.42');
+      if (aromaLede) { aromaLede.style.opacity = 1; aromaLede.style.transform = 'none'; }
+    }
+
+    // ─── Horizontal scroll (desktop only) — mirrors index.html ───
+    if (window.gsap && window.ScrollTrigger) {
+      gsap.registerPlugin(ScrollTrigger);
+      const mm = gsap.matchMedia();
+      mm.add('(min-width: 1024px)', () => {
+        const track = document.getElementById('hpanelsTrack');
+        const wrapper = document.getElementById('hpanels');
+        if (!track || !wrapper) return;
+        const panels = track.querySelectorAll('.hpanel');
+        const slides = panels.length;
+        const distance = () => (slides - 1) * window.innerWidth;
+        const tween = gsap.to(track, {
+          x: () => -distance(),
+          ease: 'none',
+          scrollTrigger: {
+            trigger: wrapper,
+            start: 'top top',
+            end: () => '+=' + distance(),
+            pin: true,
+            scrub: 0.4,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        });
+        return () => { tween.scrollTrigger && tween.scrollTrigger.kill(); tween.kill(); };
+      });
+    }
+  </script>
+</body>
+</html>
