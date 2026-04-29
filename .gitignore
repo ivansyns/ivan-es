@@ -1,0 +1,8 @@
+.DS_Store
+.vercel
+.env
+.env.*
+*.log
+
+# Pendant fallback video — too heavy to track; rebuilt locally per release
+assets/sap.mp4
