@@ -149,24 +149,6 @@
     }
     /* Nav stays fully transparent at all times — no background, no blur, no border on scroll */
     nav.scrolled { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
-    /* Logo is centered horizontally regardless of how many nav items sit on the right.
-       The mark is now the Chi Rho sigil — strokes inherit color via currentColor. */
-    .nav-mark {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      display: inline-flex;
-      align-items: center;
-      color: var(--bone);
-      transition: color 240ms var(--ease-out);
-    }
-    .nav-mark:hover { color: var(--gold); }
-    .nav-mark svg {
-      display: block;
-      height: 26px;
-      width: 26px;
-    }
     .nav-links {
       display: flex;
       align-items: center;
@@ -198,55 +180,42 @@
     .nav-links a:hover { color: var(--bone); }
     .nav-links a:hover::after { transform: scaleX(1); }
 
-    /* ─── MOBILE — business card flip ─── */
+    /* ─── MOBILE — Latin cross that morphs into X on tap. Gold in every state. ─── */
     .nav-card {
       display: none;
-      width: 56px;
+      width: 36px;
       height: 36px;
-      perspective: 800px;
       cursor: pointer;
       background: transparent;
       border: 0;
-      padding: 0;
+      padding: 4px;
+      color: var(--gold);
     }
-    .nav-card-inner {
-      position: relative;
+    .nav-card svg {
+      display: block;
       width: 100%;
       height: 100%;
-      transition: transform 720ms cubic-bezier(0.7, -0.1, 0.3, 1.1);
-      transform-style: preserve-3d;
+      overflow: visible;
     }
-    .nav-card.open .nav-card-inner { transform: rotateY(180deg); }
-    .nav-card-face {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      border: 1px solid var(--bone-line);
-      border-radius: 2px;
-      background: var(--ink-2);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    .nav-card line {
+      stroke: currentColor;
+      stroke-width: 1.6;
+      stroke-linecap: round;
+      transform-box: view-box;
+      transform-origin: 12px 12px;
+      transition: transform 420ms cubic-bezier(0.7, -0.1, 0.3, 1.1);
     }
-    .nav-card-front svg {
-      display: block;
-      height: 22px;
-      width: 22px;
-      color: var(--bone);
-    }
-    .nav-card-back {
-      transform: rotateY(180deg);
-      background: var(--bone);
-      border-color: var(--bone);
-    }
-    .nav-card-back span {
-      width: 6px; height: 1px; background: var(--ink); display: block;
-    }
-    .nav-card-back span + span { width: 14px; }
-    .nav-card-back span + span + span { width: 6px; }
+    /* Open state → symmetric X around the icon center (12,12), arms length ~14.
+       Per the spec: vertical's top point lands LEFT, bottom point lands RIGHT
+       (top-left → bottom-right diagonal). Horizontal's bottom point lands LEFT,
+       top point lands RIGHT (bottom-left → top-right diagonal). Both bars are
+       scaled to the same length so the X is balanced.
+       Order applies right-to-left:
+         vertical  : scaleY(0.7) shortens 20→14, then rotate(-45deg) puts it on TL→BR.
+         horizontal: scaleX(1.17) stretches 12→14, translateY(3px) drops to center,
+                     rotate(-45deg) puts it on BL→TR. */
+    .nav-card.open .cx-v { transform: rotate(-45deg) scaleY(0.7); }
+    .nav-card.open .cx-h { transform: rotate(-45deg) translateY(3px) scaleX(1.17); }
 
     /* Mobile menu sheet — opens when card is flipped */
     .menu-sheet {
@@ -279,14 +248,6 @@
       text-transform: uppercase;
     }
     .menu-sheet a:hover { color: var(--gold); }
-    .menu-sheet .menu-meta {
-      margin-top: 24px;
-      font-family: var(--f-mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.24em;
-      color: var(--bone-faint);
-      text-transform: uppercase;
-    }
 
     /* ─── HERO ─── */
     .hero {
@@ -461,9 +422,16 @@
       pointer-events: none;
       transition: filter 600ms var(--ease-out), transform 600ms var(--ease-out);
     }
+    /* Desktop (≥1024px) loads sap.webm — real VP9 alpha, no blend mode needed. */
     @media (min-width: 1024px) {
       .door-visual-piece { height: clamp(320px, 46vh, 480px); }
     }
+    /* When the MP4 is loaded (no alpha — black matte), JS adds .use-blend so
+       `lighten` knocks the matte out against the panel's dark background. Driven
+       by JS, not media query, because viewport size alone can't tell us whether
+       the renderer supports VP9 alpha (Safari macOS, iPad landscape, "Request
+       Desktop Site" all report >=1024 yet can't render VP9 alpha). */
+    .door-visual-piece.use-blend { mix-blend-mode: lighten; }
     /* Carved wordmark — same filter recipe as the hero name, baked-in (no animation). */
     .door-visual-mark {
       width: clamp(240px, 34vw, 420px);
@@ -534,46 +502,24 @@
 
   <!-- NAV -->
   <nav id="nav">
-    <a href="#" class="nav-mark" aria-label="Iván Alzamora — home">
-      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="22" x2="52" y2="56"/>
-          <line x1="52" y1="22" x2="12" y2="56"/>
-          <line x1="32" y1="6" x2="32" y2="58"/>
-          <path d="M32 6 C 44 6 46 14 46 18 C 46 23 42 27 32 27"/>
-        </g>
-      </svg>
-    </a>
     <ul class="nav-links">
       <li><a href="aromazla.html">Aromazla</a></li>
-      <li><a href="https://visuanza.com" target="_blank" rel="noopener">Visuanza</a></li>
+      <li><a href="https://visuanza.es" target="_blank" rel="noopener">Visuanza</a></li>
     </ul>
 
-    <!-- mobile card-flip nav -->
+    <!-- mobile cross — morphs to an X on tap -->
     <button class="nav-card" id="navCard" aria-label="Open navigation" aria-expanded="false">
-      <span class="nav-card-inner">
-        <span class="nav-card-face nav-card-front">
-          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="22" x2="52" y2="56"/>
-              <line x1="52" y1="22" x2="12" y2="56"/>
-              <line x1="32" y1="6" x2="32" y2="58"/>
-              <path d="M32 6 C 44 6 46 14 46 18 C 46 23 42 27 32 27"/>
-            </g>
-          </svg>
-        </span>
-        <span class="nav-card-face nav-card-back" aria-hidden="true">
-          <span></span><span></span><span></span>
-        </span>
-      </span>
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <line class="cx-v" x1="12" y1="2" x2="12" y2="22"/>
+        <line class="cx-h" x1="6" y1="9" x2="18" y2="9"/>
+      </svg>
     </button>
   </nav>
 
   <!-- MOBILE MENU SHEET -->
   <div class="menu-sheet" id="menuSheet" aria-hidden="true">
     <a href="aromazla.html">Aromazla</a>
-    <a href="https://visuanza.com" target="_blank" rel="noopener">Visuanza</a>
-    <span class="menu-meta">Madrid · 40°25′N 3°42′W</span>
+    <a href="https://visuanza.es" target="_blank" rel="noopener">Visuanza</a>
   </div>
 
   <!-- STICKY STACK on mobile · HORIZONTAL SCROLL on desktop (≥1024px).
@@ -633,7 +579,7 @@
   <!-- DOORWAY — single visual door, no labels -->
   <section class="doorways panel hpanel" id="doorways" style="--z:2;">
     <a href="aromazla.html" class="door-visual reveal" aria-label="Enter Aromazla — jewellery collection">
-      <video class="door-visual-piece" src="assets/sap.webm" autoplay loop muted playsinline aria-hidden="true"></video>
+      <video class="door-visual-piece" id="doorVideo" autoplay loop muted playsinline aria-hidden="true"></video>
 
       <!-- AROMAZLA wordmark, statically carved with the same filter recipe as the hero name -->
       <div class="door-visual-mark" aria-label="Aromazla">
@@ -690,6 +636,34 @@
     const onScroll = () => navEl.classList.toggle('scrolled', window.scrollY > 30);
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
+
+    // ─── Pendant video source: WebM (real VP9 alpha) where supported, MP4 + blend everywhere else ───
+    // Safari (macOS + iOS, any viewport) can't render VP9 alpha — this includes
+    // iPad in landscape and any device with "Request Desktop Site" toggled on.
+    // So source selection has to combine UA detection with viewport size.
+    const doorVideo = document.getElementById('doorVideo');
+    if (doorVideo) {
+      const ua = navigator.userAgent;
+      // Match Safari (any platform) but exclude Chrome/Edge/Firefox-on-iOS, which all
+      // include "Safari" in their UA but render VP9 alpha correctly.
+      const isSafari = /^((?!chrome|chromium|crios|fxios|edgios|android).)*safari/i.test(ua);
+      const supportsVp9Alpha = !isSafari;
+
+      const mql = window.matchMedia('(min-width: 1024px)');
+      const setDoorVideoSrc = () => {
+        const useWebm = supportsVp9Alpha && mql.matches;
+        const next = useWebm ? 'assets/sap.webm' : 'assets/sap.mp4';
+        // The blend is needed whenever the MP4 (black-matte) is loaded.
+        doorVideo.classList.toggle('use-blend', !useWebm);
+        if (doorVideo.getAttribute('src') !== next) {
+          doorVideo.setAttribute('src', next);
+          doorVideo.load();
+          doorVideo.play().catch(() => {});
+        }
+      };
+      setDoorVideoSrc();
+      mql.addEventListener('change', setDoorVideoSrc);
+    }
 
     // ─── Card-flip mobile nav ───
     const card = document.getElementById('navCard');
