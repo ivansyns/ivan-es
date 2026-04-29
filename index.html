@@ -637,30 +637,46 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 
-    // ─── Pendant video source: WebM (real VP9 alpha) where supported, MP4 + blend everywhere else ───
-    // Safari (macOS + iOS, any viewport) can't render VP9 alpha — this includes
-    // iPad in landscape and any device with "Request Desktop Site" toggled on.
-    // So source selection has to combine UA detection with viewport size.
+    // ─── Pendant video source: pick the format whose alpha each browser can actually render ───
+    //   Safari (macOS + iOS):  HEVC alpha .mov  — Apple's native transparent-video format
+    //   Chrome / Firefox / Edge desktop:  VP9 alpha WebM
+    //   Mobile non-Safari (Android Chrome small viewport):  H.264 MP4 + mix-blend-mode: lighten
+    // The MP4 + blend path is also the safety fallback if the .mov fails to decode.
     const doorVideo = document.getElementById('doorVideo');
     if (doorVideo) {
       const ua = navigator.userAgent;
-      // Match Safari (any platform) but exclude Chrome/Edge/Firefox-on-iOS, which all
-      // include "Safari" in their UA but render VP9 alpha correctly.
+      // Safari (any platform). Excludes Chrome/Edge/Firefox-on-iOS which include "Safari" in UA.
       const isSafari = /^((?!chrome|chromium|crios|fxios|edgios|android).)*safari/i.test(ua);
-      const supportsVp9Alpha = !isSafari;
 
       const mql = window.matchMedia('(min-width: 1024px)');
+      let movFailed = false;
       const setDoorVideoSrc = () => {
-        const useWebm = supportsVp9Alpha && mql.matches;
-        const next = useWebm ? 'assets/sap.webm' : 'assets/sap.mp4';
-        // The blend is needed whenever the MP4 (black-matte) is loaded.
-        doorVideo.classList.toggle('use-blend', !useWebm);
+        let next, blend;
+        if (isSafari && !movFailed) {
+          next = 'assets/sap.mov';   // HEVC alpha — native transparency on Safari
+          blend = false;
+        } else if (!isSafari && mql.matches) {
+          next = 'assets/sap.webm';  // VP9 alpha — desktop Chrome/Firefox/Edge
+          blend = false;
+        } else {
+          next = 'assets/sap.mp4';   // H.264 + black matte → lighten blend knocks it out
+          blend = true;
+        }
+        doorVideo.classList.toggle('use-blend', blend);
         if (doorVideo.getAttribute('src') !== next) {
           doorVideo.setAttribute('src', next);
           doorVideo.load();
           doorVideo.play().catch(() => {});
         }
       };
+      // If the HEVC .mov can't be decoded for whatever reason on a given Safari
+      // (older iOS, missing hardware decoder), fall back to MP4 + blend automatically.
+      doorVideo.addEventListener('error', () => {
+        if (!movFailed && doorVideo.getAttribute('src')?.endsWith('sap.mov')) {
+          movFailed = true;
+          setDoorVideoSrc();
+        }
+      });
       setDoorVideoSrc();
       mql.addEventListener('change', setDoorVideoSrc);
     }
