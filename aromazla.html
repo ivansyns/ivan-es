@@ -59,15 +59,18 @@
     img, svg { display: block; max-width: 100%; }
     ::selection { background: var(--gold); color: var(--ink); }
 
-    /* ─── GRAIN ─── */
+    /* ─── GRAIN — fixed overlay, dithers the radial-gradient ─── */
+    /* Noise served as a static file so no inline data: URI can be mangled by
+       caches, minifiers, or CSP rules between dev and the deployed site. */
     body::after {
       content: '';
       position: fixed;
       inset: 0;
       pointer-events: none;
       z-index: 90;
-      opacity: 0.035;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 320 320' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.05;
+      background-image: url("assets/noise.svg");
+      background-size: 320px 320px;
       mix-blend-mode: screen;
     }
 
@@ -108,8 +111,8 @@
         height: 100vh;
         overflow: hidden;
         background:
-          radial-gradient(ellipse 60% 70% at 50% 32%, rgba(50, 42, 28, 0.6) 0%, transparent 70%),
-          linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%);
+          radial-gradient(ellipse 60% 70% at 50% 32% in oklab, rgba(50, 42, 28, 0.6) 0%, transparent 70%),
+          linear-gradient(180deg in oklab, var(--ink-2) 0%, var(--ink) 100%);
       }
       .hpanels-track {
         display: flex;
@@ -446,8 +449,8 @@
       aspect-ratio: 4/5;
       overflow: hidden;
       background:
-        radial-gradient(ellipse 80% 60% at 50% 30%, rgba(201, 168, 76, 0.10) 0%, transparent 65%),
-        linear-gradient(160deg, var(--ink-card) 0%, var(--ink-2) 100%);
+        radial-gradient(ellipse 80% 60% at 50% 30% in oklab, rgba(201, 168, 76, 0.10) 0%, transparent 65%),
+        linear-gradient(160deg in oklab, var(--ink-card) 0%, var(--ink-2) 100%);
       border: 1px solid var(--bone-line);
       transition: transform 600ms var(--ease-out), border-color 600ms var(--ease-out);
     }

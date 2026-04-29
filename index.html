@@ -59,15 +59,18 @@
     img, svg { display: block; max-width: 100%; }
     ::selection { background: var(--gold); color: var(--ink); }
 
-    /* ─── GRAIN — fixed overlay, ~3% opacity ─── */
+    /* ─── GRAIN — fixed overlay, dithers the radial-gradient ─── */
+    /* Noise is served as a static file so no inline data: URI can be mangled by
+       caches, minifiers, or CSP rules between dev and the deployed site. */
     body::after {
       content: '';
       position: fixed;
       inset: 0;
       pointer-events: none;
       z-index: 90;
-      opacity: 0.035;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 320 320' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      opacity: 0.05;
+      background-image: url("assets/noise.svg");
+      background-size: 320px 320px;
       mix-blend-mode: screen;
     }
 
@@ -106,8 +109,8 @@
         height: 100vh;
         overflow: hidden;
         background:
-          radial-gradient(ellipse 60% 70% at 50% 32%, rgba(50, 42, 28, 0.6) 0%, transparent 70%),
-          linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%);
+          radial-gradient(ellipse 60% 70% at 50% 32% in oklab, rgba(50, 42, 28, 0.6) 0%, transparent 70%),
+          linear-gradient(180deg in oklab, var(--ink-2) 0%, var(--ink) 100%);
       }
       .hpanels-track {
         display: flex;
@@ -302,14 +305,14 @@
       isolation: isolate;
       /* Mobile: the gradient lives on the panel itself (the wrapper has display:contents). */
       background:
-        radial-gradient(ellipse 70% 65% at 50% 28%, rgba(50, 42, 28, 0.55) 0%, transparent 70%),
-        linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%);
+        radial-gradient(ellipse 70% 65% at 50% 28% in oklab, rgba(50, 42, 28, 0.55) 0%, transparent 70%),
+        linear-gradient(180deg in oklab, var(--ink-2) 0%, var(--ink) 100%);
     }
     /* Mobile: same backdrop on the doorway so the sticky-stack reads as one canvas */
     .doorways.panel {
       background:
-        radial-gradient(ellipse 70% 65% at 50% 28%, rgba(50, 42, 28, 0.55) 0%, transparent 70%),
-        linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%);
+        radial-gradient(ellipse 70% 65% at 50% 28% in oklab, rgba(50, 42, 28, 0.55) 0%, transparent 70%),
+        linear-gradient(180deg in oklab, var(--ink-2) 0%, var(--ink) 100%);
     }
     .hero-frame {
       width: 100%;
@@ -429,8 +432,8 @@
     .doorways {
       padding: clamp(60px, 10vw, 132px) clamp(20px, 4vw, 48px);
       background:
-        radial-gradient(ellipse 70% 65% at 50% 28%, rgba(50, 42, 28, 0.55) 0%, transparent 70%),
-        linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%);
+        radial-gradient(ellipse 70% 65% at 50% 28% in oklab, rgba(50, 42, 28, 0.55) 0%, transparent 70%),
+        linear-gradient(180deg in oklab, var(--ink-2) 0%, var(--ink) 100%);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -787,7 +790,11 @@
             invalidateOnRefresh: true,
           },
         });
-        return () => { tween.scrollTrigger && tween.scrollTrigger.kill(); tween.kill(); };
+
+        return () => {
+          tween.scrollTrigger && tween.scrollTrigger.kill();
+          tween.kill();
+        };
       });
     }
   </script>
