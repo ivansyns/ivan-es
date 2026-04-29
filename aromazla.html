@@ -14,7 +14,7 @@
   <meta property="og:url" content="https://ivan.es/aromazla" />
   <meta property="og:locale" content="en_GB" />
   <link rel="canonical" href="https://ivan.es/aromazla" />
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%230A0A0A'/><text x='32' y='42' font-family='Georgia,serif' font-size='28' font-weight='400' fill='%23F5F0E8' text-anchor='middle' letter-spacing='1'>IA</text></svg>" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%230A0A0A'/><g fill='none' stroke='%23F5F0E8' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'><line x1='14' y1='22' x2='50' y2='54'/><line x1='50' y1='22' x2='14' y2='54'/><line x1='32' y1='8' x2='32' y2='56'/><path d='M32 8 C 42 8 44 14 44 18 C 44 23 40 27 32 27'/></g></svg>" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -162,20 +162,24 @@
     }
     /* Nav stays fully transparent at all times — no background, no blur, no border on scroll */
     nav.scrolled { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
-    /* Logo is centered horizontally regardless of how many nav items sit on the right */
+    /* Logo is centered horizontally regardless of how many nav items sit on the right.
+       The mark is now the Chi Rho sigil — strokes inherit color via currentColor. */
     .nav-mark {
       position: absolute;
       left: 50%;
       top: 50%;
       transform: translate(-50%, -50%);
-      font-family: var(--f-display);
-      font-size: 0.94rem;
-      font-weight: 500;
-      letter-spacing: 0.36em;
+      display: inline-flex;
+      align-items: center;
       color: var(--bone);
-      padding-left: 2px;
+      transition: color 240ms var(--ease-out);
     }
-    .nav-mark span { color: var(--gold); }
+    .nav-mark:hover { color: var(--gold); }
+    .nav-mark svg {
+      display: block;
+      height: 26px;
+      width: 26px;
+    }
     .nav-links {
       display: flex;
       align-items: center;
@@ -241,20 +245,11 @@
       background: var(--ink-2);
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
     }
-    .nav-card-face strong {
-      font-family: var(--f-display);
-      font-size: 0.82rem;
-      font-weight: 500;
-      letter-spacing: 0.32em;
+    .nav-card-front svg {
+      display: block;
+      height: 22px;
+      width: 22px;
       color: var(--bone);
-      padding-left: 4px;
-    }
-    .nav-card-face em {
-      font-family: var(--f-mono);
-      font-style: normal;
-      font-size: 0.5rem;
-      letter-spacing: 0.24em;
-      color: var(--gold);
     }
     .nav-card-back {
       transform: rotateY(180deg);
@@ -683,16 +678,31 @@
 
   <!-- NAV -->
   <nav id="nav">
-    <a href="index.html" class="nav-mark" aria-label="Iván Alzamora — home">I<span>·</span>A</a>
+    <a href="index.html" class="nav-mark" aria-label="Iván Alzamora — home">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="22" x2="52" y2="56"/>
+          <line x1="52" y1="22" x2="12" y2="56"/>
+          <line x1="32" y1="6" x2="32" y2="58"/>
+          <path d="M32 6 C 44 6 46 14 46 18 C 46 23 42 27 32 27"/>
+        </g>
+      </svg>
+    </a>
     <ul class="nav-links">
       <li><a href="aromazla.html" class="active">Aromazla</a></li>
-      <li><a href="https://visuanza.com" target="_blank" rel="noopener">Visuanza ↗</a></li>
+      <li><a href="https://visuanza.com" target="_blank" rel="noopener">Visuanza</a></li>
     </ul>
     <button class="nav-card" id="navCard" aria-label="Open navigation" aria-expanded="false">
       <span class="nav-card-inner">
         <span class="nav-card-face nav-card-front">
-          <strong>IA</strong>
-          <em>·</em>
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <g fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="22" x2="52" y2="56"/>
+              <line x1="52" y1="22" x2="12" y2="56"/>
+              <line x1="32" y1="6" x2="32" y2="58"/>
+              <path d="M32 6 C 44 6 46 14 46 18 C 46 23 42 27 32 27"/>
+            </g>
+          </svg>
         </span>
         <span class="nav-card-face nav-card-back" aria-hidden="true">
           <span></span><span></span><span></span>
@@ -703,7 +713,7 @@
 
   <div class="menu-sheet" id="menuSheet" aria-hidden="true">
     <a href="aromazla.html">Aromazla</a>
-    <a href="https://visuanza.com" target="_blank" rel="noopener">Visuanza ↗</a>
+    <a href="https://visuanza.com" target="_blank" rel="noopener">Visuanza</a>
     <span class="menu-meta">Madrid · 40°25′N 3°42′W</span>
   </div>
 
