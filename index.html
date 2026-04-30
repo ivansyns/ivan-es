@@ -436,6 +436,41 @@
        the renderer supports VP9 alpha (Safari macOS, iPad landscape, "Request
        Desktop Site" all report >=1024 yet can't render VP9 alpha). */
     .door-visual-piece.use-blend { mix-blend-mode: lighten; }
+
+    /* ── SPRITE-SHEET FALLBACK for iOS Low Power Mode ──
+       The animated WebP fallback gets glitchy in LPM because every frame
+       is decoded independently and LPM throttles per-frame decode work.
+       This sprite-sheet alternative uses a single static WebP (15 cols × 10
+       rows = 150 frames) and animates background-position via two CSS
+       animations multiplied together (X cycles cols every 1s, Y advances
+       rows over 10s). Background-position is GPU-composited, no per-frame
+       decode — completely sidesteps the LPM bottleneck. */
+    .door-visual-sprite {
+      display: block;
+      height: clamp(260px, 40vh, 380px);
+      aspect-ratio: 480 / 596;
+      background-image: url('assets/sap-sprite.webp');
+      background-repeat: no-repeat;
+      /* Image is 7200x5960 native (15 cols * 480 = 7200, 10 rows * 596 = 5960).
+         Make it 1500% wide and 1000% tall so each cell is exactly 100% of element. */
+      background-size: 1500% 1000%;
+      animation:
+        spriteX 1s steps(15, end) infinite,
+        spriteY 10s steps(10, end) infinite;
+      pointer-events: none;
+    }
+    @media (min-width: 1024px) {
+      .door-visual-sprite { height: clamp(320px, 46vh, 480px); }
+    }
+    @keyframes spriteX {
+      from { background-position-x: 0%; }
+      to   { background-position-x: 100%; }
+    }
+    @keyframes spriteY {
+      from { background-position-y: 0%; }
+      to   { background-position-y: 100%; }
+    }
+
     /* Carved wordmark — same filter recipe as the hero name, baked-in (no animation). */
     .door-visual-mark {
       width: clamp(300px, 64vw, 420px);
@@ -657,26 +692,20 @@
       let lpmFallbackTriggered = false;
 
       // Low Power Mode (and other autoplay rejections) → swap <video> for
-      // animated WebP. WebP isn't a "video" so iOS LPM doesn't block its
-      // playback. Browser loops the <img> automatically.
-      // Two safety belts to avoid the scroll-anchor jumping to the doorway:
-      //   1. Set explicit intrinsic width/height on the img so the browser
-      //      reserves layout space before the 4.3MB WebP downloads.
-      //   2. Snapshot + restore window.scrollY around the DOM mutation in
-      //      case mobile Safari still tries to scroll-anchor.
+      // a sprite-sheet <div>. CSS background-position animation on a static
+      // WebP sprite sidesteps iOS LPM's per-frame decode throttling entirely
+      // because no codec is decoding per frame — just GPU compositing.
+      // Snapshot + restore window.scrollY around the DOM mutation in case
+      // iOS Safari still tries to scroll-anchor to the swap point.
       const swapToWebpFallback = () => {
         if (lpmFallbackTriggered) return;
         lpmFallbackTriggered = true;
         const savedScrollY = window.scrollY;
-        const img = new Image(720, 894);  // intrinsic aspect ratio of sap.webp
-        img.src = 'assets/sap.webp';
-        img.alt = '';
-        img.className = doorVideo.className; // keeps .door-visual-piece sizing
-        img.id = 'doorVideo';                // preserve hooks
-        img.setAttribute('aria-hidden', 'true');
-        doorVideo.replaceWith(img);
-        // Re-pin scroll on the next frame in case the DOM swap triggered
-        // scroll-anchoring (esp. iOS Safari).
+        const sprite = document.createElement('div');
+        sprite.className = 'door-visual-sprite';
+        sprite.id = 'doorVideo';                // preserve hooks
+        sprite.setAttribute('aria-hidden', 'true');
+        doorVideo.replaceWith(sprite);
         requestAnimationFrame(() => {
           if (window.scrollY !== savedScrollY) {
             window.scrollTo(0, savedScrollY);
@@ -700,9 +729,12 @@
         if (doorVideo.getAttribute('src') !== next) {
           doorVideo.setAttribute('src', next);
           doorVideo.load();
-          // Promise rejection here = autoplay blocked (LPM is the common case).
-          // Swap to animated WebP which LPM doesn't restrict.
-          doorVideo.play().catch(() => swapToWebpFallback());
+          // Don't trigger the LPM fallback on initial load — the DOM mutation
+          // during first paint causes iOS to scroll-anchor to the doorway.
+          // The IntersectionObserver below handles the LPM case correctly,
+          // because by the time it fires the user has already scrolled to
+          // the doorway and the layout shift is in their current scroll context.
+          doorVideo.play().catch(() => {});
         }
       };
       // If the HEVC .mov can't be decoded for whatever reason on a given Safari
