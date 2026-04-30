@@ -679,6 +679,21 @@
       });
       setDoorVideoSrc();
       mql.addEventListener('change', setDoorVideoSrc);
+
+      // iOS Safari pauses autoplay videos that start offscreen and never
+      // auto-resumes them. The pendant is below the hero on mobile, so it
+      // hits exactly that case. Re-issue play() whenever the video scrolls
+      // into view — iOS accepts this as a valid user-context gesture.
+      if ('IntersectionObserver' in window) {
+        const resumeObs = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting && doorVideo.paused) {
+              doorVideo.play().catch(() => {});
+            }
+          });
+        }, { threshold: 0.1 });
+        resumeObs.observe(doorVideo);
+      }
     }
 
     // ─── Card-flip mobile nav ───
