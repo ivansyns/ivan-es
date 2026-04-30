@@ -437,48 +437,6 @@
        Desktop Site" all report >=1024 yet can't render VP9 alpha). */
     .door-visual-piece.use-blend { mix-blend-mode: lighten; }
 
-    /* ── SPRITE-SHEET FALLBACK for iOS Low Power Mode ──
-       The animated WebP fallback gets glitchy in LPM because every frame
-       is decoded independently and LPM throttles per-frame decode work.
-       This sprite-sheet alternative uses a single static WebP (15 cols × 10
-       rows = 150 frames) and animates background-position via two CSS
-       animations multiplied together (X cycles cols every 1s, Y advances
-       rows over 10s). Background-position is GPU-composited, no per-frame
-       decode — completely sidesteps the LPM bottleneck. */
-    .door-visual-sprite {
-      display: block;
-      height: clamp(260px, 40vh, 380px);
-      aspect-ratio: 480 / 596;
-      background-image: url('assets/sap-sprite.webp');
-      background-repeat: no-repeat;
-      /* Image is 7200x5960 native (15 cols * 480 = 7200, 10 rows * 596 = 5960).
-         At 1500% × 1000%, the image is 15× wider and 10× taller than the
-         element, so each cell is exactly element-sized. */
-      background-size: 1500% 1000%;
-      animation:
-        spriteX 1s steps(15, end) infinite,
-        spriteY 10s steps(10, end) infinite;
-      pointer-events: none;
-    }
-    @media (min-width: 1024px) {
-      .door-visual-sprite { height: clamp(320px, 46vh, 480px); }
-    }
-    /* Math note: background-position-x percentage P shifts the image left by
-       P% of (image_width − element_width). With image 15× element, that's
-       P% × 14 × element_width. To land on column i (shift = i × element_width)
-       we need P = i/14. For 15 evenly-spaced step values 0..14/14, with
-       steps(15, end), each step k yields P = (k/15) × to. To make step 14
-       equal P=100% (i.e., 14/14), we set to = 15/14 = 107.143%. Similarly
-       Y uses 10/9 = 111.111% for 10 rows. */
-    @keyframes spriteX {
-      from { background-position-x: 0%; }
-      to   { background-position-x: 107.143%; }
-    }
-    @keyframes spriteY {
-      from { background-position-y: 0%; }
-      to   { background-position-y: 111.111%; }
-    }
-
     /* Carved wordmark — same filter recipe as the hero name, baked-in (no animation). */
     .door-visual-mark {
       width: clamp(300px, 64vw, 420px);
@@ -700,20 +658,22 @@
       let lpmFallbackTriggered = false;
 
       // Low Power Mode (and other autoplay rejections) → swap <video> for
-      // a sprite-sheet <div>. CSS background-position animation on a static
-      // WebP sprite sidesteps iOS LPM's per-frame decode throttling entirely
-      // because no codec is decoding per frame — just GPU compositing.
+      // animated WebP. WebP image animation isn't a "video" so iOS doesn't
+      // hard-block it under LPM. Encoded at 10fps which divides 30Hz cleanly
+      // (3 refreshes per frame) for smooth cadence.
       // Snapshot + restore window.scrollY around the DOM mutation in case
       // iOS Safari still tries to scroll-anchor to the swap point.
       const swapToWebpFallback = () => {
         if (lpmFallbackTriggered) return;
         lpmFallbackTriggered = true;
         const savedScrollY = window.scrollY;
-        const sprite = document.createElement('div');
-        sprite.className = 'door-visual-sprite';
-        sprite.id = 'doorVideo';                // preserve hooks
-        sprite.setAttribute('aria-hidden', 'true');
-        doorVideo.replaceWith(sprite);
+        const img = new Image(720, 894);  // intrinsic aspect ratio of sap.webp
+        img.src = 'assets/sap.webp';
+        img.alt = '';
+        img.className = doorVideo.className; // keeps .door-visual-piece sizing
+        img.id = 'doorVideo';                // preserve hooks
+        img.setAttribute('aria-hidden', 'true');
+        doorVideo.replaceWith(img);
         requestAnimationFrame(() => {
           if (window.scrollY !== savedScrollY) {
             window.scrollTo(0, savedScrollY);
