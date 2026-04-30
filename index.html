@@ -342,6 +342,11 @@
       fill-opacity: 0;
       stroke: var(--bone);
       stroke-width: 0.8;
+      /* Pre-hidden via dash-offset so the stroke isn't visible during the
+         microsecond between first paint and gsap.set() running. JS overwrites
+         with the precise path length once it measures via getTotalLength(). */
+      stroke-dasharray: 9999;
+      stroke-dashoffset: 9999;
     }
 
     .hero-tagline {
