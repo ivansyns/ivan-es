@@ -393,7 +393,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      /* Don't let the DOM swap from <video> to <img> (LPM WebP fallback)
+         trigger browser scroll-anchoring into this panel. */
+      overflow-anchor: none;
     }
+    .doorways * { overflow-anchor: none; }
     .doorways .door-visual {
       max-width: 1100px;
       margin: 0 auto;
@@ -655,16 +659,29 @@
       // Low Power Mode (and other autoplay rejections) → swap <video> for
       // animated WebP. WebP isn't a "video" so iOS LPM doesn't block its
       // playback. Browser loops the <img> automatically.
+      // Two safety belts to avoid the scroll-anchor jumping to the doorway:
+      //   1. Set explicit intrinsic width/height on the img so the browser
+      //      reserves layout space before the 4.3MB WebP downloads.
+      //   2. Snapshot + restore window.scrollY around the DOM mutation in
+      //      case mobile Safari still tries to scroll-anchor.
       const swapToWebpFallback = () => {
         if (lpmFallbackTriggered) return;
         lpmFallbackTriggered = true;
-        const img = new Image();
+        const savedScrollY = window.scrollY;
+        const img = new Image(720, 894);  // intrinsic aspect ratio of sap.webp
         img.src = 'assets/sap.webp';
         img.alt = '';
         img.className = doorVideo.className; // keeps .door-visual-piece sizing
         img.id = 'doorVideo';                // preserve hooks
         img.setAttribute('aria-hidden', 'true');
         doorVideo.replaceWith(img);
+        // Re-pin scroll on the next frame in case the DOM swap triggered
+        // scroll-anchoring (esp. iOS Safari).
+        requestAnimationFrame(() => {
+          if (window.scrollY !== savedScrollY) {
+            window.scrollTo(0, savedScrollY);
+          }
+        });
       };
 
       const setDoorVideoSrc = () => {
