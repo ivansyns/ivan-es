@@ -650,6 +650,23 @@
 
       const mql = window.matchMedia('(min-width: 1024px)');
       let movFailed = false;
+      let lpmFallbackTriggered = false;
+
+      // Low Power Mode (and other autoplay rejections) → swap <video> for
+      // animated WebP. WebP isn't a "video" so iOS LPM doesn't block its
+      // playback. Browser loops the <img> automatically.
+      const swapToWebpFallback = () => {
+        if (lpmFallbackTriggered) return;
+        lpmFallbackTriggered = true;
+        const img = new Image();
+        img.src = 'assets/sap.webp';
+        img.alt = '';
+        img.className = doorVideo.className; // keeps .door-visual-piece sizing
+        img.id = 'doorVideo';                // preserve hooks
+        img.setAttribute('aria-hidden', 'true');
+        doorVideo.replaceWith(img);
+      };
+
       const setDoorVideoSrc = () => {
         let next, blend;
         if (isSafari && !movFailed) {
@@ -666,7 +683,9 @@
         if (doorVideo.getAttribute('src') !== next) {
           doorVideo.setAttribute('src', next);
           doorVideo.load();
-          doorVideo.play().catch(() => {});
+          // Promise rejection here = autoplay blocked (LPM is the common case).
+          // Swap to animated WebP which LPM doesn't restrict.
+          doorVideo.play().catch(() => swapToWebpFallback());
         }
       };
       // If the HEVC .mov can't be decoded for whatever reason on a given Safari
@@ -684,25 +703,28 @@
       // auto-resumes them. The pendant is below the hero on mobile, so it
       // hits exactly that case. Re-issue play() whenever the video scrolls
       // into view — iOS accepts this as a valid user-context gesture.
+      // Skip if we already swapped to the WebP fallback (img element loops itself).
       if ('IntersectionObserver' in window) {
         const resumeObs = new IntersectionObserver((entries) => {
+          if (lpmFallbackTriggered) return;
           entries.forEach((entry) => {
             if (entry.isIntersecting && doorVideo.paused) {
-              doorVideo.play().catch(() => {});
+              doorVideo.play().catch(() => swapToWebpFallback());
             }
           });
         }, { threshold: 0.1 });
         resumeObs.observe(doorVideo);
       }
 
-      // Low Power Mode hard-blocks autoplay even when the video is in view.
-      // iOS then shows its native play-button overlay, but tapping it bubbles
-      // up to the wrapping <a href="aromazla.html"> and navigates instead of
-      // playing. Intercept clicks that land within the video's bounding box
-      // while the video is paused — call play() and swallow the navigation.
+      // Click-fix safety net: if the WebP swap somehow doesn't trigger and
+      // iOS shows its native play overlay anyway, intercept taps that land
+      // on the video so they call play() instead of bubbling to the parent
+      // <a href="aromazla.html"> and navigating away.
       const doorVisual = doorVideo.closest('.door-visual');
       if (doorVisual) {
         doorVisual.addEventListener('click', (e) => {
+          if (lpmFallbackTriggered) return;       // WebP fallback active; let anchor handle clicks
+          if (!doorVideo.isConnected) return;     // doorVideo was replaced; no-op
           if (!doorVideo.paused) return;
           const r = doorVideo.getBoundingClientRect();
           const insideVideo = e.clientX >= r.left && e.clientX <= r.right
@@ -710,7 +732,7 @@
           if (insideVideo) {
             e.preventDefault();
             e.stopPropagation();
-            doorVideo.play().catch(() => {});
+            doorVideo.play().catch(() => swapToWebpFallback());
           }
         });
       }
