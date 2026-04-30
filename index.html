@@ -694,6 +694,26 @@
         }, { threshold: 0.1 });
         resumeObs.observe(doorVideo);
       }
+
+      // Low Power Mode hard-blocks autoplay even when the video is in view.
+      // iOS then shows its native play-button overlay, but tapping it bubbles
+      // up to the wrapping <a href="aromazla.html"> and navigates instead of
+      // playing. Intercept clicks that land within the video's bounding box
+      // while the video is paused — call play() and swallow the navigation.
+      const doorVisual = doorVideo.closest('.door-visual');
+      if (doorVisual) {
+        doorVisual.addEventListener('click', (e) => {
+          if (!doorVideo.paused) return;
+          const r = doorVideo.getBoundingClientRect();
+          const insideVideo = e.clientX >= r.left && e.clientX <= r.right
+                           && e.clientY >= r.top  && e.clientY <= r.bottom;
+          if (insideVideo) {
+            e.preventDefault();
+            e.stopPropagation();
+            doorVideo.play().catch(() => {});
+          }
+        });
+      }
     }
 
     // ─── Card-flip mobile nav ───
