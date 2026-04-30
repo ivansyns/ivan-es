@@ -686,11 +686,14 @@
         if (isSafari && !movFailed) {
           next = 'assets/sap.mov';   // HEVC alpha — native transparency on Safari
           blend = false;
-        } else if (!isSafari && mql.matches) {
-          next = 'assets/sap.webm';  // VP9 alpha — desktop Chrome/Firefox/Edge
+        } else if (!isSafari) {
+          // Any non-Safari browser — desktop Chrome/Firefox/Edge AND
+          // Android Chrome/Firefox — all decode VP9 alpha cleanly.
+          next = 'assets/sap.webm';
           blend = false;
         } else {
-          next = 'assets/sap.mp4';   // H.264 + black matte → lighten blend knocks it out
+          // Last resort: Safari that couldn't decode the .mov (very rare).
+          next = 'assets/sap.mp4';
           blend = true;
         }
         doorVideo.classList.toggle('use-blend', blend);
