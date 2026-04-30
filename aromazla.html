@@ -195,6 +195,42 @@
     .nav-links a.active { color: var(--bone); }
     .nav-links a.active::after { transform: scaleX(1); }
 
+    /* ── BACK-TO-HOME ARROW (subpage component) ──
+       Drop-in: <a class="nav-back" href="index.html" aria-label="Inicio">…svg…</a>
+       margin-right:auto pushes it to the far left of the nav while right-side
+       items (nav-links + nav-card) stay flex-end. Same 36px hit-target and
+       gold color as .nav-card so the optical balance reads correctly. */
+    .nav-back {
+      margin-right: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      padding: 4px;
+      color: var(--gold);
+      background: transparent;
+      border: 0;
+      transition: color 240ms var(--ease-out);
+    }
+    .nav-back svg {
+      width: 22px;
+      height: 22px;
+      display: block;
+      overflow: visible;
+      transition: transform 360ms cubic-bezier(0.7, -0.05, 0.3, 1);
+    }
+    .nav-back svg line,
+    .nav-back svg polyline {
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    .nav-back:hover { color: var(--bone); }
+    .nav-back:hover svg { transform: translateX(-2px); }
+
     /* Mobile cross — morphs to an X on tap. Gold in every state. Same recipe as index.html. */
     .nav-card {
       display: none;
@@ -634,6 +670,12 @@
 
   <!-- NAV -->
   <nav id="nav">
+    <a class="nav-back" href="index.html" aria-label="Inicio">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <line x1="20" y1="12" x2="4" y2="12"/>
+        <polyline points="10 6 4 12 10 18"/>
+      </svg>
+    </a>
     <ul class="nav-links">
       <li><a href="aromazla.html" class="active">Aromazla</a></li>
       <li><a href="https://visuanza.es" target="_blank" rel="noopener">Visuanza</a></li>
