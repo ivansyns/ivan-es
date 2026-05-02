@@ -402,7 +402,13 @@
        position (both panels use the same `clamp(120px, 18vh, 200px)` top pad). */
     .page-title {
       width: 100%;
-      max-width: 460px;
+      /* Sized to match the IVAN ALZAMORA hero on index.html. The index
+         glyphs render at ~51px tall (path-based, viewBox 504 wide).
+         AROMAZLA uses a wider viewBox (600) with font-size 56 — at the
+         old max-width 460 the letters were only 43px tall, visibly
+         smaller than the index hero. 548px lifts AROMAZLA's letters to
+         ~51px (56 × 548/600), matching the index hero's letter height. */
+      max-width: 548px;
       display: block;
       line-height: 0;
       margin: 0;
