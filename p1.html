@@ -1139,23 +1139,13 @@
       };
 
       const setSrc = () => {
-        let next, blend;
-        if (isSafari && !movFailed) {
-          // Safari (any platform) — HEVC alpha, native transparency.
-          next = 'assets/p1/sap.mov';
-          blend = false;
-        } else if (!isSafari && desktopMql.matches) {
-          // Desktop Chrome/Firefox/Edge — VP9 alpha decodes cleanly here.
-          next = 'assets/p1/sap.webm';
-          blend = false;
-        } else {
-          // Mobile non-Safari (Android Chrome/Firefox) AND any Safari that
-          // couldn't decode the .mov: H.264 .mp4 has no alpha, so we knock
-          // out the black matte with mix-blend-mode: lighten against the
-          // dark panel background. Reliable across every mobile browser.
-          next = 'assets/p1/sap.mp4';
-          blend = true;
-        }
+        // None of the sap.{mov,webm,mp4} files actually carry an alpha
+        // channel (verified via ffprobe — all three are pix_fmt yuv420p).
+        // Always use the H.264 .mp4 + mix-blend-mode: lighten to knock
+        // out the black matte against the dark panel — only reliable
+        // mask for the pendant across all browsers.
+        const next = 'assets/p1/sap.mp4';
+        const blend = true;
         pieceVideo.classList.toggle('use-blend', blend);
         if (pieceVideo.getAttribute('src') !== next) {
           pieceVideo.setAttribute('src', next);

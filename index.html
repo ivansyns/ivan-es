@@ -545,11 +545,11 @@
     }
     .door-visual-cue .glyph { display: inline-block; }
     /* Mobile: drop the AROMAZLA carved wordmark + cue arrow under the
-       pendant — the floating piece itself is the door, no label needed
-       on the smaller viewport. */
+       pendant — the floating piece itself is the door, no label needed.
+       !important so it beats any inherited inline / cascade override. */
     @media (max-width: 1023px) {
       .door-visual-mark,
-      .door-visual-cue { display: none; }
+      .door-visual-cue { display: none !important; }
     }
 
     /* ─── REVEAL ─── */
@@ -805,24 +805,13 @@
       };
 
       const setDoorVideoSrc = () => {
-        let next, blend;
-        if (isSafari && !movFailed) {
-          // Safari (any platform) — HEVC alpha, native transparency.
-          next = 'assets/p1/sap.mov';
-          blend = false;
-        } else if (!isSafari && mql.matches) {
-          // Desktop Chrome/Firefox/Edge — VP9 alpha decodes cleanly here.
-          next = 'assets/p1/sap.webm';
-          blend = false;
-        } else {
-          // Mobile non-Safari (Android Chrome/Firefox) AND any Safari that
-          // couldn't decode the .mov: H.264 .mp4 has no alpha, so we knock
-          // out the black matte with mix-blend-mode: lighten against the
-          // panel's dark background. Same recipe as the aromazla pendant
-          // card — reliable across every mobile browser.
-          next = 'assets/p1/sap.mp4';
-          blend = true;
-        }
+        // None of the sap.{mov,webm,mp4} files actually carry an alpha
+        // channel (verified via ffprobe — all three are pix_fmt yuv420p).
+        // So the only way to mask the black background is mix-blend-mode:
+        // lighten on the H.264 .mp4 against the dark panel. Use it
+        // everywhere — same recipe across every browser + platform.
+        const next = 'assets/p1/sap.mp4';
+        const blend = true;
         doorVideo.classList.toggle('use-blend', blend);
         if (doorVideo.getAttribute('src') !== next) {
           doorVideo.setAttribute('src', next);
