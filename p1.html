@@ -1139,13 +1139,12 @@
       };
 
       const setSrc = () => {
-        // None of the sap.{mov,webm,mp4} files actually carry an alpha
-        // channel (verified via ffprobe — all three are pix_fmt yuv420p).
-        // Always use the H.264 .mp4 + mix-blend-mode: lighten to knock
-        // out the black matte against the dark panel — only reliable
-        // mask for the pendant across all browsers.
-        const next = 'assets/p1/sap.mp4';
-        const blend = true;
+        // Safari (iOS + macOS) → sap.mov: HEVC carries an alpha track
+        // that Safari renders with real transparency — no blend needed.
+        // Everywhere else → sap.webm + lighten blend (the webm is pix_fmt
+        // yuv420p so we knock out the black matte via mix-blend-mode).
+        const next = isSafari ? 'assets/p1/sap.mov' : 'assets/p1/sap.webm';
+        const blend = !isSafari;
         pieceVideo.classList.toggle('use-blend', blend);
         if (pieceVideo.getAttribute('src') !== next) {
           pieceVideo.setAttribute('src', next);

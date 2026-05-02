@@ -1,15 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-i18n-title="index.meta.title">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Inline bootstrap: sets <html lang> BEFORE first paint based on
+       localStorage choice or navigator.language seed. Prevents FOUC of
+       the wrong-language flag in the lang switcher. The full string
+       substitution happens once i18n.js (deferred) runs at DOMContentLoaded. -->
+  <script>
+    (function(){
+      try {
+        var s = localStorage.getItem('ivanes.lang');
+        if (s === 'en' || s === 'es') { document.documentElement.lang = s; return; }
+      } catch (e) {}
+      var b = (navigator.language || '').toLowerCase();
+      if (b.indexOf('es') === 0) document.documentElement.lang = 'es';
+    })();
+  </script>
+  <script src="assets/i18n.js" defer></script>
   <title>Iván Alzamora — Madrid</title>
-  <meta name="description" content="Iván Alzamora — freelancer, builder, operations at Visuanza, jewelry under Aromazla. Madrid, Spain." />
+  <meta name="description" content="Iván Alzamora — freelancer, builder, operations at Visuanza, jewelry under Aromazla. Madrid, Spain." data-i18n-content="index.meta.description" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#0A0A0A" />
 
-  <meta property="og:title" content="Iván Alzamora" />
-  <meta property="og:description" content="Builder. Operations at Visuanza. Jewelry under Aromazla. Madrid." />
+  <meta property="og:title" content="Iván Alzamora" data-i18n-content="index.meta.ogTitle" />
+  <meta property="og:description" content="Builder. Operations at Visuanza. Jewelry under Aromazla. Madrid." data-i18n-content="index.meta.ogDescription" />
   <meta property="og:type" content="profile" />
   <meta property="og:url" content="https://ivan.es" />
   <meta property="og:locale" content="en_GB" />
@@ -266,6 +281,120 @@
       filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
     }
     .menu-sheet__icons svg { width: 44px; height: 44px; }
+
+    /* ─── LANGUAGE SWITCHER (shared block — duplicated across pages) ───
+       Desktop: a flag + chevron trigger that opens a small dropdown with
+       both languages; the trigger shows the CURRENT lang's flag, the
+       dropdown shows BOTH. Mobile: hidden in nav, replaced by a pill row
+       inside .menu-sheet (handled below). */
+    .lang-switcher {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      margin-left: 24px;
+    }
+    .lang-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      background: transparent;
+      border: 1px solid transparent;
+      cursor: pointer;
+      color: var(--bone-soft);
+      border-radius: 4px;
+      transition: color 240ms var(--ease-out), border-color 240ms var(--ease-out);
+    }
+    .lang-trigger:hover { color: var(--bone); border-color: var(--bone-line); }
+    .lang-flag-svg {
+      width: 22px; height: 14px;
+      border-radius: 1px;
+      display: block;
+      flex-shrink: 0;
+    }
+    .lang-arrow-svg {
+      width: 10px; height: 6px;
+      display: block;
+      transition: transform 240ms var(--ease-out);
+    }
+    .lang-trigger[aria-expanded="true"] .lang-arrow-svg { transform: rotate(180deg); }
+    /* Show only the current language's flag on the trigger button */
+    .lang-trigger .lang-flag-en, .lang-trigger .lang-flag-es { display: none; }
+    html[lang="en"] .lang-trigger .lang-flag-en,
+    html[lang="es"] .lang-trigger .lang-flag-es { display: block; }
+
+    .lang-dropdown {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      min-width: 150px;
+      padding: 6px;
+      background: var(--ink-card);
+      border: 1px solid var(--bone-line);
+      border-radius: 6px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
+      z-index: 60;
+    }
+    .lang-dropdown.open {
+      opacity: 1; pointer-events: auto;
+      transform: translateY(0);
+    }
+    .lang-dropdown button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+      font-family: var(--f-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--bone-soft);
+      text-align: left;
+      border-radius: 4px;
+      transition: color 240ms var(--ease-out), background 240ms var(--ease-out);
+    }
+    .lang-dropdown button:hover {
+      color: var(--bone);
+      background: rgba(245, 240, 232, 0.04);
+    }
+    .lang-dropdown button[aria-current="true"] { color: var(--gold); }
+
+    /* ─── Mobile menu-sheet language pills ─── */
+    .menu-sheet__lang {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+    .menu-sheet__lang button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--bone-line);
+      border-radius: 9999px;
+      cursor: pointer;
+      font-family: var(--f-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--bone-soft);
+      transition: color 240ms var(--ease-out), border-color 240ms var(--ease-out);
+    }
+    .menu-sheet__lang button[aria-current="true"] {
+      color: var(--gold);
+      border-color: var(--gold);
+    }
 
     /* ─── HERO ─── */
     .hero {
@@ -564,6 +693,7 @@
     @media (max-width: 768px) {
       .nav-links { display: none; }
       .nav-card { display: inline-flex; }
+      .lang-switcher { display: none; }
     }
     @media (max-width: 540px) {
       .hero { padding: 96px 18px 90px; }
@@ -805,13 +935,12 @@
       };
 
       const setDoorVideoSrc = () => {
-        // None of the sap.{mov,webm,mp4} files actually carry an alpha
-        // channel (verified via ffprobe — all three are pix_fmt yuv420p).
-        // So the only way to mask the black background is mix-blend-mode:
-        // lighten on the H.264 .mp4 against the dark panel. Use it
-        // everywhere — same recipe across every browser + platform.
-        const next = 'assets/p1/sap.mp4';
-        const blend = true;
+        // Safari (iOS + macOS) → sap.mov: HEVC carries an alpha track
+        // that Safari renders with real transparency — no blend needed.
+        // Everywhere else → sap.webm + lighten blend (the webm is pix_fmt
+        // yuv420p so we knock out the black matte via mix-blend-mode).
+        const next = isSafari ? 'assets/p1/sap.mov' : 'assets/p1/sap.webm';
+        const blend = !isSafari;
         doorVideo.classList.toggle('use-blend', blend);
         if (doorVideo.getAttribute('src') !== next) {
           doorVideo.setAttribute('src', next);
