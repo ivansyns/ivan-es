@@ -1,15 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-i18n-title="aroma.meta.title">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    (function(){
+      try {
+        var s = localStorage.getItem('ivanes.lang');
+        if (s === 'en' || s === 'es') { document.documentElement.lang = s; return; }
+      } catch (e) {}
+      var b = (navigator.language || '').toLowerCase();
+      if (b.indexOf('es') === 0) document.documentElement.lang = 'es';
+    })();
+  </script>
+  <script src="assets/i18n.js" defer></script>
   <title>Aromazla — Jewellery by Iván Alzamora</title>
-  <meta name="description" content="Aromazla — symbolic art forged in gold and set with certified precious stones. Wearable meaning, made once. By Iván Alzamora, Madrid." />
+  <meta name="description" content="Aromazla — symbolic art forged in gold and set with certified precious stones. Wearable meaning, made once. By Iván Alzamora, Madrid." data-i18n-content="aroma.meta.description" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#0A0A0A" />
 
-  <meta property="og:title" content="Aromazla — Jewellery" />
-  <meta property="og:description" content="Symbolic art forged in gold and set with certified precious stones. Wearable meaning, made once." />
+  <meta property="og:title" content="Aromazla — Jewellery" data-i18n-content="aroma.meta.ogTitle" />
+  <meta property="og:description" content="Symbolic art forged in gold and set with certified precious stones. Wearable meaning, made once." data-i18n-content="aroma.meta.ogDescription" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://ivan.es/aromazla" />
   <meta property="og:locale" content="en_GB" />
@@ -315,6 +326,53 @@
       filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
     }
     .menu-sheet__icons svg { width: 44px; height: 44px; }
+
+    /* ─── LANGUAGE SWITCHER (shared block) ─── */
+    .lang-switcher { position: relative; display: inline-flex; align-items: center; margin-left: 24px; }
+    .lang-trigger {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 10px; background: transparent; border: 1px solid transparent;
+      cursor: pointer; color: var(--bone-soft); border-radius: 4px;
+      transition: color 240ms var(--ease-out), border-color 240ms var(--ease-out);
+    }
+    .lang-trigger:hover { color: var(--bone); border-color: var(--bone-line); }
+    .lang-flag-svg { width: 22px; height: 14px; border-radius: 1px; display: block; flex-shrink: 0; }
+    .lang-arrow-svg { width: 10px; height: 6px; display: block; transition: transform 240ms var(--ease-out); }
+    .lang-trigger[aria-expanded="true"] .lang-arrow-svg { transform: rotate(180deg); }
+    .lang-trigger .lang-flag-en, .lang-trigger .lang-flag-es { display: none; }
+    html[lang="en"] .lang-trigger .lang-flag-en,
+    html[lang="es"] .lang-trigger .lang-flag-es { display: block; }
+    .lang-dropdown {
+      position: absolute; top: calc(100% + 6px); right: 0;
+      min-width: 150px; padding: 6px;
+      background: var(--ink-card); border: 1px solid var(--bone-line);
+      border-radius: 6px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+      display: flex; flex-direction: column; gap: 2px;
+      opacity: 0; pointer-events: none; transform: translateY(-4px);
+      transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
+      z-index: 60;
+    }
+    .lang-dropdown.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .lang-dropdown button {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px; background: transparent; border: 0; cursor: pointer;
+      font-family: var(--f-mono); font-size: 0.7rem;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--bone-soft); text-align: left; border-radius: 4px;
+      transition: color 240ms var(--ease-out), background 240ms var(--ease-out);
+    }
+    .lang-dropdown button:hover { color: var(--bone); background: rgba(245, 240, 232, 0.04); }
+    .lang-dropdown button[aria-current="true"] { color: var(--gold); }
+    .menu-sheet__lang { display: flex; gap: 14px; margin-bottom: 8px; }
+    .menu-sheet__lang button {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px; background: transparent;
+      border: 1px solid var(--bone-line); border-radius: 9999px;
+      cursor: pointer; font-family: var(--f-mono); font-size: 0.7rem;
+      letter-spacing: 0.22em; text-transform: uppercase; color: var(--bone-soft);
+      transition: color 240ms var(--ease-out), border-color 240ms var(--ease-out);
+    }
+    .menu-sheet__lang button[aria-current="true"] { color: var(--gold); border-color: var(--gold); }
 
     /* ─── PAGE HEAD ─── */
     /* Top-anchored hero stack — mirrors index.html so the two pages feel like a pair.
@@ -1259,6 +1317,7 @@
     @media (max-width: 768px) {
       .nav-links { display: none; }
       .nav-card { display: inline-flex; }
+      .lang-switcher { display: none; }
     }
     @media (max-width: 540px) {
       .piece.span-2 { aspect-ratio: 4/5; }
@@ -1285,18 +1344,43 @@
 
   <!-- NAV -->
   <nav id="nav">
-    <a class="nav-back" href="index.html" aria-label="Inicio">
+    <a class="nav-back" href="index.html" aria-label="Inicio" data-i18n-attr="aria-label:nav.home.aria">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <circle cx="12" cy="12" r="9"/>
         <circle class="sun-dot" cx="12" cy="12" r="1.6"/>
       </svg>
     </a>
     <ul class="nav-links">
-      <li><a href="aromazla.html" class="active">Aromazla</a></li>
-      <li><a href="https://visuanza.es" target="_blank" rel="noopener">Visuanza</a></li>
-      <li><a href="contact.html">Contact</a></li>
+      <li><a href="aromazla.html" class="active" data-i18n="nav.aromazla">Aromazla</a></li>
+      <li><a href="https://visuanza.es" target="_blank" rel="noopener" data-i18n="nav.visuanza">Visuanza</a></li>
+      <li><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
     </ul>
-    <button class="nav-card" id="navCard" aria-label="Open navigation" aria-expanded="false">
+    <div class="lang-switcher">
+      <button type="button" class="lang-trigger" data-lang-trigger
+              aria-haspopup="true" aria-expanded="false"
+              aria-label="Change language" data-i18n-attr="aria-label:nav.changeLanguage.aria">
+        <span class="lang-flag-en" aria-hidden="true">
+          <svg class="lang-flag-svg" viewBox="0 0 60 30" preserveAspectRatio="none"><rect width="60" height="30" fill="#012169"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#C8102E" stroke-width="2"/><path d="M30 0 V30 M0 15 H60" stroke="#fff" stroke-width="10"/><path d="M30 0 V30 M0 15 H60" stroke="#C8102E" stroke-width="6"/></svg>
+        </span>
+        <span class="lang-flag-es" aria-hidden="true">
+          <svg class="lang-flag-svg" viewBox="0 0 60 30" preserveAspectRatio="none"><rect width="60" height="30" fill="#C60B1E"/><rect y="7.5" width="60" height="15" fill="#FFC400"/></svg>
+        </span>
+        <svg class="lang-arrow-svg" viewBox="0 0 12 8" aria-hidden="true">
+          <path d="M2 2 L6 6 L10 2" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="lang-dropdown" role="menu">
+        <button type="button" data-set-lang="en" role="menuitem">
+          <svg class="lang-flag-svg" viewBox="0 0 60 30" aria-hidden="true" preserveAspectRatio="none"><rect width="60" height="30" fill="#012169"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#C8102E" stroke-width="2"/><path d="M30 0 V30 M0 15 H60" stroke="#fff" stroke-width="10"/><path d="M30 0 V30 M0 15 H60" stroke="#C8102E" stroke-width="6"/></svg>
+          <span data-i18n="nav.lang.english">English</span>
+        </button>
+        <button type="button" data-set-lang="es" role="menuitem">
+          <svg class="lang-flag-svg" viewBox="0 0 60 30" aria-hidden="true" preserveAspectRatio="none"><rect width="60" height="30" fill="#C60B1E"/><rect y="7.5" width="60" height="15" fill="#FFC400"/></svg>
+          <span data-i18n="nav.lang.spanish">Español</span>
+        </button>
+      </div>
+    </div>
+    <button class="nav-card" id="navCard" aria-label="Open navigation" aria-expanded="false" data-i18n-attr="aria-label:nav.openMenu.aria">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <line class="cx-v" x1="12" y1="2" x2="12" y2="22"/>
         <line class="cx-h" x1="6" y1="9" x2="18" y2="9"/>
@@ -1305,9 +1389,19 @@
   </nav>
 
   <div class="menu-sheet" id="menuSheet" aria-hidden="true">
-    <a href="aromazla.html">Aromazla</a>
-    <a href="https://visuanza.es" target="_blank" rel="noopener">Visuanza</a>
-    <a href="contact.html">Contact</a>
+    <div class="menu-sheet__lang">
+      <button type="button" data-set-lang="en">
+        <svg class="lang-flag-svg" viewBox="0 0 60 30" aria-hidden="true" preserveAspectRatio="none"><rect width="60" height="30" fill="#012169"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#C8102E" stroke-width="2"/><path d="M30 0 V30 M0 15 H60" stroke="#fff" stroke-width="10"/><path d="M30 0 V30 M0 15 H60" stroke="#C8102E" stroke-width="6"/></svg>
+        EN
+      </button>
+      <button type="button" data-set-lang="es">
+        <svg class="lang-flag-svg" viewBox="0 0 60 30" aria-hidden="true" preserveAspectRatio="none"><rect width="60" height="30" fill="#C60B1E"/><rect y="7.5" width="60" height="15" fill="#FFC400"/></svg>
+        ES
+      </button>
+    </div>
+    <a href="aromazla.html" data-i18n="nav.aromazla">Aromazla</a>
+    <a href="https://visuanza.es" target="_blank" rel="noopener" data-i18n="nav.visuanza">Visuanza</a>
+    <a href="contact.html" data-i18n="nav.contact">Contact</a>
     <div class="menu-sheet__icons">
       <a href="https://www.instagram.com/ivan.alzam/" target="_blank" rel="noopener" aria-label="Instagram @ivan.alzam">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1377,11 +1471,11 @@
                 filter="url(#carvedAroma)">AROMAZLA</text>
         </svg>
       </h1>
-      <p class="page-lede">Symbolic art forged in gold and set with certified precious stones. <em>Wearable meaning, made once.</em></p>
+      <p class="page-lede" data-i18n-html="aroma.pageLede">Symbolic art forged in gold and set with certified precious stones. <em>Wearable meaning, made once.</em></p>
     </div>
    </div>
    <div class="page-cue" aria-hidden="true">
-     <span>Pieces</span>
+     <span data-i18n="aroma.pageCue.pieces">Pieces</span>
      <span class="arrow"></span>
    </div>
   </header>
@@ -1390,8 +1484,8 @@
   <section class="gallery gallery--pieces panel hpanel" style="--z:2;">
    <div class="panel-inner">
     <header class="gallery-head reveal">
-      <h2>Pieces</h2>
-      <span class="num">selected · ongoing</span>
+      <h2 data-i18n="aroma.pieces.heading">Pieces</h2>
+      <span class="num" data-i18n="aroma.pieces.num">selected · ongoing</span>
     </header>
 
     <div class="gallery-grid">
@@ -1401,7 +1495,7 @@
         </span>
         <div class="piece-meta">
           <span class="piece-num">No. 001</span>
-          <span class="piece-name">Yellow Sapphire <em>·</em> pendant</span>
+          <span class="piece-name" data-i18n-html="aroma.piece.p1.name">Yellow Sapphire <em>·</em> pendant</span>
         </div>
       </a>
 
@@ -1413,15 +1507,15 @@
   <section class="gallery gallery--stones panel hpanel" style="--z:3;">
    <div class="panel-inner">
     <header class="gallery-head reveal">
-      <h2>Stones</h2>
-      <span class="num">loose · certified</span>
+      <h2 data-i18n="aroma.stones.heading">Stones</h2>
+      <span class="num" data-i18n="aroma.stones.num">loose · certified</span>
     </header>
 
     <div class="gallery-grid">
       <!-- IGI Diamond -->
       <a href="#" class="piece reveal" data-gallery="s3" style="--i:0;">
         <span class="piece-top-label" aria-hidden="true">
-          <span class="piece-top-label__name">Diamond</span>
+          <span class="piece-top-label__name" data-i18n="aroma.stones.diamond.name">Diamond</span>
           <span class="piece-top-label__sep"></span>
           <span class="piece-top-label__carat">0.90 ct</span>
         </span>
@@ -1435,17 +1529,17 @@
           <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
           <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
         </span>
-        <span class="piece-pill" aria-hidden="true">4 photos · 1 video · IGI</span>
+        <span class="piece-pill" aria-hidden="true" data-i18n="aroma.stones.diamond.pill">4 photos · 1 video · IGI</span>
         <div class="piece-meta">
           <span class="piece-cert">IGI</span>
-          <span class="piece-name">Diamond</span>
+          <span class="piece-name" data-i18n="aroma.stones.diamond.name">Diamond</span>
         </div>
       </a>
 
       <!-- GIA Ruby -->
       <a href="#" class="piece reveal" data-gallery="s1" style="--i:1;">
         <span class="piece-top-label" aria-hidden="true">
-          <span class="piece-top-label__name">Ruby</span>
+          <span class="piece-top-label__name" data-i18n="aroma.stones.ruby.name">Ruby</span>
           <span class="piece-top-label__sep"></span>
           <span class="piece-top-label__carat">1.02 ct</span>
         </span>
@@ -1459,17 +1553,17 @@
           <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
           <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
         </span>
-        <span class="piece-pill" aria-hidden="true">4 photos · 1 video · GIA</span>
+        <span class="piece-pill" aria-hidden="true" data-i18n="aroma.stones.ruby.pill">4 photos · 1 video · GIA</span>
         <div class="piece-meta">
           <span class="piece-cert">GIA</span>
-          <span class="piece-name">Ruby</span>
+          <span class="piece-name" data-i18n="aroma.stones.ruby.name">Ruby</span>
         </div>
       </a>
 
       <!-- IGE Aquamarine — uses a still photo (no video on this card) -->
       <a href="#" class="piece reveal" data-gallery="s2" style="--i:2;">
         <span class="piece-top-label" aria-hidden="true">
-          <span class="piece-top-label__name">Aquamarine</span>
+          <span class="piece-top-label__name" data-i18n="aroma.stones.aquamarine.name">Aquamarine</span>
           <span class="piece-top-label__sep"></span>
           <span class="piece-top-label__carat">8.65 ct</span>
         </span>
@@ -1479,10 +1573,10 @@
           <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
           <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
         </span>
-        <span class="piece-pill" aria-hidden="true">1 photo · 1 video · IGE</span>
+        <span class="piece-pill" aria-hidden="true" data-i18n="aroma.stones.aquamarine.pill">1 photo · 1 video · IGE</span>
         <div class="piece-meta">
           <span class="piece-cert">IGE</span>
-          <span class="piece-name">Aquamarine</span>
+          <span class="piece-name" data-i18n="aroma.stones.aquamarine.name">Aquamarine</span>
         </div>
       </a>
 
@@ -1493,9 +1587,9 @@
   <!-- COMMISSION -->
   <section class="commission panel hpanel" id="commission" style="--z:4;">
    <div class="panel-inner">
-    <span class="commission-eyebrow"><span class="commission-eyebrow__a">Commission</span> <span class="commission-eyebrow__sep" aria-hidden="true">·</span> <span class="commission-eyebrow__b">per request</span></span>
-    <h2><span class="commission-h2-line">Custom pieces,</span> <span class="commission-h2-line">made <em>to order</em>.</span></h2>
-    <p>If you want a custom piece, get in touch. Commissions usually take six to eight weeks.</p>
+    <span class="commission-eyebrow"><span class="commission-eyebrow__a" data-i18n="aroma.commission.eyebrow.a">Commission</span> <span class="commission-eyebrow__sep" aria-hidden="true">·</span> <span class="commission-eyebrow__b" data-i18n="aroma.commission.eyebrow.b">per request</span></span>
+    <h2 data-i18n-html="aroma.commission.heading"><span class="commission-h2-line">Custom pieces,</span> <span class="commission-h2-line">made <em>to order</em>.</span></h2>
+    <p data-i18n="aroma.commission.body">If you want a custom piece, get in touch. Commissions usually take six to eight weeks.</p>
     <div class="commission__contacts">
       <a href="https://www.instagram.com/ivan.alzam/" target="_blank" rel="noopener" class="commission__contact" aria-label="Instagram @ivan.alzam">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1542,7 +1636,7 @@
         <span class="lb-sep" aria-hidden="true"></span>
         <span class="lb-pos" id="lbPos">1 / 7</span>
       </div>
-      <button class="lb-close" id="lbClose" type="button" aria-label="Close gallery">
+      <button class="lb-close" id="lbClose" type="button" aria-label="Close gallery" data-i18n-attr="aria-label:aroma.lightbox.close.aria">
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <line class="cx-v" x1="12" y1="2" x2="12" y2="22"/>
           <line class="cx-h" x1="6" y1="9" x2="18" y2="9"/>
@@ -1550,16 +1644,16 @@
       </button>
     </div>
     <div class="lb-stage-wrap">
-      <button class="lb-arrow lb-arrow--prev" id="lbPrev" type="button" aria-label="Previous image">
+      <button class="lb-arrow lb-arrow--prev" id="lbPrev" type="button" aria-label="Previous image" data-i18n-attr="aria-label:aroma.lightbox.prev.aria">
         <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 6 9 12 15 18"/></svg>
       </button>
       <div class="lb-stage" id="lbStage" aria-live="off"></div>
-      <button class="lb-arrow lb-arrow--next" id="lbNext" type="button" aria-label="Next image">
+      <button class="lb-arrow lb-arrow--next" id="lbNext" type="button" aria-label="Next image" data-i18n-attr="aria-label:aroma.lightbox.next.aria">
         <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg>
       </button>
     </div>
     <div class="lb-foot">
-      <div class="lb-thumbs" id="lbThumbs" role="tablist" aria-label="Gallery thumbnails"></div>
+      <div class="lb-thumbs" id="lbThumbs" role="tablist" aria-label="Gallery thumbnails" data-i18n-attr="aria-label:aroma.lightbox.thumbs.aria"></div>
     </div>
     <div class="lb-sr" aria-live="polite" id="lbAnnounce"></div>
   </div>

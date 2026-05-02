@@ -1,15 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-i18n-title="p1.meta.title">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    (function(){
+      try {
+        var s = localStorage.getItem('ivanes.lang');
+        if (s === 'en' || s === 'es') { document.documentElement.lang = s; return; }
+      } catch (e) {}
+      var b = (navigator.language || '').toLowerCase();
+      if (b.indexOf('es') === 0) document.documentElement.lang = 'es';
+    })();
+  </script>
+  <script src="assets/i18n.js" defer></script>
   <title>Equinoccio — Yellow Sapphire Pendant — Aromazla</title>
-  <meta name="description" content="No. 001 — Equinoccio. A natural yellow sapphire of 2.08 carats, set in 18k white gold and finished in rhodium. By Iván Alzamora." />
+  <meta name="description" content="No. 001 — Equinoccio. A natural yellow sapphire of 2.08 carats, set in 18k white gold and finished in rhodium. By Iván Alzamora." data-i18n-content="p1.meta.description" />
   <meta name="robots" content="index, follow" />
   <meta name="theme-color" content="#0A0A0A" />
 
-  <meta property="og:title" content="Equinoccio — Yellow Sapphire Pendant — Aromazla" />
-  <meta property="og:description" content="No. 001 — Equinoccio. Yellow sapphire pendant, 2.08 ct, 18k white gold rhodium plated. Made once." />
+  <meta property="og:title" content="Equinoccio — Yellow Sapphire Pendant — Aromazla" data-i18n-content="p1.meta.ogTitle" />
+  <meta property="og:description" content="No. 001 — Equinoccio. Yellow sapphire pendant, 2.08 ct, 18k white gold rhodium plated. Made once." data-i18n-content="p1.meta.ogDescription" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://ivan.es/p1" />
   <meta property="og:locale" content="en_GB" />
@@ -135,6 +146,53 @@
       filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
     }
     .menu-sheet__icons svg { width: 44px; height: 44px; }
+
+    /* ─── LANGUAGE SWITCHER ─── */
+    .lang-switcher { position: relative; display: inline-flex; align-items: center; margin-left: 24px; }
+    .lang-trigger {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 10px; background: transparent; border: 1px solid transparent;
+      cursor: pointer; color: var(--bone-soft); border-radius: 4px;
+      transition: color 240ms var(--ease-out), border-color 240ms var(--ease-out);
+    }
+    .lang-trigger:hover { color: var(--bone); border-color: var(--bone-line); }
+    .lang-flag-svg { width: 22px; height: 14px; border-radius: 1px; display: block; flex-shrink: 0; }
+    .lang-arrow-svg { width: 10px; height: 6px; display: block; transition: transform 240ms var(--ease-out); }
+    .lang-trigger[aria-expanded="true"] .lang-arrow-svg { transform: rotate(180deg); }
+    .lang-trigger .lang-flag-en, .lang-trigger .lang-flag-es { display: none; }
+    html[lang="en"] .lang-trigger .lang-flag-en,
+    html[lang="es"] .lang-trigger .lang-flag-es { display: block; }
+    .lang-dropdown {
+      position: absolute; top: calc(100% + 6px); right: 0;
+      min-width: 150px; padding: 6px;
+      background: var(--ink-card); border: 1px solid var(--bone-line);
+      border-radius: 6px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+      display: flex; flex-direction: column; gap: 2px;
+      opacity: 0; pointer-events: none; transform: translateY(-4px);
+      transition: opacity 220ms var(--ease-out), transform 220ms var(--ease-out);
+      z-index: 60;
+    }
+    .lang-dropdown.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .lang-dropdown button {
+      display: flex; align-items: center; gap: 10px;
+      padding: 8px 12px; background: transparent; border: 0; cursor: pointer;
+      font-family: var(--f-mono); font-size: 0.7rem;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--bone-soft); text-align: left; border-radius: 4px;
+      transition: color 240ms var(--ease-out), background 240ms var(--ease-out);
+    }
+    .lang-dropdown button:hover { color: var(--bone); background: rgba(245, 240, 232, 0.04); }
+    .lang-dropdown button[aria-current="true"] { color: var(--gold); }
+    .menu-sheet__lang { display: flex; gap: 14px; margin-bottom: 8px; }
+    .menu-sheet__lang button {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px; background: transparent;
+      border: 1px solid var(--bone-line); border-radius: 9999px;
+      cursor: pointer; font-family: var(--f-mono); font-size: 0.7rem;
+      letter-spacing: 0.22em; text-transform: uppercase; color: var(--bone-soft);
+      transition: color 240ms var(--ease-out), border-color 240ms var(--ease-out);
+    }
+    .menu-sheet__lang button[aria-current="true"] { color: var(--gold); border-color: var(--gold); }
 
     /* ─── PANEL STACK (mobile) / HORIZONTAL SCROLL (desktop ≥1024px) ───
        Mirrors aromazla.html: panels stack vertically below 1024px and lay
@@ -715,6 +773,7 @@
     @media (max-width: 768px) {
       .nav-links { display: none; }
       .nav-card { display: inline-flex; }
+      .lang-switcher { display: none; }
     }
     @media (max-width: 540px) {
       .specs-grid { grid-template-columns: 1fr; }
@@ -752,18 +811,43 @@
   </svg>
 
   <nav id="nav" role="navigation" aria-label="Main navigation">
-    <a class="nav-back" href="index.html" aria-label="Home">
+    <a class="nav-back" href="index.html" aria-label="Home" data-i18n-attr="aria-label:nav.home.aria">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <circle cx="12" cy="12" r="9"/>
         <circle class="sun-dot" cx="12" cy="12" r="1.6"/>
       </svg>
     </a>
     <ul class="nav-links">
-      <li><a href="aromazla.html" class="active">Aromazla</a></li>
-      <li><a href="https://visuanza.es" target="_blank" rel="noopener">Visuanza</a></li>
-      <li><a href="contact.html">Contact</a></li>
+      <li><a href="aromazla.html" class="active" data-i18n="nav.aromazla">Aromazla</a></li>
+      <li><a href="https://visuanza.es" target="_blank" rel="noopener" data-i18n="nav.visuanza">Visuanza</a></li>
+      <li><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
     </ul>
-    <button class="nav-card" id="navCard" aria-label="Open navigation" aria-expanded="false">
+    <div class="lang-switcher">
+      <button type="button" class="lang-trigger" data-lang-trigger
+              aria-haspopup="true" aria-expanded="false"
+              aria-label="Change language" data-i18n-attr="aria-label:nav.changeLanguage.aria">
+        <span class="lang-flag-en" aria-hidden="true">
+          <svg class="lang-flag-svg" viewBox="0 0 60 30" preserveAspectRatio="none"><rect width="60" height="30" fill="#012169"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#C8102E" stroke-width="2"/><path d="M30 0 V30 M0 15 H60" stroke="#fff" stroke-width="10"/><path d="M30 0 V30 M0 15 H60" stroke="#C8102E" stroke-width="6"/></svg>
+        </span>
+        <span class="lang-flag-es" aria-hidden="true">
+          <svg class="lang-flag-svg" viewBox="0 0 60 30" preserveAspectRatio="none"><rect width="60" height="30" fill="#C60B1E"/><rect y="7.5" width="60" height="15" fill="#FFC400"/></svg>
+        </span>
+        <svg class="lang-arrow-svg" viewBox="0 0 12 8" aria-hidden="true">
+          <path d="M2 2 L6 6 L10 2" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="lang-dropdown" role="menu">
+        <button type="button" data-set-lang="en" role="menuitem">
+          <svg class="lang-flag-svg" viewBox="0 0 60 30" aria-hidden="true" preserveAspectRatio="none"><rect width="60" height="30" fill="#012169"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#C8102E" stroke-width="2"/><path d="M30 0 V30 M0 15 H60" stroke="#fff" stroke-width="10"/><path d="M30 0 V30 M0 15 H60" stroke="#C8102E" stroke-width="6"/></svg>
+          <span data-i18n="nav.lang.english">English</span>
+        </button>
+        <button type="button" data-set-lang="es" role="menuitem">
+          <svg class="lang-flag-svg" viewBox="0 0 60 30" aria-hidden="true" preserveAspectRatio="none"><rect width="60" height="30" fill="#C60B1E"/><rect y="7.5" width="60" height="15" fill="#FFC400"/></svg>
+          <span data-i18n="nav.lang.spanish">Español</span>
+        </button>
+      </div>
+    </div>
+    <button class="nav-card" id="navCard" aria-label="Open navigation" aria-expanded="false" data-i18n-attr="aria-label:nav.openMenu.aria">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <line class="cx-v" x1="12" y1="2" x2="12" y2="22"/>
         <line class="cx-h" x1="6" y1="9" x2="18" y2="9"/>
@@ -772,9 +856,19 @@
   </nav>
 
   <div class="menu-sheet" id="menuSheet" aria-hidden="true">
-    <a href="aromazla.html">Aromazla</a>
-    <a href="https://visuanza.es" target="_blank" rel="noopener">Visuanza</a>
-    <a href="contact.html">Contact</a>
+    <div class="menu-sheet__lang">
+      <button type="button" data-set-lang="en">
+        <svg class="lang-flag-svg" viewBox="0 0 60 30" aria-hidden="true" preserveAspectRatio="none"><rect width="60" height="30" fill="#012169"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#C8102E" stroke-width="2"/><path d="M30 0 V30 M0 15 H60" stroke="#fff" stroke-width="10"/><path d="M30 0 V30 M0 15 H60" stroke="#C8102E" stroke-width="6"/></svg>
+        EN
+      </button>
+      <button type="button" data-set-lang="es">
+        <svg class="lang-flag-svg" viewBox="0 0 60 30" aria-hidden="true" preserveAspectRatio="none"><rect width="60" height="30" fill="#C60B1E"/><rect y="7.5" width="60" height="15" fill="#FFC400"/></svg>
+        ES
+      </button>
+    </div>
+    <a href="aromazla.html" data-i18n="nav.aromazla">Aromazla</a>
+    <a href="https://visuanza.es" target="_blank" rel="noopener" data-i18n="nav.visuanza">Visuanza</a>
+    <a href="contact.html" data-i18n="nav.contact">Contact</a>
     <div class="menu-sheet__icons">
       <a href="https://www.instagram.com/ivan.alzam/" target="_blank" rel="noopener" aria-label="Instagram @ivan.alzam">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -801,8 +895,8 @@
             <video id="pieceVideo" autoplay loop muted playsinline preload="metadata" aria-hidden="true"></video>
           </div>
           <div class="hero-copy reveal">
-            <span class="eyebrow">No. 001 · Pendant</span>
-            <h1 class="hero-title" aria-label="Equinoccio">
+            <span class="eyebrow" data-i18n="p1.hero.eyebrow">No. 001 · Pendant</span>
+            <h1 class="hero-title" aria-label="Equinoccio" data-i18n-attr="aria-label:p1.hero.title.aria">
               <svg viewBox="0 0 720 90" preserveAspectRatio="xMidYMid meet" role="img" aria-hidden="true">
                 <defs>
                   <!-- Same carved recipe as the AROMAZLA wordmark — flood opacities start
@@ -833,9 +927,9 @@
                       filter="url(#carvedEqui)">EQUINOCCIO</text>
               </svg>
             </h1>
-            <p class="hero-sub">Yellow Sapphire · 2.08 ct · GIA</p>
-            <p class="hero-lede">A natural yellow sapphire of 2.08 carats, set in 18k white gold and finished in rhodium.</p>
-            <span class="scroll-cue">scroll</span>
+            <p class="hero-sub" data-i18n="p1.hero.sub">Yellow Sapphire · 2.08 ct · GIA</p>
+            <p class="hero-lede" data-i18n="p1.hero.lede">A natural yellow sapphire of 2.08 carats, set in 18k white gold and finished in rhodium.</p>
+            <span class="scroll-cue" data-i18n="p1.scroll.cue">scroll</span>
           </div>
          </div><!-- /.hero-grid -->
 
@@ -865,16 +959,16 @@
       <!-- PANEL 2 — STORY -->
       <section class="panel hpanel panel--story">
         <div class="panel-inner">
-          <span class="eyebrow reveal">Story</span>
-          <p class="story-body reveal">
+          <span class="eyebrow reveal" data-i18n="p1.story.eyebrow">Story</span>
+          <p class="story-body reveal" data-i18n-html="p1.story.line1">
             Winter dies for days of spring —<br>
             and what stands between is held.
           </p>
-          <p class="story-body reveal">
+          <p class="story-body reveal" data-i18n-html="p1.story.line2">
             A cradle of white gold petals, in the line of art nouveau, holds the paradox.<br>
             Named <em>Equinoccio</em> for the threshold of the rebirth of nature — what was crystallized, now beginning to flow.
           </p>
-          <p class="story-body reveal"><em>Made once.</em></p>
+          <p class="story-body reveal" data-i18n-html="p1.story.line3"><em>Made once.</em></p>
         </div>
       </section>
 
@@ -882,38 +976,38 @@
       <section class="panel hpanel panel--specs">
         <div class="panel-inner">
           <div class="specs-col reveal">
-            <span class="eyebrow">Specifications</span>
-            <h2 class="specs-heading">Equinoccio</h2>
+            <span class="eyebrow" data-i18n="p1.specs.eyebrow">Specifications</span>
+            <h2 class="specs-heading" data-i18n="p1.specs.heading">Equinoccio</h2>
             <div class="specs-grid">
               <div>
-                <div class="spec-label">Stone</div>
-                <div class="spec-value">Yellow Sapphire</div>
+                <div class="spec-label" data-i18n="p1.specs.label.stone">Stone</div>
+                <div class="spec-value" data-i18n="p1.specs.value.stone">Yellow Sapphire</div>
               </div>
               <div>
-                <div class="spec-label">Carat</div>
-                <div class="spec-value">2.08 ct</div>
+                <div class="spec-label" data-i18n="p1.specs.label.carat">Carat</div>
+                <div class="spec-value" data-i18n="p1.specs.value.carat">2.08 ct</div>
               </div>
               <div>
-                <div class="spec-label">Cut</div>
-                <div class="spec-value">Oval</div>
+                <div class="spec-label" data-i18n="p1.specs.label.cut">Cut</div>
+                <div class="spec-value" data-i18n="p1.specs.value.cut">Oval</div>
               </div>
               <div>
-                <div class="spec-label">Setting</div>
-                <div class="spec-value">18k white gold · rhodium plated</div>
+                <div class="spec-label" data-i18n="p1.specs.label.setting">Setting</div>
+                <div class="spec-value" data-i18n="p1.specs.value.setting">18k white gold · rhodium plated</div>
               </div>
               <div>
-                <div class="spec-label">Origin</div>
-                <div class="spec-value">Sri Lanka</div>
-                <div class="spec-note">Per maker · origin not certified on report</div>
+                <div class="spec-label" data-i18n="p1.specs.label.origin">Origin</div>
+                <div class="spec-value" data-i18n="p1.specs.value.origin">Sri Lanka</div>
+                <div class="spec-note" data-i18n="p1.specs.note.origin">Per maker · origin not certified on report</div>
               </div>
               <div>
-                <div class="spec-label">Certificate</div>
-                <div class="spec-value">GIA</div>
+                <div class="spec-label" data-i18n="p1.specs.label.cert">Certificate</div>
+                <div class="spec-value" data-i18n="p1.specs.value.cert">GIA</div>
               </div>
             </div>
           </div>
           <div class="cert-col reveal">
-            <span class="eyebrow">Certificate</span>
+            <span class="eyebrow" data-i18n="p1.cert.eyebrow">Certificate</span>
             <div class="cert-frame">
               <!-- iframe (not object) so Chromium's PDFium shows its full
                    toolbar with zoom controls. data-src is promoted to src
@@ -927,12 +1021,13 @@
               <iframe class="cert-iframe"
                       data-src="assets/p1/yellow%20sapphire%20-%20GIA.pdf#view=FitH"
                       title="GIA report — Yellow Sapphire 2.08 ct"
+                      data-i18n-attr="title:p1.cert.aria"
                       loading="lazy"></iframe>
             </div>
             <div class="cert-actions">
-              <span class="cert-meta">GIA · 2.08 ct</span>
+              <span class="cert-meta" data-i18n="p1.cert.meta">GIA · 2.08 ct</span>
               <a class="cert-link" href="assets/p1/yellow%20sapphire%20-%20GIA.pdf" target="_blank" rel="noopener" download>
-                Open / download
+                <span data-i18n="p1.cert.openDownload">Open / download</span>
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                   <line x1="7" y1="17" x2="17" y2="7"/>
                   <polyline points="7 7 17 7 17 17"/>
@@ -945,22 +1040,25 @@
 
       <!-- PANEL 4 — Closing signature: corner numero · hairline · chain note · CTAs -->
       <section class="panel hpanel panel--cta" id="panelCta">
-        <span class="cta-numero" aria-hidden="true">No. 001</span>
+        <span class="cta-numero" aria-hidden="true" data-i18n="p1.cta.numero">No. 001</span>
         <div class="panel-inner">
           <span class="cta-rule" aria-hidden="true"></span>
-          <span class="eyebrow reveal">A note on the chain</span>
-          <p class="cta-note reveal">
+          <span class="eyebrow reveal" data-i18n="p1.cta.eyebrow">A note on the chain</span>
+          <p class="cta-note reveal" data-i18n-html="p1.cta.note">
             <em>Pendant only.</em> The chain is yours to choose — its length, its weight, the way it sits — and is priced alongside the piece.
           </p>
           <div class="cta-row reveal">
-            <a class="cta-btn cta-btn--primary" href="https://wa.me/34646853773?text=Hello%2C%20I%27m%20interested%20in%20Equinoccio%20(Yellow%20Sapphire%20pendant)" target="_blank" rel="noopener">
-              Enquire
+            <a class="cta-btn cta-btn--primary"
+               href="https://wa.me/34646853773?text=Hello%2C%20I%27m%20interested%20in%20Equinoccio%20(Yellow%20Sapphire%20pendant)"
+               data-i18n-attr="href:p1.cta.whatsappUrl"
+               target="_blank" rel="noopener">
+              <span data-i18n="p1.cta.enquire">Enquire</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <line x1="5" y1="12" x2="19" y2="12"/>
                 <polyline points="12 5 19 12 12 19"/>
               </svg>
             </a>
-            <a class="cta-btn" href="contact.html">
+            <a class="cta-btn" href="contact.html" data-i18n="p1.cta.contact">
               Contact
             </a>
             <a class="cta-btn" href="aromazla.html">
@@ -968,7 +1066,7 @@
                 <line x1="20" y1="12" x2="4" y2="12"/>
                 <polyline points="10 6 4 12 10 18"/>
               </svg>
-              Back to pieces
+              <span data-i18n="p1.cta.back">Back to pieces</span>
             </a>
           </div>
         </div>
@@ -1139,13 +1237,12 @@
       };
 
       const setSrc = () => {
-        // Safari (iOS + macOS) → sap.mov: HEVC carries an alpha track
-        // that Safari renders with real transparency — no blend needed.
-        // Everywhere else → sap.webm + lighten blend (the webm is pix_fmt
-        // yuv420p so we knock out the black matte via mix-blend-mode).
-        const next = isSafari ? 'assets/p1/sap.mov' : 'assets/p1/sap.webm';
-        const blend = !isSafari;
-        pieceVideo.classList.toggle('use-blend', blend);
+        // Same recipe as the aromazla pieces card (which works
+        // perfectly): single hardcoded sap.mp4 source + always-on
+        // mix-blend-mode: lighten. The lighten blend masks the black
+        // matte against the dark panel — works on every browser.
+        const next = 'assets/p1/sap.mp4';
+        pieceVideo.classList.add('use-blend');
         if (pieceVideo.getAttribute('src') !== next) {
           pieceVideo.setAttribute('src', next);
           pieceVideo.load();

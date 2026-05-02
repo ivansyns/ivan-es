@@ -581,12 +581,9 @@
       transform: translateY(-50%) rotate(-45deg);
     }
     @media (max-width: 1023px) {
-      .hero-cue { writing-mode: vertical-rl; bottom: clamp(20px, 4vh, 40px); }
-      .hero-cue .arrow { width: 1px; height: 28px; }
-      .hero-cue .arrow::after {
-        right: 50%; top: auto; bottom: 0;
-        transform: translateX(50%) rotate(45deg);
-      }
+      /* Mobile stacks vertically — the user just scrolls down naturally,
+         no "AROMAZLA ↓" cue needed at the bottom of the hero. */
+      .hero-cue { display: none !important; }
     }
     @keyframes cue-pulse {
       0%, 100% { opacity: 0.55; }
@@ -726,13 +723,41 @@
   <!-- NAV -->
   <nav id="nav">
     <ul class="nav-links">
-      <li><a href="aromazla.html">Aromazla</a></li>
-      <li><a href="https://visuanza.es" target="_blank" rel="noopener">Visuanza</a></li>
-      <li><a href="contact.html">Contact</a></li>
+      <li><a href="aromazla.html" data-i18n="nav.aromazla">Aromazla</a></li>
+      <li><a href="https://visuanza.es" target="_blank" rel="noopener" data-i18n="nav.visuanza">Visuanza</a></li>
+      <li><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
     </ul>
 
+    <!-- Language switcher (desktop) — flag + chevron, opens a dropdown.
+         Hidden on mobile; the menu-sheet has its own pill row below. -->
+    <div class="lang-switcher">
+      <button type="button" class="lang-trigger" data-lang-trigger
+              aria-haspopup="true" aria-expanded="false"
+              aria-label="Change language" data-i18n-attr="aria-label:nav.changeLanguage.aria">
+        <span class="lang-flag-en" aria-hidden="true">
+          <svg class="lang-flag-svg" viewBox="0 0 60 30" preserveAspectRatio="none"><rect width="60" height="30" fill="#012169"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#C8102E" stroke-width="2"/><path d="M30 0 V30 M0 15 H60" stroke="#fff" stroke-width="10"/><path d="M30 0 V30 M0 15 H60" stroke="#C8102E" stroke-width="6"/></svg>
+        </span>
+        <span class="lang-flag-es" aria-hidden="true">
+          <svg class="lang-flag-svg" viewBox="0 0 60 30" preserveAspectRatio="none"><rect width="60" height="30" fill="#C60B1E"/><rect y="7.5" width="60" height="15" fill="#FFC400"/></svg>
+        </span>
+        <svg class="lang-arrow-svg" viewBox="0 0 12 8" aria-hidden="true">
+          <path d="M2 2 L6 6 L10 2" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="lang-dropdown" role="menu">
+        <button type="button" data-set-lang="en" role="menuitem">
+          <svg class="lang-flag-svg" viewBox="0 0 60 30" aria-hidden="true" preserveAspectRatio="none"><rect width="60" height="30" fill="#012169"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#C8102E" stroke-width="2"/><path d="M30 0 V30 M0 15 H60" stroke="#fff" stroke-width="10"/><path d="M30 0 V30 M0 15 H60" stroke="#C8102E" stroke-width="6"/></svg>
+          <span data-i18n="nav.lang.english">English</span>
+        </button>
+        <button type="button" data-set-lang="es" role="menuitem">
+          <svg class="lang-flag-svg" viewBox="0 0 60 30" aria-hidden="true" preserveAspectRatio="none"><rect width="60" height="30" fill="#C60B1E"/><rect y="7.5" width="60" height="15" fill="#FFC400"/></svg>
+          <span data-i18n="nav.lang.spanish">Español</span>
+        </button>
+      </div>
+    </div>
+
     <!-- mobile cross — morphs to an X on tap -->
-    <button class="nav-card" id="navCard" aria-label="Open navigation" aria-expanded="false">
+    <button class="nav-card" id="navCard" aria-label="Open navigation" aria-expanded="false" data-i18n-attr="aria-label:nav.openMenu.aria">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <line class="cx-v" x1="12" y1="2" x2="12" y2="22"/>
         <line class="cx-h" x1="6" y1="9" x2="18" y2="9"/>
@@ -742,9 +767,21 @@
 
   <!-- MOBILE MENU SHEET -->
   <div class="menu-sheet" id="menuSheet" aria-hidden="true">
-    <a href="aromazla.html">Aromazla</a>
-    <a href="https://visuanza.es" target="_blank" rel="noopener">Visuanza</a>
-    <a href="contact.html">Contact</a>
+    <!-- Mobile language pills — sit above the nav links, current pill
+         highlighted via aria-current="true" on the matching button. -->
+    <div class="menu-sheet__lang">
+      <button type="button" data-set-lang="en">
+        <svg class="lang-flag-svg" viewBox="0 0 60 30" aria-hidden="true" preserveAspectRatio="none"><rect width="60" height="30" fill="#012169"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0 L60 30 M60 0 L0 30" stroke="#C8102E" stroke-width="2"/><path d="M30 0 V30 M0 15 H60" stroke="#fff" stroke-width="10"/><path d="M30 0 V30 M0 15 H60" stroke="#C8102E" stroke-width="6"/></svg>
+        EN
+      </button>
+      <button type="button" data-set-lang="es">
+        <svg class="lang-flag-svg" viewBox="0 0 60 30" aria-hidden="true" preserveAspectRatio="none"><rect width="60" height="30" fill="#C60B1E"/><rect y="7.5" width="60" height="15" fill="#FFC400"/></svg>
+        ES
+      </button>
+    </div>
+    <a href="aromazla.html" data-i18n="nav.aromazla">Aromazla</a>
+    <a href="https://visuanza.es" target="_blank" rel="noopener" data-i18n="nav.visuanza">Visuanza</a>
+    <a href="contact.html" data-i18n="nav.contact">Contact</a>
     <div class="menu-sheet__icons">
       <a href="https://www.instagram.com/ivan.alzam/" target="_blank" rel="noopener" aria-label="Instagram @ivan.alzam">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -935,13 +972,12 @@
       };
 
       const setDoorVideoSrc = () => {
-        // Safari (iOS + macOS) → sap.mov: HEVC carries an alpha track
-        // that Safari renders with real transparency — no blend needed.
-        // Everywhere else → sap.webm + lighten blend (the webm is pix_fmt
-        // yuv420p so we knock out the black matte via mix-blend-mode).
-        const next = isSafari ? 'assets/p1/sap.mov' : 'assets/p1/sap.webm';
-        const blend = !isSafari;
-        doorVideo.classList.toggle('use-blend', blend);
+        // Same recipe as the aromazla pieces card (which works
+        // perfectly): single hardcoded sap.mp4 source + always-on
+        // mix-blend-mode: lighten. The lighten blend masks the black
+        // matte against the dark panel — works on every browser.
+        const next = 'assets/p1/sap.mp4';
+        doorVideo.classList.add('use-blend');
         if (doorVideo.getAttribute('src') !== next) {
           doorVideo.setAttribute('src', next);
           doorVideo.load();

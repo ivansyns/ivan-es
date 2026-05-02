@@ -303,6 +303,18 @@
     });
 
     document.dispatchEvent(new CustomEvent('langchange', { detail: { lang: lang } }));
+
+    // i18n.js is deferred so it runs AFTER the non-deferred GSAP scripts
+    // at the bottom of <body>. ScrollTrigger has already computed scroll
+    // distances against the (English) initial text. Changing textContent
+    // can shift element heights → ScrollTrigger's positions become stale.
+    // Refresh nudges it to recompute. Skip if ScrollTrigger isn't loaded
+    // (e.g., contact.html doesn't use it).
+    if (window.ScrollTrigger && typeof window.ScrollTrigger.refresh === 'function') {
+      // Wait one frame so the layout actually reflects the new text before
+      // ScrollTrigger reads element bounding boxes.
+      requestAnimationFrame(function () { window.ScrollTrigger.refresh(); });
+    }
   }
 
   function setLang(lang) {
