@@ -488,10 +488,13 @@
     .hero-media img {
       width: 100%; height: 100%; object-fit: contain;
     }
-    /* Only the H.264 black-matte MP4 needs the blend-mode knockout. The
-       VP9 .webm and HEVC alpha .mov carry real transparency, so we keep the
-       blend off for them. JS toggles .use-blend based on the loaded source. */
-    .hero-media video.use-blend { mix-blend-mode: lighten; }
+    /* Mirrors the aromazla pieces card recipe — single hardcoded MP4
+       (black matte) + mix-blend-mode: lighten ALWAYS on the video. The
+       blend knocks the matte out against the panel's dark background on
+       every browser. No source-picker, no .use-blend toggle — the JS
+       branching version was dropping the blend on iOS Safari/Edge AND
+       on some desktop Safari paths, leaving a visible black rectangle. */
+    .hero-media video { mix-blend-mode: lighten; }
     .hero-copy { display: flex; flex-direction: column; gap: 22px; }
     /* The H1 wraps the carved-text SVG; the visible glyphs come from <text> below.
        Same recipe as the AROMAZLA wordmark on aromazla.html. */
@@ -892,7 +895,18 @@
         <div class="panel-inner">
          <div class="hero-grid">
           <div class="hero-media reveal">
-            <video id="pieceVideo" autoplay loop muted playsinline preload="metadata" aria-hidden="true"></video>
+            <!-- Three sources, ordered by browser-native alpha support:
+                   1. sap.mov  — HEVC alpha (Safari macOS + iOS)
+                   2. sap.webm — VP9 alpha (Chrome / Firefox / Edge desktop + Android)
+                   3. sap.mp4  — H.264 with black matte (universal fallback)
+                 The always-on `mix-blend-mode: lighten` in CSS knocks the
+                 mp4 matte out; on the real-alpha formats it's a no-op
+                 (transparent pixels don't contribute to compositing). -->
+            <video id="pieceVideo" autoplay loop muted playsinline preload="metadata" aria-hidden="true">
+              <source src="assets/p1/sap.mov"  type="video/quicktime">
+              <source src="assets/p1/sap.webm" type="video/webm">
+              <source src="assets/p1/sap.mp4"  type="video/mp4">
+            </video>
           </div>
           <div class="hero-copy reveal">
             <span class="eyebrow" data-i18n="p1.hero.eyebrow">No. 001 · Pendant</span>
@@ -1207,23 +1221,19 @@
       if (equiLightFlood) equiLightFlood.setAttribute('flood-opacity', '0.42');
     }
 
-    // ─── Pendant video source picker — same logic as index.html ───
-    //   Safari:  HEVC alpha .mov  — Apple's native transparent-video format
-    //   Chrome / Firefox / Edge / Android:  VP9 alpha WebM
-    //   Fallback:  H.264 MP4 + mix-blend-mode: lighten (black-matte knockout)
-    //   iOS Low Power Mode:  swap <video> for animated WebP (LPM blocks autoplay)
+    // ─── Pendant video — mirrors the aromazla pieces card recipe ───
+    // Single MP4 source baked into the <video> markup + mix-blend-mode:
+    // lighten always-on in CSS. No source picker, no isSafari branching,
+    // no .use-blend class toggle. The lighten blend knocks the black matte
+    // out against the panel's dark background on every browser, including
+    // iOS Safari where the source-picker version was leaving a visible
+    // black rectangle around the pendant.
+    // The remaining JS only handles iOS Low Power Mode (autoplay denied)
+    // by swapping the <video> for an animated WebP that LPM doesn't block.
     let pieceVideo = document.getElementById('pieceVideo');
     if (pieceVideo) {
-      const ua = navigator.userAgent;
-      const isSafari = /^((?!chrome|chromium|crios|fxios|edgios|android).)*safari/i.test(ua);
-      const desktopMql = window.matchMedia('(min-width: 1024px)');
-      let movFailed = false;
       let lpmFallbackTriggered = false;
 
-      // Hero pendant clip — multi-format alpha source picker. Safari plays
-      // the HEVC .mov natively; other browsers get the VP9 .webm; the .mp4
-      // fallback uses a black matte that mix-blend-mode: lighten knocks
-      // out. iOS LPM hard-blocks autoplay → swap to the static .webp still.
       const swapToWebpFallback = () => {
         if (lpmFallbackTriggered || !pieceVideo) return;
         lpmFallbackTriggered = true;
@@ -1236,28 +1246,8 @@
         pieceVideo = img;
       };
 
-      const setSrc = () => {
-        // Same recipe as the aromazla pieces card (which works
-        // perfectly): single hardcoded sap.mp4 source + always-on
-        // mix-blend-mode: lighten. The lighten blend masks the black
-        // matte against the dark panel — works on every browser.
-        const next = 'assets/p1/sap.mp4';
-        pieceVideo.classList.add('use-blend');
-        if (pieceVideo.getAttribute('src') !== next) {
-          pieceVideo.setAttribute('src', next);
-          pieceVideo.load();
-          pieceVideo.play().catch(() => {});
-        }
-      };
-      pieceVideo.addEventListener('error', () => {
-        if (!movFailed && pieceVideo.getAttribute('src')?.endsWith('sap.mov')) {
-          movFailed = true;
-          setSrc();
-        }
-      });
-      setSrc();
-      desktopMql.addEventListener('change', setSrc);
-
+      // iOS Safari pauses autoplay videos that start offscreen. Re-issue
+      // play() on intersection. If still blocked (LPM), swap to WebP.
       if ('IntersectionObserver' in window) {
         const resumeObs = new IntersectionObserver((entries) => {
           if (lpmFallbackTriggered) return;

@@ -223,7 +223,7 @@
       'p1.cert.openDownload': 'Abrir / descargar',
       'p1.cta.numero': 'Nº 001',
       'p1.cta.eyebrow': 'Nota sobre la cadena',
-      'p1.cta.note': '<em>Sólo el colgante.</em> La cadena es tuya — su longitud, su peso, su caída — y se cotiza junto con la pieza.',
+      'p1.cta.note': '<em>Sólo el colgante.</em> Tú eliges la cadena — su longitud, su peso, su caída — y se cotiza junto con la pieza.',
       'p1.cta.enquire': 'Consultar',
       'p1.cta.contact': 'Contacto',
       'p1.cta.back': 'Volver a las piezas',

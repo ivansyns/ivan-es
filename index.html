@@ -631,18 +631,18 @@
       max-width: 90%;
       object-fit: contain;
       pointer-events: none;
+      /* Mirrors the aromazla pieces card recipe — single hardcoded MP4
+         (black matte) + mix-blend-mode: lighten ALWAYS on. The blend
+         knocks the matte out against the panel's dark background on
+         every browser. No source-picker, no .use-blend toggle — the
+         JS branching version was failing to apply the blend reliably
+         on iOS Safari/Edge and on some desktop Safari paths. */
+      mix-blend-mode: lighten;
       transition: filter 600ms var(--ease-out), transform 600ms var(--ease-out);
     }
-    /* Desktop (≥1024px) loads sap.webm — real VP9 alpha, no blend mode needed. */
     @media (min-width: 1024px) {
       .door-visual-piece { height: clamp(320px, 46vh, 480px); }
     }
-    /* When the MP4 is loaded (no alpha — black matte), JS adds .use-blend so
-       `lighten` knocks the matte out against the panel's dark background. Driven
-       by JS, not media query, because viewport size alone can't tell us whether
-       the renderer supports VP9 alpha (Safari macOS, iPad landscape, "Request
-       Desktop Site" all report >=1024 yet can't render VP9 alpha). */
-    .door-visual-piece.use-blend { mix-blend-mode: lighten; }
 
     /* Carved wordmark — same filter recipe as the hero name, baked-in (no animation). */
     .door-visual-mark {
@@ -874,7 +874,20 @@
   <!-- DOORWAY — single visual door, no labels -->
   <section class="doorways panel hpanel" id="doorways" style="--z:2;">
     <a href="aromazla.html" class="door-visual reveal" aria-label="Enter Aromazla — jewellery collection">
-      <video class="door-visual-piece" id="doorVideo" autoplay loop muted playsinline aria-hidden="true"></video>
+      <!-- Three sources, ordered by browser-native alpha support. The
+           browser picks the first it can decode:
+             1. sap.mov  — HEVC alpha (Safari macOS + iOS)
+             2. sap.webm — VP9 alpha (Chrome / Firefox / Edge desktop + Android)
+             3. sap.mp4  — H.264 with black matte (universal fallback)
+           The mp4 fallback relies on the always-on `mix-blend-mode: lighten`
+           in CSS to knock the matte out. The blend is a no-op on real-alpha
+           formats (transparent pixels don't contribute to compositing), so
+           leaving it on for all sources is safe. -->
+      <video class="door-visual-piece" id="doorVideo" autoplay loop muted playsinline preload="metadata" aria-hidden="true">
+        <source src="assets/p1/sap.mov"  type="video/quicktime">
+        <source src="assets/p1/sap.webm" type="video/webm">
+        <source src="assets/p1/sap.mp4"  type="video/mp4">
+      </video>
 
       <!-- AROMAZLA wordmark, statically carved with the same filter recipe as the hero name -->
       <div class="door-visual-mark" aria-label="Aromazla">
@@ -932,84 +945,42 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 
-    // ─── Pendant video source: pick the format whose alpha each browser can actually render ───
-    //   Safari (macOS + iOS):  HEVC alpha .mov  — Apple's native transparent-video format
-    //   Chrome / Firefox / Edge desktop:  VP9 alpha WebM
-    //   Mobile non-Safari (Android Chrome small viewport):  H.264 MP4 + mix-blend-mode: lighten
-    // The MP4 + blend path is also the safety fallback if the .mov fails to decode.
-    const doorVideo = document.getElementById('doorVideo');
+    // ─── Pendant video — mirrors the aromazla pieces card recipe ───
+    // Single MP4 source baked into the <video> markup + mix-blend-mode:
+    // lighten always-on in CSS. No source picker, no isSafari branching,
+    // no .use-blend class toggle. The lighten blend knocks the black matte
+    // out against the panel's dark background on every browser.
+    // The remaining JS only handles iOS Low Power Mode (autoplay denied)
+    // by swapping the <video> for an animated WebP that LPM doesn't block.
+    let doorVideo = document.getElementById('doorVideo');
     if (doorVideo) {
-      const ua = navigator.userAgent;
-      // Safari (any platform). Excludes Chrome/Edge/Firefox-on-iOS which include "Safari" in UA.
-      const isSafari = /^((?!chrome|chromium|crios|fxios|edgios|android).)*safari/i.test(ua);
-
-      const mql = window.matchMedia('(min-width: 1024px)');
-      let movFailed = false;
       let lpmFallbackTriggered = false;
 
-      // Low Power Mode (and other autoplay rejections) → swap <video> for
-      // animated WebP. WebP image animation isn't a "video" so iOS doesn't
-      // hard-block it under LPM. Encoded at 10fps which divides 30Hz cleanly
-      // (3 refreshes per frame) for smooth cadence.
-      // Snapshot + restore window.scrollY around the DOM mutation in case
-      // iOS Safari still tries to scroll-anchor to the swap point.
       const swapToWebpFallback = () => {
-        if (lpmFallbackTriggered) return;
+        if (lpmFallbackTriggered || !doorVideo) return;
         lpmFallbackTriggered = true;
         const savedScrollY = window.scrollY;
-        const img = new Image(720, 894);  // intrinsic aspect ratio of sap.webp
+        const img = new Image(720, 894);
         img.src = 'assets/p1/sap.webp';
         img.alt = '';
-        img.className = doorVideo.className; // keeps .door-visual-piece sizing
-        img.id = 'doorVideo';                // preserve hooks
+        img.className = doorVideo.className;
+        img.id = 'doorVideo';
         img.setAttribute('aria-hidden', 'true');
         doorVideo.replaceWith(img);
+        doorVideo = img;
         requestAnimationFrame(() => {
-          if (window.scrollY !== savedScrollY) {
-            window.scrollTo(0, savedScrollY);
-          }
+          if (window.scrollY !== savedScrollY) window.scrollTo(0, savedScrollY);
         });
       };
 
-      const setDoorVideoSrc = () => {
-        // Same recipe as the aromazla pieces card (which works
-        // perfectly): single hardcoded sap.mp4 source + always-on
-        // mix-blend-mode: lighten. The lighten blend masks the black
-        // matte against the dark panel — works on every browser.
-        const next = 'assets/p1/sap.mp4';
-        doorVideo.classList.add('use-blend');
-        if (doorVideo.getAttribute('src') !== next) {
-          doorVideo.setAttribute('src', next);
-          doorVideo.load();
-          // Don't trigger the LPM fallback on initial load — the DOM mutation
-          // during first paint causes iOS to scroll-anchor to the doorway.
-          // The IntersectionObserver below handles the LPM case correctly,
-          // because by the time it fires the user has already scrolled to
-          // the doorway and the layout shift is in their current scroll context.
-          doorVideo.play().catch(() => {});
-        }
-      };
-      // If the HEVC .mov can't be decoded for whatever reason on a given Safari
-      // (older iOS, missing hardware decoder), fall back to MP4 + blend automatically.
-      doorVideo.addEventListener('error', () => {
-        if (!movFailed && doorVideo.getAttribute('src')?.endsWith('sap.mov')) {
-          movFailed = true;
-          setDoorVideoSrc();
-        }
-      });
-      setDoorVideoSrc();
-      mql.addEventListener('change', setDoorVideoSrc);
-
-      // iOS Safari pauses autoplay videos that start offscreen and never
-      // auto-resumes them. The pendant is below the hero on mobile, so it
-      // hits exactly that case. Re-issue play() whenever the video scrolls
-      // into view — iOS accepts this as a valid user-context gesture.
-      // Skip if we already swapped to the WebP fallback (img element loops itself).
+      // iOS Safari pauses autoplay videos that start offscreen. The doorway
+      // is below the hero on mobile, so it hits exactly that case. Re-issue
+      // play() on intersection. If it still fails (LPM), swap to WebP.
       if ('IntersectionObserver' in window) {
         const resumeObs = new IntersectionObserver((entries) => {
           if (lpmFallbackTriggered) return;
           entries.forEach((entry) => {
-            if (entry.isIntersecting && doorVideo.paused) {
+            if (entry.isIntersecting && doorVideo && doorVideo.tagName === 'VIDEO' && doorVideo.paused) {
               doorVideo.play().catch(() => swapToWebpFallback());
             }
           });
@@ -1017,16 +988,13 @@
         resumeObs.observe(doorVideo);
       }
 
-      // Click-fix safety net: if the WebP swap somehow doesn't trigger and
-      // iOS shows its native play overlay anyway, intercept taps that land
-      // on the video so they call play() instead of bubbling to the parent
-      // <a href="aromazla.html"> and navigating away.
+      // Click-fix safety net: tap on the (paused) video calls play() instead
+      // of bubbling to the parent anchor and navigating away.
       const doorVisual = doorVideo.closest('.door-visual');
       if (doorVisual) {
         doorVisual.addEventListener('click', (e) => {
-          if (lpmFallbackTriggered) return;       // WebP fallback active; let anchor handle clicks
-          if (!doorVideo.isConnected) return;     // doorVideo was replaced; no-op
-          if (!doorVideo.paused) return;
+          if (lpmFallbackTriggered || !doorVideo) return;
+          if (doorVideo.tagName !== 'VIDEO' || !doorVideo.paused) return;
           const r = doorVideo.getBoundingClientRect();
           const insideVideo = e.clientX >= r.left && e.clientX <= r.right
                            && e.clientY >= r.top  && e.clientY <= r.bottom;
