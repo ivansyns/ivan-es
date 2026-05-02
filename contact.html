@@ -15,8 +15,8 @@
   <meta property="og:locale" content="en_GB" />
   <link rel="canonical" href="https://ivan.es/contact" />
 
-  <link rel="icon" type="image/png" href="assets/hash-mark.png" />
-  <link rel="apple-touch-icon" href="assets/hash-mark.png" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%230A0A0A'/><g fill='none' stroke='%23F5F0E8' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'><line x1='14' y1='22' x2='50' y2='54'/><line x1='50' y1='22' x2='14' y2='54'/><line x1='32' y1='8' x2='32' y2='56'/><path d='M32 8 C 42 8 44 14 44 18 C 44 23 40 27 32 27'/></g></svg>" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='10' fill='%230A0A0A'/><g fill='none' stroke='%23F5F0E8' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'><line x1='14' y1='22' x2='50' y2='54'/><line x1='50' y1='22' x2='14' y2='54'/><line x1='32' y1='8' x2='32' y2='56'/><path d='M32 8 C 42 8 44 14 44 18 C 44 23 40 27 32 27'/></g></svg>" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -140,14 +140,12 @@
       overflow: visible;
       transition: transform 360ms cubic-bezier(0.7, -0.05, 0.3, 1);
     }
-    .nav-back svg line, .nav-back svg polyline {
-      stroke: currentColor;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      fill: none;
+    /* Sun-alchemical glyph: circle ring + centered dot. Quiet bookmark to home. */
+    .nav-back svg circle {
+      stroke: currentColor; stroke-width: 2; fill: none;
     }
-    .nav-back:hover svg { transform: translateX(-3px); }
+    .nav-back svg .sun-dot { fill: currentColor; stroke: none; }
+    .nav-back:hover svg { transform: scale(1.08); }
 
     .nav-card {
       display: none;
@@ -392,8 +390,8 @@
   <nav id="nav" role="navigation" aria-label="Main navigation">
     <a class="nav-back" href="index.html" aria-label="Home">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <line x1="20" y1="12" x2="4" y2="12"/>
-        <polyline points="10 6 4 12 10 18"/>
+        <circle cx="12" cy="12" r="9"/>
+        <circle class="sun-dot" cx="12" cy="12" r="1.6"/>
       </svg>
     </a>
     <ul class="nav-links">
@@ -445,7 +443,6 @@
         </span>
         <span class="contact-card__label">Instagram</span>
         <span class="contact-card__handle">@ivan.alzam</span>
-        <span class="contact-card__cap">Direct messages</span>
       </a>
 
       <a href="https://wa.me/34646853773" target="_blank" rel="noopener" class="contact-card reveal" aria-label="WhatsApp +34 646 853 773">
@@ -456,7 +453,6 @@
         </span>
         <span class="contact-card__label">WhatsApp</span>
         <span class="contact-card__handle">+34 646 853 773</span>
-        <span class="contact-card__cap">Direct reply</span>
       </a>
     </div>
   </main>

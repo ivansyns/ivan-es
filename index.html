@@ -719,7 +719,7 @@
         lpmFallbackTriggered = true;
         const savedScrollY = window.scrollY;
         const img = new Image(720, 894);  // intrinsic aspect ratio of sap.webp
-        img.src = 'assets/sap.webp';
+        img.src = 'assets/p1/sap.webp';
         img.alt = '';
         img.className = doorVideo.className; // keeps .door-visual-piece sizing
         img.id = 'doorVideo';                // preserve hooks
@@ -735,16 +735,16 @@
       const setDoorVideoSrc = () => {
         let next, blend;
         if (isSafari && !movFailed) {
-          next = 'assets/sap.mov';   // HEVC alpha — native transparency on Safari
+          next = 'assets/p1/sap.mov';   // HEVC alpha — native transparency on Safari
           blend = false;
         } else if (!isSafari) {
           // Any non-Safari browser — desktop Chrome/Firefox/Edge AND
           // Android Chrome/Firefox — all decode VP9 alpha cleanly.
-          next = 'assets/sap.webm';
+          next = 'assets/p1/sap.webm';
           blend = false;
         } else {
           // Last resort: Safari that couldn't decode the .mov (very rare).
-          next = 'assets/sap.mp4';
+          next = 'assets/p1/sap.mp4';
           blend = true;
         }
         doorVideo.classList.toggle('use-blend', blend);

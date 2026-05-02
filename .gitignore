@@ -3,3 +3,6 @@
 .env
 .env.*
 *.log
+
+# Linux Mint / Nemo file-manager metadata sidecar
+**/.comments/
