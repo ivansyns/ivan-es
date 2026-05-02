@@ -842,11 +842,14 @@
          <!-- Pendant gallery thumbs — full-width row beneath both pendant + copy -->
          <div class="hero-thumbs reveal" id="heroThumbs" role="list" aria-label="Equinoccio gallery">
            <button class="hero-thumb" type="button" data-idx="0" aria-label="Open gallery — video 1">
-             <video src="assets/p1/sap1.mov" muted playsinline preload="metadata" aria-hidden="true"></video>
+             <!-- Static image preview — iOS Safari doesn't render <video poster>
+                  reliably until first play, so we use a plain <img>. The play
+                  glyph in the corner tells users this opens a video clip. -->
+             <img src="assets/p1/sap5.jpeg" alt="" loading="lazy">
              <span class="hero-thumb-tag" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19"/></svg></span>
            </button>
            <button class="hero-thumb" type="button" data-idx="1" aria-label="Open gallery — video 2">
-             <video src="assets/p1/sap3.mov" muted playsinline preload="metadata" aria-hidden="true"></video>
+             <img src="assets/p1/sap6.png" alt="" loading="lazy">
              <span class="hero-thumb-tag" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19"/></svg></span>
            </button>
            <button class="hero-thumb" type="button" data-idx="2" aria-label="Open gallery — image 1">
@@ -1115,6 +1118,7 @@
     if (pieceVideo) {
       const ua = navigator.userAgent;
       const isSafari = /^((?!chrome|chromium|crios|fxios|edgios|android).)*safari/i.test(ua);
+      const desktopMql = window.matchMedia('(min-width: 1024px)');
       let movFailed = false;
       let lpmFallbackTriggered = false;
 
@@ -1137,12 +1141,18 @@
       const setSrc = () => {
         let next, blend;
         if (isSafari && !movFailed) {
+          // Safari (any platform) — HEVC alpha, native transparency.
           next = 'assets/p1/sap.mov';
           blend = false;
-        } else if (!isSafari) {
+        } else if (!isSafari && desktopMql.matches) {
+          // Desktop Chrome/Firefox/Edge — VP9 alpha decodes cleanly here.
           next = 'assets/p1/sap.webm';
           blend = false;
         } else {
+          // Mobile non-Safari (Android Chrome/Firefox) AND any Safari that
+          // couldn't decode the .mov: H.264 .mp4 has no alpha, so we knock
+          // out the black matte with mix-blend-mode: lighten against the
+          // dark panel background. Reliable across every mobile browser.
           next = 'assets/p1/sap.mp4';
           blend = true;
         }
@@ -1160,6 +1170,7 @@
         }
       });
       setSrc();
+      desktopMql.addEventListener('change', setSrc);
 
       if ('IntersectionObserver' in window) {
         const resumeObs = new IntersectionObserver((entries) => {

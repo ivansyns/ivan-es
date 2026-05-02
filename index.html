@@ -300,6 +300,13 @@
       height: min(82vh, 1000px);
       width: auto;
       transform: scaleX(-1);
+      /* GSAP drives this on desktop horizontal scroll for the parallax-lag
+         effect. Page-coord px shift, applied via individual `translate`
+         property so it composes cleanly with the scaleX(-1) flip without
+         transform-order math. Mobile overrides this with its own translate
+         for the optical-center fix. */
+      --parallax-x: 0px;
+      translate: var(--parallax-x) 0;
       pointer-events: none;
       user-select: none;
       -webkit-user-select: none;
@@ -537,6 +544,13 @@
       background: var(--gold-soft);
     }
     .door-visual-cue .glyph { display: inline-block; }
+    /* Mobile: drop the AROMAZLA carved wordmark + cue arrow under the
+       pendant — the floating piece itself is the door, no label needed
+       on the smaller viewport. */
+    @media (max-width: 1023px) {
+      .door-visual-mark,
+      .door-visual-cue { display: none; }
+    }
 
     /* ─── REVEAL ─── */
     .reveal {
@@ -793,15 +807,19 @@
       const setDoorVideoSrc = () => {
         let next, blend;
         if (isSafari && !movFailed) {
-          next = 'assets/p1/sap.mov';   // HEVC alpha — native transparency on Safari
+          // Safari (any platform) — HEVC alpha, native transparency.
+          next = 'assets/p1/sap.mov';
           blend = false;
-        } else if (!isSafari) {
-          // Any non-Safari browser — desktop Chrome/Firefox/Edge AND
-          // Android Chrome/Firefox — all decode VP9 alpha cleanly.
+        } else if (!isSafari && mql.matches) {
+          // Desktop Chrome/Firefox/Edge — VP9 alpha decodes cleanly here.
           next = 'assets/p1/sap.webm';
           blend = false;
         } else {
-          // Last resort: Safari that couldn't decode the .mov (very rare).
+          // Mobile non-Safari (Android Chrome/Firefox) AND any Safari that
+          // couldn't decode the .mov: H.264 .mp4 has no alpha, so we knock
+          // out the black matte with mix-blend-mode: lighten against the
+          // panel's dark background. Same recipe as the aromazla pendant
+          // card — reliable across every mobile browser.
           next = 'assets/p1/sap.mp4';
           blend = true;
         }
@@ -915,15 +933,17 @@
       const lightFlood = document.getElementById('carveLightFlood');
 
       const tl = gsap.timeline();
-      // Statue rises into being alongside the name's fill phase — they
-      //    emerge together rather than the figure waiting first. Start at
-      //    1.2s (same beat as the name fill), 2.0s duration so the marble
-      //    materialises through the name's reveal and a touch beyond.
-      //    Caps at 0.88 so the marble keeps a faint distance from the
-      //    page surface (full opacity would compete with the name for
-      //    foreground attention).
+      // Statue materialises slowly through the entire name reveal —
+      //    starts before the name fill (T=0.4, just after the stroke
+      //    begins) and extends well past the carving so the marble feels
+      //    like it's rising from the page's depth, not arriving on a beat.
+      //    Long duration (4.0s) makes the fade barely perceptible per
+      //    frame; viewers register the figure becoming present rather
+      //    than appearing. Caps at 0.88 so the marble keeps a faint
+      //    distance from the page surface (full opacity would compete
+      //    with the name for foreground attention).
       if (heroStatue) {
-        tl.to(heroStatue, { opacity: 0.88, duration: 2.0, ease: 'sine.out' }, 1.2);
+        tl.to(heroStatue, { opacity: 0.88, duration: 4.0, ease: 'sine.out' }, 0.4);
       }
       // 1. Draw the stroke (same 4s pace as before).
       tl.to(path, { strokeDashoffset: 0, duration: 4, ease: 'power1.inOut' }, 0.6);
@@ -989,9 +1009,41 @@
           },
         });
 
+        // Bust parallax — counter-translates the bust by ~15% of the track's
+        // horizontal scroll distance so the figure appears to lag behind
+        // the panel, reading as a heavier object sitting deeper in space.
+        // Tied to the same scroll progress as the main horizontal tween
+        // (same trigger, same start/end, same scrub) so they stay in lockstep
+        // even on resize/refresh. Drives the `--parallax-x` CSS variable
+        // which feeds the bust's `translate` property — composes cleanly
+        // with the scaleX(-1) flip already on the element.
+        const statue = document.querySelector('.hero-statue');
+        let statueParallax = null;
+        if (statue) {
+          const lag = () => Math.round(window.innerWidth * 0.15);
+          statueParallax = gsap.fromTo(statue,
+            { '--parallax-x': '0px' },
+            {
+              '--parallax-x': () => lag() + 'px',
+              ease: 'none',
+              scrollTrigger: {
+                trigger: wrapper,
+                start: 'top top',
+                end: () => '+=' + distance(),
+                scrub: 0.4,
+                invalidateOnRefresh: true,
+              },
+            }
+          );
+        }
+
         return () => {
           tween.scrollTrigger && tween.scrollTrigger.kill();
           tween.kill();
+          if (statueParallax) {
+            statueParallax.scrollTrigger && statueParallax.scrollTrigger.kill();
+            statueParallax.kill();
+          }
         };
       });
     }
