@@ -288,6 +288,53 @@
         radial-gradient(ellipse 70% 65% at 50% 28% in oklab, rgba(50, 42, 28, 0.55) 0%, transparent 70%),
         linear-gradient(180deg in oklab, var(--ink-2) 0%, var(--ink) 100%);
     }
+    /* Marble bust — left rail, looks up-right toward the name.
+       Source faces left with gaze up-left, so we flip horizontally
+       to redirect the gaze. The asset is a real alpha-channel cutout
+       (rembg-processed WebP), so the figure floats cleanly on the page
+       gradient without needing mix-blend-mode tricks. */
+    .hero-statue {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: min(82vh, 1000px);
+      width: auto;
+      transform: scaleX(-1);
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-select: none;
+      z-index: 1;
+      opacity: 0;
+    }
+    @media (max-width: 1023px) {
+      /* Mobile: bust drops out of absolute and sits in-flow below the name.
+         The hero is already flex column with align-items: center, so a
+         static child centers automatically. order: 2 places it after
+         .hero-frame (default order 0) without needing to move the source
+         markup. The horizontal flip stays so the face direction is
+         consistent across breakpoints. */
+      .hero-statue {
+        position: static;
+        order: 2;
+        width: min(58vw, 280px);
+        height: auto;
+        margin-top: clamp(16px, 3vh, 36px);
+        align-self: center;
+        /* Optical-center fix: after the scaleX(-1) flip, the bust's visual
+           mass sits left of the image's geometric center (the bun is
+           tighter than the protruding face), so a straight-centered image
+           lands the figure left of the panel midpoint. Shift the whole
+           image right with the individual `translate` property — composes
+           cleanly with `transform: scaleX(-1)` without fighting the
+           scale's coordinate-flip. */
+        translate: clamp(18px, 5vw, 36px) 0;
+        /* Reset desktop anchors so the cascade is clean even though
+           static positioning ignores them. */
+        left: auto;
+        bottom: auto;
+      }
+    }
+
     .hero-frame {
       width: 100%;
       max-width: 1100px;
@@ -295,6 +342,10 @@
       flex-direction: column;
       align-items: center;
       gap: 24px;
+      /* Sits above the absolute statue so the name reads cleanly even
+         where the marble overlaps the lower-left of the panel. */
+      position: relative;
+      z-index: 2;
     }
 
     /* the name plate sits at the top; large negative space below is left as canvas */
@@ -588,6 +639,13 @@
 
   <!-- HERO -->
   <section class="hero panel hpanel" id="hero" style="--z:1;">
+    <!-- Marble bust on the left rail. Decorative, hidden from AT.
+         WebP cutout (~115 KB, 1011×1300, alpha-channel). decoding=async
+         + fetchpriority=low so the name SVG (the actual hero subject)
+         strokes in without waiting on the image fetch. -->
+    <img class="hero-statue" id="heroStatue"
+         src="assets/mm-cutout.webp" alt="" aria-hidden="true"
+         decoding="async" fetchpriority="low" />
     <div class="hero-frame">
       <div class="hero-plate">
         <div class="hero-name" aria-label="Ivan Alzamora">
@@ -844,6 +902,7 @@
     const path = document.getElementById('namePath');
     const tagline = document.querySelector('.hero-tagline');
     const heroCue = document.getElementById('heroCue');
+    const heroStatue = document.getElementById('heroStatue');
     if (path && !reduce) {
       const len = path.getTotalLength();
       gsap.set(path, {
@@ -856,6 +915,16 @@
       const lightFlood = document.getElementById('carveLightFlood');
 
       const tl = gsap.timeline();
+      // Statue rises into being alongside the name's fill phase — they
+      //    emerge together rather than the figure waiting first. Start at
+      //    1.2s (same beat as the name fill), 2.0s duration so the marble
+      //    materialises through the name's reveal and a touch beyond.
+      //    Caps at 0.88 so the marble keeps a faint distance from the
+      //    page surface (full opacity would compete with the name for
+      //    foreground attention).
+      if (heroStatue) {
+        tl.to(heroStatue, { opacity: 0.88, duration: 2.0, ease: 'sine.out' }, 1.2);
+      }
       // 1. Draw the stroke (same 4s pace as before).
       tl.to(path, { strokeDashoffset: 0, duration: 4, ease: 'power1.inOut' }, 0.6);
       // 2. Fill catches the draw early — starts 3.4s before the stroke completes.
@@ -887,6 +956,7 @@
       if (lf) lf.setAttribute('flood-opacity', '0.42');
       if (tagline) { tagline.style.opacity = 1; tagline.style.transform = 'none'; }
       if (heroCue) { heroCue.style.opacity = 0.75; }
+      if (heroStatue) { heroStatue.style.opacity = '0.88'; }
     }
 
     // ─── Horizontal scroll (desktop only) ───

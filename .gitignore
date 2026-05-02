@@ -6,3 +6,10 @@
 
 # Linux Mint / Nemo file-manager metadata sidecar
 **/.comments/
+
+# Marble-bust master assets (kept locally, not in git — too large)
+# The production WebP cutout (assets/mm-cutout.webp) is committed; these
+# are masters / intermediates used to regenerate it.
+assets/mm.png
+assets/mm-cutout.png
+assets/mm-cutout-1300.png
