@@ -950,14 +950,15 @@
          <!-- Pendant gallery thumbs — full-width row beneath both pendant + copy -->
          <div class="hero-thumbs reveal" id="heroThumbs" role="list" aria-label="Equinoccio gallery">
            <button class="hero-thumb" type="button" data-idx="0" aria-label="Open gallery — video 1">
-             <!-- Static image preview — iOS Safari doesn't render <video poster>
-                  reliably until first play, so we use a plain <img>. The play
-                  glyph in the corner tells users this opens a video clip. -->
-             <img src="assets/p1/sap5.jpeg" alt="" loading="lazy">
+             <!-- Pre-rendered first frame extracted from sap1.mov via ffmpeg
+                  so iOS Safari shows an actual frame from the video itself,
+                  not a generic still. Play glyph still signals it opens a
+                  video clip in the lightbox. -->
+             <img src="assets/p1/sap1-frame.jpg" alt="" loading="lazy">
              <span class="hero-thumb-tag" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19"/></svg></span>
            </button>
            <button class="hero-thumb" type="button" data-idx="1" aria-label="Open gallery — video 2">
-             <img src="assets/p1/sap6.png" alt="" loading="lazy">
+             <img src="assets/p1/sap3-frame.jpg" alt="" loading="lazy">
              <span class="hero-thumb-tag" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19"/></svg></span>
            </button>
            <button class="hero-thumb" type="button" data-idx="2" aria-label="Open gallery — image 1">
