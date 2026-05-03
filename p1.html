@@ -590,14 +590,13 @@
     }
 
     /* ─── PANEL 3 — SPECS + CERTIFICATE ─── */
+    /* Specs panel after the spec-grid removal — only the cert column
+       remains. Single-column layout, centered, no grid template needed. */
     .panel--specs .panel-inner {
-      display: grid;
-      grid-template-columns: 0.9fr 1.1fr;
-      gap: clamp(40px, 5vw, 80px);
+      display: flex;
+      flex-direction: column;
       align-items: center;
-    }
-    @media (max-width: 900px) {
-      .panel--specs .panel-inner { grid-template-columns: 1fr; gap: 40px; }
+      gap: 0;
     }
     .specs-col { display: flex; flex-direction: column; gap: 22px; }
     .specs-heading {
@@ -647,8 +646,6 @@
       }
       .panel--specs .panel-inner {
         max-width: 1400px;
-        grid-template-columns: 0.65fr 1.35fr;
-        gap: clamp(32px, 4vw, 64px);
       }
       .cert-frame {
         aspect-ratio: auto;
@@ -941,7 +938,7 @@
                       filter="url(#carvedEqui)">EQUINOCCIO</text>
               </svg>
             </h1>
-            <p class="hero-sub" data-i18n="p1.hero.sub">Yellow Sapphire · 2.08 ct · GIA</p>
+            <p class="hero-sub" data-i18n="p1.hero.sub">Yellow Sapphire · 2.08 ct · Sri Lanka · GIA</p>
             <p class="hero-lede" data-i18n="p1.hero.lede">A natural yellow sapphire of 2.08 carats, set in 18k white gold and finished in rhodium.</p>
             <span class="scroll-cue" data-i18n="p1.scroll.cue">scroll</span>
           </div>
@@ -990,37 +987,6 @@
       <!-- PANEL 3 — SPECS + CERTIFICATE -->
       <section class="panel hpanel panel--specs">
         <div class="panel-inner">
-          <div class="specs-col reveal">
-            <span class="eyebrow" data-i18n="p1.specs.eyebrow">Specifications</span>
-            <h2 class="specs-heading" data-i18n="p1.specs.heading">Equinoccio</h2>
-            <div class="specs-grid">
-              <div>
-                <div class="spec-label" data-i18n="p1.specs.label.stone">Stone</div>
-                <div class="spec-value" data-i18n="p1.specs.value.stone">Yellow Sapphire</div>
-              </div>
-              <div>
-                <div class="spec-label" data-i18n="p1.specs.label.carat">Carat</div>
-                <div class="spec-value" data-i18n="p1.specs.value.carat">2.08 ct</div>
-              </div>
-              <div>
-                <div class="spec-label" data-i18n="p1.specs.label.cut">Cut</div>
-                <div class="spec-value" data-i18n="p1.specs.value.cut">Oval</div>
-              </div>
-              <div>
-                <div class="spec-label" data-i18n="p1.specs.label.setting">Setting</div>
-                <div class="spec-value" data-i18n="p1.specs.value.setting">18k white gold · rhodium plated</div>
-              </div>
-              <div>
-                <div class="spec-label" data-i18n="p1.specs.label.origin">Origin</div>
-                <div class="spec-value" data-i18n="p1.specs.value.origin">Sri Lanka</div>
-                <div class="spec-note" data-i18n="p1.specs.note.origin">Per maker · origin not certified on report</div>
-              </div>
-              <div>
-                <div class="spec-label" data-i18n="p1.specs.label.cert">Certificate</div>
-                <div class="spec-value" data-i18n="p1.specs.value.cert">GIA</div>
-              </div>
-            </div>
-          </div>
           <div class="cert-col reveal">
             <span class="eyebrow" data-i18n="p1.cert.eyebrow">Certificate</span>
             <div class="cert-frame">
@@ -1200,7 +1166,8 @@
         strokeOpacity: 1,
       });
 
-      const tl = gsap.timeline();
+      // Build the timeline paused — we start it manually based on viewport.
+      const tl = gsap.timeline({ paused: true });
       // 1. Draw the stroke.
       tl.to(equiText, { strokeDashoffset: 0, duration: 4, ease: 'power1.inOut' }, 0.6);
       // 2. Fill catches the draw early; stroke crossfades down across the same window.
@@ -1213,6 +1180,36 @@
       }
       if (equiLightFlood) {
         tl.to(equiLightFlood, { attr: { 'flood-opacity': 0.42 }, duration: 1.0, ease: 'sine.inOut' }, '<');
+      }
+
+      // Desktop (≥1024px): the hero panel is panel 1 of the horizontal
+      // scroll track and visible from page load — play immediately.
+      // Mobile / tablet: panels stack vertically and the .hero-media video
+      // (aspect 4/5) sits ABOVE the title in the source order, pushing the
+      // EQUINOCCIO title below the fold on short viewports (iPhone 13 mini
+      // ~620px usable). Gate the timeline on an IntersectionObserver of
+      // the title so the carve sequence waits for the user to scroll it
+      // into view rather than playing unseen.
+      const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+      if (isDesktop) {
+        tl.play();
+      } else {
+        const heroTitle = document.querySelector('.hero-title');
+        if (heroTitle && 'IntersectionObserver' in window) {
+          const io = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                tl.play();
+                io.disconnect();
+              }
+            });
+          }, { threshold: 0.1 });
+          io.observe(heroTitle);
+        } else {
+          // No IntersectionObserver support — play immediately rather
+          // than leaving the title invisible forever.
+          tl.play();
+        }
       }
     } else if (equiText) {
       equiText.style.fillOpacity = 1;
