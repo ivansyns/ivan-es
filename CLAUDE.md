@@ -100,3 +100,16 @@ assets/
 ```
 
 Path convention in code: every reference uses `assets/<folder>/<file>` — never the bare `assets/<file>` form, even for the pendant videos that originally lived at the root. URL-encode spaces (`%20`) for filenames with spaces (e.g. `Ruby - GIA.pdf` → `assets/s1/Ruby%20-%20GIA.pdf`). When adding a new piece or stone, create its `p#/` or `s#/` folder before placing media — keep the per-item locality.
+
+## Vercel Web Analytics
+All four pages (`index.html`, `aromazla.html`, `contact.html`, `p1.html`) carry the Vercel Web Analytics script in `<head>`:
+
+```html
+<script defer src="/_vercel/insights/script.js"></script>
+```
+
+Why a bare script tag instead of the `@vercel/analytics` npm package + `inject()`: ivan.es is plain static HTML with no build step, no React, no bundler. The npm package is just a thin wrapper that injects the same script tag at runtime — adding it would mean introducing a bundler for zero functional gain. Vercel's edge serves `/_vercel/insights/script.js` automatically when Web Analytics is enabled on the project.
+
+Privacy posture: no cookies, no personal data, GDPR-compliant by default — no consent banner needed. Data starts collecting from the moment of first deploy with the script live (no retroactive backfill).
+
+When adding a new page (e.g. `p2.html`, future subpages), drop the same `<script defer src="/_vercel/insights/script.js"></script>` tag in `<head>` so the new page is tracked alongside the others.
