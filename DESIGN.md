@@ -1,114 +1,162 @@
 # Design System — ivan.es
 
-The current state of the system. CLAUDE.md holds the immutable constraints; this file documents the implemented choices that satisfy them.
+*Regenerated 2026-08-04 **from the code**, not from the previous version of this file. The
+prior doc was last accurate 2026-04-28 and had drifted 2½ months: it described a
+`Madrid · 40°25′N 3°42′W` caption and an `I·A` gold-middle-dot mark that no longer exist, and
+documented 2 pages when the site has 4.*
+
+**Rule going forward: when this file and the code disagree, the code is right and this file
+gets fixed in the same pass.** A stale design doc is worse than none — it reads as
+authoritative and is confidently wrong.
+
+`CLAUDE.md` holds the immutable constraints. This file documents what is actually implemented.
+
+---
 
 ## Personality
-Dark, classical, restrained. The name is the anchor, not the spectacle. Typography-driven, low-saturation, generous negative space.
 
-## Pages
-- `index.html` — Home. **Two panels only: Hero + Aromazla doorway.** No footer, no copyright, no contact links — contact lives on aromazla.html. **Desktop (≥1024px):** the two panels sit on a horizontal track that GSAP ScrollTrigger pins and translates left as the user scrolls vertically. Once the pin distance is consumed, scrolling stops because there's nothing else in the document. **Mobile (<1024px):** sticky-stack — the doorway rises up and buries the hero.
-- `aromazla.html` — Jewelry. Sticky-stack of four panels: page-head (single-word title) → gallery (six placeholder pieces) → commission CTA → footer (the site's only footer — coordinates, email, social links).
+Dark, classical, restrained. **The name is the anchor, not the spectacle.** Typography-driven,
+low-saturation, generous negative space. Empty canvas is intentional and load-bearing — the
+site's argument is that the person behind it has judgement, and crowding would contradict it.
 
-## Colors
-| Token             | Value                            | Usage                                    |
-|-------------------|----------------------------------|------------------------------------------|
-| `--ink`           | `#0A0A0A`                        | Page background                          |
-| `--ink-2`         | `#111111`                        | Hero gradient stop, card front face      |
-| `--ink-3`         | `#15140F`                        | Reserved (warm ink variant)              |
-| `--ink-card`     | `#18171A`                        | Door + piece card surface                |
-| `--bone`          | `#F5F0E8`                        | Primary text                             |
-| `--bone-soft`     | `rgba(245,240,232,0.72)`         | Secondary text                           |
-| `--bone-faint`    | `rgba(245,240,232,0.42)`         | Tertiary / meta                          |
-| `--bone-line`     | `rgba(245,240,232,0.10)`         | Hairlines, dividers                      |
-| `--gold`          | `#C9A84C`                        | Accent — used sparingly                  |
-| `--gold-soft`     | `rgba(201,168,76,0.72)`          | Corner brackets, emblem strokes          |
+**This site does not follow the 8-point house Formula, and should not.** The Formula is
+distilled from restaurant and clinic work — a business reassuring a wary customer with
+photography and warmth. A person selling judgement inverts it: there is no full-bleed
+photograph to lead with, because the product *is* the taste. See `_pipeline/DIRECTION.md`.
 
-No bright colors. No gradients except subtle dark radial glows.
+---
+
+## Pages — four, not two
+
+| Page | What it is |
+|------|-----------|
+| `index.html` | Home. Two panels: **hero** + **Aromazla doorway**. No footer, no contact links. |
+| `aromazla.html` | Jewellery. Page-head → **pieces gallery** → **stones gallery** → commission → footer (the site's only footer). |
+| `p1.html` | **Product page — "Equinoccio", No. 001.** Hero → story → specs → CTA. Natural yellow sapphire 2.08 ct, 18k white gold, rhodium finish, GIA certificate. |
+| `contact.html` | Direct contact. Instagram `@ivan.alzam`, WhatsApp `+34 646 853 773`. |
+
+`p1.html` is the newest and most significant addition: **Aromazla has gone commercial.** It is
+a complete single-product page with real certification, video, and a WhatsApp CTA that
+pre-fills the piece name. It is the model for future pieces (`p2`, `p3`, …).
+
+---
+
+## Colours
+
+Unchanged since April — these were right and stayed right.
+
+| Token | Value | Usage |
+|---|---|---|
+| `--ink` | `#0A0A0A` | Page background |
+| `--ink-2` | `#111111` | Hero gradient stop, card front face |
+| `--ink-3` | `#15140F` | Warm ink variant |
+| `--ink-card` | `#18171A` | Door and piece card surface |
+| `--bone` | `#F5F0E8` | Primary text |
+| `--bone-soft` | `rgba(245,240,232,0.72)` | Secondary text |
+| `--bone-faint` | `rgba(245,240,232,0.42)` | Tertiary / meta |
+| `--bone-line` | `rgba(245,240,232,0.10)` | Hairlines, dividers |
+| `--gold` | `#C9A84C` | Accent — rationed |
+| `--gold-soft` | `rgba(201,168,76,0.72)` | Emblem strokes, brackets |
+
+No bright colour. No gradients except subtle dark radial glows.
 
 ## Typography
-| Family               | Variable        | Usage                                                     |
-|----------------------|-----------------|-----------------------------------------------------------|
-| Cinzel               | `--f-display`   | All headings, body display copy, doorway names, footer    |
-| Inter                | `--f-body`      | Card descriptions, lede paragraphs, body text             |
-| JetBrains Mono       | `--f-mono`      | Eyebrows, labels, breadcrumbs, footer h4, motto, meta     |
 
-**Sizing** — all heading sizes are clamped:
-- Hero name (SVG path) — `max-width: 460px`, anchored at the top of the viewport with `clamp(120px, 18vh, 200px)` of breathing room above. Empty canvas below is intentional.
-- Hero motto — `clamp(0.78rem, 0.95vw, 0.9rem)`, mono italic, lowercase, letter-spacing 0.42em.
-- Page title (Aromazla) — `clamp(2.8rem, 9vw, 7rem)`, single line, `white-space: nowrap`.
-- Section h2 — `clamp(1.4rem, 2.4vw, 2rem)`, uppercase, letter-spacing 0.18em.
-- Door name — `clamp(2.4rem, 4.6vw, 3.6rem)`, uppercase, letter-spacing 0.06em.
-- Body — 16px / 1.65 line-height, weight 300.
+| Family | Token | Usage |
+|---|---|---|
+| **Cinzel** | `--f-display` | Headings, doorway names, footer. Roman inscriptional capitals — the classical anchor. |
+| **Inter** | `--f-body` | Body, card descriptions, ledes |
+| **JetBrains Mono** | `--f-mono` | Eyebrows, labels, meta, motto |
 
-## Spacing
-Section vertical rhythm: `clamp(60px, 10vw, 132px)`.
-Container max-width: 1280px.
-Side gutter: `clamp(20px, 4vw, 48px)`.
-Stack tokens (8-grid): 4 / 8 / 12 / 16 / 24 / 32 / 48 / 64 / 96 / 128.
+Easing: `--ease-out: cubic-bezier(0.22, 1, 0.36, 1)`.
+
+---
 
 ## Components
 
-### Nav (shared)
-Fixed top, transparent over hero, gains `rgba(10,10,10,0.78)` + 14px blur after 30px scroll. Left mark `I·A` in Cinzel with gold middle-dot. Right side: 5 mono-caps links with gold underline-on-hover. Below 768px the link list is replaced by the card-flip button.
+### Chrome
+- **`nav-links`** — desktop link row, gold underline on hover.
+- **`nav-card`** — mobile card-flip button.
+- **`menu-sheet`** — full-screen sheet, with `menu-sheet__icons` and `menu-sheet__lang`
+  (language toggle lives in the menu, with SVG flags).
 
-### Card-flip mobile nav
-56×36 button. Front face: dark `--ink-2` with `IA` mark. Back face: white `--bone` with three black hamburger lines. Flips on Y axis 720ms, custom cubic-bezier `(0.7, -0.1, 0.3, 1.1)` for slight overshoot. Open state reveals a full-screen `--ink` sheet with five Cinzel uppercase links and a `Madrid · 40°25′N 3°42′W` mono caption.
+### Hero (`index.html`)
+`hero-frame` · `hero-plate` · `hero-statue` · **`hero-name`** (SVG path draw from
+`assets/name-paths.svg`) · `hero-tagline` · `hero-cue`.
 
-### Hero (index)
-Full viewport, dark canvas, radial glow biased toward the top (`50% 18%`). Hero is `flex-direction: column` with `justify-content: flex-start` and `padding-top: clamp(120px, 18vh, 200px)`, so the name sits near the top and the bottom 60–70% of the viewport is intentional negative space (canvas for a future ASCII piece). Inline SVG path for "IVAN ALZAMORA". GSAP timeline:
-1. **Stroke draw** — `getTotalLength` → `strokeDashoffset` 0 over 4s, `power1.inOut`, starting at 0.6s
-2. **Crossfade** — `fill-opacity` 0→1 + `stroke-opacity` 1→0 over 1.6s, `sine.inOut`, starting at `-=3.4` (catches the tail of the draw, no perceptible pause)
-3. **Carve** — fill darkens from `#F5F0E8` to `#A89F90` over 1.0s `sine.inOut`; the `#carved` SVG filter's two `feFlood` nodes raise their `flood-opacity` over the same window (shadow → 0.92, light → 0.42)
+### Doorway (`index.html`)
+`door-visual-cue` · `door-visual-mark` · `door-visual-piece`.
 
-The Latin motto `aut viam inveniam aut faciam` rides phase 2 with `sine.out` over 1.2s. **Nothing else** in the hero — no eyebrow, no meta, no location, no number, no date.
+### Galleries (`aromazla.html`)
+Two `gallery-grid` instances — **pieces** and **stones**. Card parts: `piece-name`,
+`piece-num`, `piece-meta`, `piece-pill`, `piece-cert`, `piece-emblem`, `piece-top-label` +
+`piece-top-label__carat`, `piece-pendant-label`.
 
-### Page hero (aromazla)
-Padding `clamp(140px, 18vh, 220px)` top. Breadcrumb in mono caps. Two-column grid: title `AROMAZLA` left (single line, `white-space: nowrap`, font scales via clamp), lede right (Cinzel display, max 36ch).
+The `piece-cert` element is real — the GIA report PDF ships in `assets/p1/`. **Do not
+reproduce this component on a site without a genuine certificate**
+(`_library/foundations/content-truth.md`).
 
-### Doorway (single, visual)
-One image-bed doorway only — no section title, no Visuanza card, no descriptions. 16:9 aspect on desktop, 4:3 on mobile. Background is a layered radial+linear dark gradient + SVG fractal-noise overlay (mix-blend-mode `overlay`) + an outer radial vignette. The wordmark `AROMAZLA` is centered horizontally near the bottom (Cinzel 500, letter-spacing 0.32em, drop-shadow). Hover: card lifts 3px and the inner image scales 1.02 → 1.05 over 1400ms. Links to `aromazla.html`.
+### Product page (`p1.html`)
+`panel--hero` → `panel--story` → `panel--specs` → `panel--cta`. Hero carries a video in three
+encodings (`.mov` / `.webm` / `.mp4`) with a poster frame. CTA is a WhatsApp deep link with the
+piece name pre-filled.
 
-### Piece (gallery card)
-4:5 aspect ratio dark plate with subtle SVG geometric emblem in `--gold-soft` stroke (no fill). `.span-2` variant takes 16:10 aspect across two columns. Hover lifts and brightens the emblem. Number + name labels bottom-left.
+### Contact (`contact.html`)
+`contact-eyebrow` · `contact-title` · `contact-lede` · `contact-cards` with
+`contact-card__icon` / `__label` / `__handle`.
 
-### Commission section
-Centered between gold corner brackets. Mono eyebrow, Cinzel uppercase h2, body line, ghost CTA with arrow.
+---
 
-### Footer
-3-column grid (Coordinates / Write / Elsewhere). Mono gold h4s, Cinzel display body links, Inter `.quiet` annotations. Base line: copyright only.
+## Motion — Class B, and deliberately so
 
-## Animations
-- SVG name draw: 4s stroke + 1.5s fill, total ~5.4s
-- Section reveals: opacity 0 + translateY(14px) → 0, 900ms `cubic-bezier(0.22, 1, 0.36, 1)`, IntersectionObserver-triggered
-- Door hover: translateY(-3px) + border tint to `rgba(201,168,76,0.32)` over 600ms
-- Card flip: 720ms 3D rotateY with overshoot easing
-- Grain overlay: SVG fractal noise at 3.5% opacity, fixed, mix-blend-mode screen
-- `prefers-reduced-motion`: all transitions/animations clamped to 0.01ms; SVG name lands fully filled
+**Desktop (≥1024px):** panels sit on a horizontal track; **GSAP ScrollTrigger** pins the
+wrapper and scrubs the track on X as the user scrolls vertically (`pin: true, scrub: 0.4`,
+inside `gsap.matchMedia()`). Multiple triggers share the same start/end/scrub so they stay in
+lockstep.
 
-## Layout patterns
+**Mobile (<1024px):** sticky-stack — each panel rises and buries the one before.
 
-### Sticky stack (mobile + aromazla.html all viewports)
-Each top-level section in `<main class="stack">` carries a `.panel` class and a `--z` custom property (1, 2, 3, …). The CSS rule:
-```
-.stack .panel {
-  position: sticky;
-  top: 0;
-  min-height: 100vh;
-  z-index: var(--z, 1);
-  background: var(--ink); /* opaque — this is what does the covering */
-}
-```
-As the user scrolls, panel N reaches `top:0` and sticks. Panel N+1 (lower in the document) eventually reaches `top:0` too; because its `z-index` is higher, it covers panel N. No JS for the core mechanic. Panel content sits inside a `.panel-inner` wrapper that holds the max-width and horizontal centering, so the panel itself can stay full-bleed and its background covers the panel beneath at any viewport width.
+`IntersectionObserver` drives entrance reveals. `prefers-reduced-motion` is honoured in 12
+places.
 
-### Horizontal scroll (index.html, desktop ≥1024px)
-The hero and doorway panels live inside `.hpanels > .hpanels-track`. On mobile, both wrappers use `display: contents` so the panels behave as direct children of `.stack` and stack vertically. On desktop, `.hpanels` becomes `height: 100vh; overflow: hidden` and `.hpanels-track` becomes a `display: flex` row of `100vw`-wide panels. GSAP's `gsap.matchMedia('(min-width: 1024px)', ...)` registers a ScrollTrigger that pins the wrapper, sets `end: '+=' + (slides − 1) × innerWidth`, and tweens the track's `x` from 0 to that distance with `scrub: 0.4` and `invalidateOnRefresh: true`. After the pin releases, scrolling returns to normal vertical flow and the footer rises up — no jarring jump because the wrapper occupies its natural 100vh in the document.
+This is Class B (spectacle) and it is **correct here** — a freelancer has no team, no client
+logo wall and no institutional trust, so craft has to substitute for credentials and the site
+must *be* the work rather than describe it. **The same motion on a clinic site would kill
+conversion.**
 
-## Hard rules (from CLAUDE.md, mirrored)
-- "Aromazla" is one word — no separator, no break
-- Hero contains only the name + Latin motto
-- Madrid may appear in the footer only (no bio section currently exists on the home page)
-- No Tailwind, no React, no build tools
-- All CSS inline; GSAP via CDN only
+## Internationalisation
 
-## Assets
-- `assets/name-paths.svg` — Cinzel-rendered "IVAN ALZAMORA" as a single path; inlined into `index.html` for stroke animation.
+`assets/i18n.js` — bilingual **EN/ES**:
+- Strings dictionary keyed by string ID, indexed by language
+- `data-i18n` → textContent · `data-i18n-html` → innerHTML · `data-i18n-attr="attr:key,…"`
+- `<html data-i18n-title>` → document.title · `<meta data-i18n-content>` → meta content
+- `localStorage` persists the choice; `navigator.language` seeds the default (Spain → `es`)
+- `<html lang>` updated every render; an inline bootstrap prevents a flash of wrong language
+
+**This is the most reusable thing on the site and it is not in the library.** See the harvest
+debt below.
+
+---
+
+## Known deviations from our own ship standard
+
+Both would fail `_pipeline/audit.mjs`. Flagged 2026-08-04, not yet fixed:
+
+1. **Google Fonts loaded from Google's CDN** — `fonts.googleapis.com` + `fonts.gstatic.com`.
+   Every EU visitor's IP reaches Google before consent. Fix: self-host per
+   `_library/compliance/fonts.md`.
+2. **GSAP loaded from cdnjs** — `cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/`. External origin,
+   breaks `default-src 'self'`. Fix: self-host, which was already the standing decision.
+
+Vercel Web Analytics (`/_vercel/insights/script.js`) is first-party and cookieless — fine.
+
+## Harvest debt — polished here, missing from the library
+
+*The library was extracted from these sites once and never re-extracted. The sites moved on.*
+
+- [ ] **`i18n.js` → `_library/elements/i18n.md` + `.js`** — we build for DK, SE and ES and have
+      no i18n module. Highest value.
+- [ ] **`p1.html` → `_library/recipes/product.md`** — flagged as pending in
+      `references/batch-2026-07-31-codepen.md` *"when Aromazla goes commercial."* It has.
+- [ ] **`nav-card` card-flip + `menu-sheet`** → mobile nav element
+- [ ] **`piece-*` card family** → a certified-object card (with the content-truth caveat)
