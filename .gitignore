@@ -13,3 +13,6 @@
 assets/mm.png
 assets/mm-cutout.png
 assets/mm-cutout-1300.png
+
+# audit / QA output — regenerated, not source
+_qa/

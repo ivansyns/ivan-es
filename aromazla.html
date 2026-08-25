@@ -1359,6 +1359,14 @@
       }
       .gallery--stones .gallery-grid { grid-template-columns: 1fr; }
       .gallery--pieces .gallery-grid { max-width: none; }
+      /* The desktop rule slots the pendant into the CENTRE column of a
+         3-column track (`grid-column: 2`). That rule is not scoped to a
+         breakpoint, so on mobile — where the track drops to a single
+         column — the card is placed in an implicit second column that has
+         no 1fr to size against, and collapses. Measured at 390px: the
+         card rendered 2x3px with the video playing perfectly behind it.
+         Reset it to the only column that exists. */
+      .gallery--pieces .piece--video { grid-column: 1; }
       .piece.span-2 { grid-column: span 1; aspect-ratio: 4/5; }
     }
     @media (max-width: 768px) {
