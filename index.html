@@ -714,7 +714,22 @@
       .reveal { opacity: 1; transform: none; }
       .hero-name path { fill-opacity: 1; }
     }
-  </style>
+  
+      /* ─── the Aromazla mark dissolving into the marble it was traced from ──
+         No WebGL. The logo is a second <img> stacked on the statue with the
+         SAME class, so it inherits every rule the statue has — position, size,
+         the scaleX(-1) flip, the GSAP parallax — and can never drift out of
+         register. A tileable fbm mask cuts the openings; sliding
+         mask-position animates it on the compositor, no per-frame JS.
+         ⚠ The two files share one 1011x1300 canvas and agree to 94.6% IoU,
+         which is why the fog opens INSIDE one outline rather than between two. */
+      /* the mark <img> is only the SOURCE — mark-fog.js draws it into a canvas
+         and erases the fog through it, so the vapour lives inside the
+         silhouette and never touches the surroundings */
+      /* ⚠ z-index 2: .hero-statue is z-index 1, so a canvas at auto paints
+         UNDER the bust and is invisible however correct its contents are */
+      .markfog{position:absolute;pointer-events:none;z-index:2}
+    </style>
 </head>
 <body>
 
@@ -836,6 +851,10 @@
          strokes in without waiting on the image fetch. -->
     <img class="hero-statue" id="heroStatue"
          src="assets/mm-cutout.webp" alt="" aria-hidden="true"
+         decoding="async" fetchpriority="low" />
+    <!-- the brand mark, registered to the bust above and masked by the fog -->
+    <img class="hero-statue hero-statue--mark" id="heroMark"
+         src="assets/aromazla-logo-aligned.webp" alt="" aria-hidden="true"
          decoding="async" fetchpriority="low" />
     <div class="hero-frame">
       <div class="hero-plate">
@@ -1053,6 +1072,10 @@
     const tagline = document.querySelector('.hero-tagline');
     const heroCue = document.getElementById('heroCue');
     const heroStatue = document.getElementById('heroStatue');
+    /* the brand mark is a second layer of the same object — every tween that
+       touches the statue must touch it too, or the two drift apart */
+    const heroMark = document.getElementById('heroMark');
+    const heroBust = [heroStatue, heroMark].filter(Boolean);
     if (path && !reduce) {
       const len = path.getTotalLength();
       gsap.set(path, {
@@ -1075,7 +1098,7 @@
       //    distance from the page surface (full opacity would compete
       //    with the name for foreground attention).
       if (heroStatue) {
-        tl.to(heroStatue, { opacity: 0.88, duration: 4.0, ease: 'sine.out' }, 0.4);
+        tl.to(heroBust, { opacity: 0.88, duration: 4.0, ease: 'sine.out' }, 0.4);
       }
       // 1. Draw the stroke (same 4s pace as before).
       tl.to(path, { strokeDashoffset: 0, duration: 4, ease: 'power1.inOut' }, 0.6);
@@ -1108,7 +1131,7 @@
       if (lf) lf.setAttribute('flood-opacity', '0.42');
       if (tagline) { tagline.style.opacity = 1; tagline.style.transform = 'none'; }
       if (heroCue) { heroCue.style.opacity = 0.75; }
-      if (heroStatue) { heroStatue.style.opacity = '0.88'; }
+      heroBust.forEach((el) => { el.style.opacity = '0.88'; });
     }
 
     // ─── Horizontal scroll (desktop only) ───
@@ -1149,9 +1172,11 @@
         // even on resize/refresh. Drives the `--parallax-x` CSS variable
         // which feeds the bust's `translate` property — composes cleanly
         // with the scaleX(-1) flip already on the element.
-        const statue = document.querySelector('.hero-statue');
+        /* querySelectorAll, not querySelector: the bust is two stacked images
+           now and both must take the same parallax offset */
+        const statue = document.querySelectorAll('.hero-statue');
         let statueParallax = null;
-        if (statue) {
+        if (statue.length) {
           const lag = () => Math.round(window.innerWidth * 0.15);
           statueParallax = gsap.fromTo(statue,
             { '--parallax-x': '0px' },
@@ -1180,5 +1205,6 @@
       });
     }
   </script>
+<script src="assets/mark-fog.js"></script>
 </body>
 </html>
