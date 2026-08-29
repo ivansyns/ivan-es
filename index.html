@@ -723,9 +723,20 @@
          mask-position animates it on the compositor, no per-frame JS.
          ⚠ The two files share one 1011x1300 canvas and agree to 94.6% IoU,
          which is why the fog opens INSIDE one outline rather than between two. */
-      /* the mark <img> is only the SOURCE — mark-fog.js draws it into a canvas
-         and erases the fog through it, so the vapour lives inside the
-         silhouette and never touches the surroundings */
+      /* the mark <img> is only the SOURCE — mark-fog.js draws it into a
+         canvas and erases the fog through it, so the vapour lives inside the
+         silhouette and never touches the surroundings.
+         ⚠ IT MUST NOT BE LAID OUT. It first carried .hero-statue so it would
+         inherit the bust's position, size and flip for free — which works
+         only while that class is absolute. Under 1024px .hero-statue turns
+         static with order:2, so a second element carrying it became a second
+         in-flow item and the mark landed BELOW the bust instead of on it.
+         Registration now comes from measuring the bust itself, which is
+         exact at every width because both assets are the same 1011x1300
+         frame. Kept in the document (not created in JS) so the fetch starts
+         with the markup; 1px and invisible so it can never affect layout. */
+      .hero-mark-src{position:absolute;left:0;top:0;width:1px;height:1px;
+        opacity:0;pointer-events:none;visibility:hidden}
       /* ⚠ z-index 2: .hero-statue is z-index 1, so a canvas at auto paints
          UNDER the bust and is invisible however correct its contents are */
       .markfog{position:absolute;pointer-events:none;z-index:2}
@@ -852,8 +863,9 @@
     <img class="hero-statue" id="heroStatue"
          src="assets/mm-cutout.webp" alt="" aria-hidden="true"
          decoding="async" fetchpriority="low" />
-    <!-- the brand mark, registered to the bust above and masked by the fog -->
-    <img class="hero-statue hero-statue--mark" id="heroMark"
+    <!-- the brand mark. Texture source only — never laid out, never visible;
+         mark-fog.js reads it and registers the canvas to the bust above. -->
+    <img class="hero-mark-src" id="heroMark"
          src="assets/aromazla-logo-aligned.webp" alt="" aria-hidden="true"
          decoding="async" fetchpriority="low" />
     <div class="hero-frame">
@@ -1074,8 +1086,8 @@
     const heroStatue = document.getElementById('heroStatue');
     /* the brand mark is a second layer of the same object — every tween that
        touches the statue must touch it too, or the two drift apart */
-    const heroMark = document.getElementById('heroMark');
-    const heroBust = [heroStatue, heroMark].filter(Boolean);
+    /* the fog canvas reads the bust's own computed opacity every frame, so
+       the mark is not part of these tweens any more */
     if (path && !reduce) {
       const len = path.getTotalLength();
       gsap.set(path, {
@@ -1098,7 +1110,7 @@
       //    distance from the page surface (full opacity would compete
       //    with the name for foreground attention).
       if (heroStatue) {
-        tl.to(heroBust, { opacity: 0.88, duration: 4.0, ease: 'sine.out' }, 0.4);
+        tl.to(heroStatue, { opacity: 0.88, duration: 4.0, ease: 'sine.out' }, 0.4);
       }
       // 1. Draw the stroke (same 4s pace as before).
       tl.to(path, { strokeDashoffset: 0, duration: 4, ease: 'power1.inOut' }, 0.6);
@@ -1131,7 +1143,7 @@
       if (lf) lf.setAttribute('flood-opacity', '0.42');
       if (tagline) { tagline.style.opacity = 1; tagline.style.transform = 'none'; }
       if (heroCue) { heroCue.style.opacity = 0.75; }
-      heroBust.forEach((el) => { el.style.opacity = '0.88'; });
+      if (heroStatue) { heroStatue.style.opacity = '0.88'; }
     }
 
     // ─── Horizontal scroll (desktop only) ───
@@ -1172,8 +1184,6 @@
         // even on resize/refresh. Drives the `--parallax-x` CSS variable
         // which feeds the bust's `translate` property — composes cleanly
         // with the scaleX(-1) flip already on the element.
-        /* querySelectorAll, not querySelector: the bust is two stacked images
-           now and both must take the same parallax offset */
         const statue = document.querySelectorAll('.hero-statue');
         let statueParallax = null;
         if (statue.length) {
