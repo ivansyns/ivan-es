@@ -25,8 +25,13 @@
      chin. */
   const FOCUS_X = 0.38, FOCUS_Y = 0.21, FOCUS_R = 0.30;
 
-  /* the fog's own ramp — wide, because fog has no edge */
-  const FOG_LO = 0.580, FOG_HI = 0.800;
+  /* the fog's own ramp — wide, because fog has no edge. FOG_LO is the
+     dial for how much vapour there is: it sets where the field starts
+     opening the mark at all, so raising it thins the fog everywhere at
+     once without touching its character. Measured as the share of the
+     silhouette eaten, averaged over seven moments: 0.580 -> 4.2%,
+     0.592 -> 3.5%, 0.612 -> 2.7%. */
+  const FOG_LO = 0.592, FOG_HI = 0.800;
   /* ⭐ THE NUANCE. One extra high-frequency octave pair perturbs the FIELD
      before the ramp, not the alpha after it — so the vapour grows internal
      filaments and torn margins instead of just acquiring a noisy outline.
@@ -389,8 +394,23 @@
      pointer-events:none so it never eats a click meant for the page, and the
      rect + alpha test below is a more honest hit test than the box the
      canvas would have given us anyway. */
+  /* ⭐ MOUSE ONLY — AND THE TEST IS THE EVENT, NOT A MEDIA QUERY. On a phone
+     a touch is a scroll gesture nine times out of ten: the browser takes it
+     over and fires pointercancel, so the knot flickered on and died instead
+     of following anything. The obvious gate is
+     (hover: hover) and (pointer: fine) — but that asks the environment to
+     declare a capability, and an environment that declares nothing gets
+     nothing. Headless Chrome reports every one of hover, any-hover,
+     pointer:fine AND pointer:coarse as false, so the gate silently disabled
+     the effect and every measurement read as drift.
+     e.pointerType is evidence rather than a claim: a real mouse says so on
+     each event. It also gets hybrids right, where a media query cannot — a
+     touchscreen laptop keeps the effect under the mouse and ignores
+     fingers. Touch devices never raise PULL, so they also stay on the
+     slower gate and do less work. */
   if (!reduce) {
     const aim = (e) => {
+      if (e.pointerType && e.pointerType !== 'mouse') { hover = 0; return; }
       const r = geom.getBoundingClientRect();
       if (!r.width || !alpha) { hover = 0; return; }
       const sx = (e.clientX - r.left) / r.width;
@@ -405,14 +425,8 @@
       if (alpha[ay * aw + ax] < 40) { hover = 0; return; }   /* off the silhouette */
       hover = 1; tgtX = u; tgtY = sy;
     };
-    const release = (e) => {
-      /* a mouse has no 'up' that means 'gone' — only touch and pen do */
-      if (!e || e.pointerType !== 'mouse') hover = 0;
-    };
+    /* pointerdown/up/cancel were the touch path and are gone with it */
     addEventListener('pointermove', aim, { passive: true });
-    addEventListener('pointerdown', aim, { passive: true });
-    addEventListener('pointerup', release, { passive: true });
-    addEventListener('pointercancel', release, { passive: true });
     document.addEventListener('pointerleave', () => { hover = 0; });
   }
 })();
