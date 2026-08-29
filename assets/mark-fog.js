@@ -53,14 +53,20 @@
      field is locally smooth and any radially symmetric influence has
      nothing to hide behind. The cure for all three is the same and it is
      the noise on `k` below: an irregular influence region has no rim. */
-  const PULL_GAIN = 2.4;    /* gathers by contrast, not by adding a disc */
-  const PULL_MID  = 0.505;
-  /* and a mass term WEIGHTED BY EXISTING STRUCTURE. A flat bump is what
-     made rings in the first place, because a constant added radially makes
-     the field's level sets circles. Gated on the field's own value, the
-     mass can only deepen vapour that is already forming, so its contours
-     follow the noise. */
-  const PULL_MASS = 0.085;
+  /* ⭐ DRIVE TOWARD A STATE, DO NOT ADD TO THE CURRENT ONE. Gain and a
+     structure-gated mass both scale with whatever the field happens to be
+     doing under the pointer, so the knot was dramatic when a lobe sat there
+     and invisible when one did not — measured at 53..169, a 3.2x swing, and
+     the base fog at one spot ranged 77..253 on its own. Interpolating
+     toward a fixed target instead lands the same place from either end: a
+     clear patch and an already-fogged one both arrive at TARGET, so the
+     knot reads the same whenever you touch it.
+     It cannot ring for the same reason the others could not — the contours
+     follow g, and g's own boundary is raggeded by noise a few lines up.
+     LERP below 1 leaves some of the base field alive inside the knot, and
+     the fibre term still runs afterwards, so it is not a flat disc. */
+  const PULL_TARGET = 0.85;   /* comfortably past FOG_HI */
+  const PULL_LERP   = 0.88;
   /* ⚠ (4) AND NOTHING MAY VARY THE FIELD'S PHASE ACROSS THE KNOT. The
      deepest of the four, and it only shows after ~30s of holding, so a
      short test cannot find it — mine held for 1.4s and passed. The local
@@ -289,13 +295,9 @@
         const dx = (u - FOCUS_X), dy = (v - FOCUS_Y) * 0.75;
         const near = Math.max(0, 1 - Math.hypot(dx, dy) / FOCUS_R);
         n += near * 0.11;
-        /* the knot gathers by contrast — it darkens vapour that is already
-           there and opens the gaps between, so the level sets stay
-           noise-shaped and no disc appears */
-        if (g > 0) {
-          n = PULL_MID + (n - PULL_MID) * (1 + g * PULL_GAIN);
-          n += g * PULL_MASS * smooth((n - 0.46) / 0.16);
-        }
+        /* the knot pulls the field toward PULL_TARGET — see the note there
+           for why this is a lerp and not an addition */
+        if (g > 0) n += g * PULL_LERP * (PULL_TARGET - n);
 
         const nd = n + (fbmDetail(qx * FIBRE, qy * FIBRE) - 0.5) * BLEED;
         const i = (y * fw + x) * 4;
