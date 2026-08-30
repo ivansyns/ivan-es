@@ -1019,6 +1019,16 @@
         img.src = 'assets/p1/sap.webp';
         img.alt = '';
         img.className = doorVideo.className;
+        // ⭐ DROP THE BLEND ON THIS PATH. mix-blend-mode: lighten is always on
+        // for the <video>, because the mp4 fallback carries a black matte that
+        // has to be knocked out. This WebP has REAL ALPHA — 92% of frame 0 is
+        // non-opaque — so the blend buys nothing here, and it is not free: a
+        // blend mode forces the element off the fast compositing path, so the
+        // browser reads back the backdrop and blends the region on EVERY frame.
+        // That is 12 composites a second on a phone whose CPU Low Power Mode
+        // has deliberately throttled — the one device that reaches this code.
+        // Raising the frame rate would double that cost, not relieve it.
+        img.style.mixBlendMode = 'normal';
         img.id = 'doorVideo';
         img.setAttribute('aria-hidden', 'true');
         doorVideo.replaceWith(img);
