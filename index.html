@@ -993,6 +993,20 @@
     // out against the panel's dark background on every browser.
     // The remaining JS only handles iOS Low Power Mode (autoplay denied)
     // by swapping the <video> for an animated WebP that LPM doesn't block.
+    //
+    // ⭐ THE FALLBACK IS 12fps WITH MOTION BLUR, NOT A HIGHER FRAME RATE.
+    // It used to be 100 frames at 720x894 and read as stuttery. The cause was
+    // not the frame count: every frame was a frozen instant, and 24fps film
+    // looks smooth because of SHUTTER BLUR, not because 24 is enough samples.
+    // Each frame here is the mean of two source frames — a 180-degree shutter —
+    // which is why 12fps reads smoother than the old 10fps did.
+    //   ⚠ The blend is only consistent at INTEGER ratios of the 24fps source.
+    //     24/12 = 2 exactly. At 15fps the ratio is 1.6, so only about half the
+    //     frames would blur, and that unevenness reads as flicker — worse than
+    //     plain stutter. If you re-encode, stay on 12, 8 or 6.
+    // Canvas dropped 720 -> 480 to pay for it: this is only ever seen on a
+    // phone in Low Power Mode, so the extra pixels bought nothing. Net result
+    // is smoother AND 11% smaller (2.07MB -> 1.85MB).
     let doorVideo = document.getElementById('doorVideo');
     if (doorVideo) {
       let lpmFallbackTriggered = false;
@@ -1001,7 +1015,7 @@
         if (lpmFallbackTriggered || !doorVideo) return;
         lpmFallbackTriggered = true;
         const savedScrollY = window.scrollY;
-        const img = new Image(720, 894);
+        const img = new Image(480, 596);   // must match sap.webp's real canvas
         img.src = 'assets/p1/sap.webp';
         img.alt = '';
         img.className = doorVideo.className;
