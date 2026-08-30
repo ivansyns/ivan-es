@@ -648,6 +648,18 @@
     @media (min-width: 1024px) {
       .door-visual-piece { height: clamp(320px, 46vh, 480px); }
     }
+    /* ⭐ THE LOW POWER MODE STILL IS SIZED SEPARATELY, because it is framed
+       differently. The video carries a lot of empty space — the pendant is
+       only 44% of its height — while the still is trimmed to the piece and
+       fills 96%. At the same CSS height the still would therefore render the
+       pendant 2.2x larger by accident. These rules make that deliberate:
+       roughly double the video's apparent pendant on mobile (Ivan's ask,
+       since a still can afford to be bigger), and unchanged on desktop.
+       Two classes, so this beats the rules above regardless of order. */
+    .door-visual-piece.door-visual-still { height: clamp(240px, 36vh, 380px); }
+    @media (min-width: 1024px) {
+      .door-visual-piece.door-visual-still { height: clamp(150px, 21vh, 220px); }
+    }
 
     /* Carved wordmark — same filter recipe as the hero name, baked-in (no animation). */
     .door-visual-mark {
@@ -1025,10 +1037,10 @@
         if (lpmFallbackTriggered || !doorVideo) return;
         lpmFallbackTriggered = true;
         const savedScrollY = window.scrollY;
-        const img = new Image(1292, 1604);   // matches the video's framing exactly
+        const img = new Image(439, 729);   // trimmed to the pendant; see .door-visual-still
         img.src = 'assets/p1/sap-still.webp';
         img.alt = '';
-        img.className = doorVideo.className;
+        img.className = doorVideo.className + ' door-visual-still';
         // ⭐ DROP THE BLEND ON THIS PATH. mix-blend-mode: lighten is always on
         // for the <video>, because the mp4 fallback carries a black matte that
         // has to be knocked out. This WebP has REAL ALPHA — 92% of frame 0 is
