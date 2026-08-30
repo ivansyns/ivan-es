@@ -1003,9 +1003,17 @@
     //   throttles the CPU because THE USER ASKED IT TO. Spending that budget
     //   fighting for an animation works against what they requested, and a
     //   stuttering pendant looks worse than a still one.
-    // So this path shows frame 0 at full 1292x1604 with real alpha — 42KB,
-    // because 92% of the frame is transparent. Sharper than the animation ever
-    // was, and smooth by construction.
+    // So this path shows a single still with real alpha — 40KB, because 92%
+    // of the frame is transparent. Smooth by construction, and sharper than
+    // the animation ever was.
+    //   Source: the LAST frame of e1.mp4 (the Kling render), not a frame of
+    //   sap.webm — that model matches the real pendant more closely. It came
+    //   on pure black, so the key uses alpha recovery: on black C = F*a, so
+    //   F = C/a. Skip that un-multiply and the feathered edge keeps the black
+    //   it was blended with and reads as a dark fringe on a light ground.
+    //   It is composited onto the video's own 1292x1604 frame at the same
+    //   scale and centre (bbox within 3px, centre x identical at 646) so the
+    //   swap does not jump.
     //   ⚠ Do NOT trim the transparent padding. CSS sizes this by height with
     //     width:auto, so the framing must match the video's or the pendant
     //     renders larger here than it does everywhere else.
