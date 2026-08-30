@@ -394,39 +394,68 @@
      pointer-events:none so it never eats a click meant for the page, and the
      rect + alpha test below is a more honest hit test than the box the
      canvas would have given us anyway. */
-  /* ⭐ MOUSE ONLY — AND THE TEST IS THE EVENT, NOT A MEDIA QUERY. On a phone
-     a touch is a scroll gesture nine times out of ten: the browser takes it
-     over and fires pointercancel, so the knot flickered on and died instead
-     of following anything. The obvious gate is
-     (hover: hover) and (pointer: fine) — but that asks the environment to
-     declare a capability, and an environment that declares nothing gets
-     nothing. Headless Chrome reports every one of hover, any-hover,
-     pointer:fine AND pointer:coarse as false, so the gate silently disabled
-     the effect and every measurement read as drift.
-     e.pointerType is evidence rather than a claim: a real mouse says so on
-     each event. It also gets hybrids right, where a media query cannot — a
-     touchscreen laptop keeps the effect under the mouse and ignores
-     fingers. Touch devices never raise PULL, so they also stay on the
-     slower gate and do less work. */
+  /* ⭐ THE TEST IS THE EVENT, NOT A MEDIA QUERY. The obvious gate for "does
+     this device hover" is (hover: hover) and (pointer: fine) — but that asks
+     the environment to DECLARE a capability, and one that declares nothing
+     gets nothing. Headless Chrome reports hover, any-hover, pointer:fine AND
+     pointer:coarse all false, which silently disabled the effect and made
+     every measurement read as drift. e.pointerType is evidence rather than a
+     claim, and it gets hybrids right where a media query cannot: a
+     touchscreen laptop follows the mouse and ignores fingers.
+
+     ⭐ MOUSE HOVERS, FINGER TAPS — and a TAP IS NOT A TOUCH. Tracking
+     pointermove on a phone failed because most touches are the first moment
+     of a scroll: the browser takes the gesture over, fires pointercancel, and
+     the knot flickered on and died. A tap is separable though — the finger
+     barely travels and lifts quickly. Requiring both, and letting
+     pointercancel disarm, turns an unusable signal into a reliable one. The
+     knot then holds for TAP_HOLD and releases itself, since a finger has no
+     equivalent of leaving. */
+  const TAP_SLOP = 12;      /* px of travel still counted as a tap, not a drag */
+  const TAP_TIME = 600;     /* ms; longer than this is a press, not a tap */
+  const TAP_HOLD = 1800;    /* ms the knot lingers after a tap */
+
   if (!reduce) {
-    const aim = (e) => {
-      if (e.pointerType && e.pointerType !== 'mouse') { hover = 0; return; }
+    /* map a client point onto the mark; false if it misses the ink */
+    const aimAt = (cx, cy) => {
       const r = geom.getBoundingClientRect();
-      if (!r.width || !alpha) { hover = 0; return; }
-      const sx = (e.clientX - r.left) / r.width;
-      const sy = (e.clientY - r.top) / r.height;
-      if (sx < 0 || sx > 1 || sy < 0 || sy > 1) { hover = 0; return; }
-      /* ⚠ MIRROR AGAIN. The canvas draws through setTransform(-1,...), so a
-         point on the LEFT of the box is on the RIGHT of the texture. Skip
-         this and the knot appears on the far side of the face. */
+      if (!r.width || !alpha) return false;
+      const sx = (cx - r.left) / r.width, sy = (cy - r.top) / r.height;
+      if (sx < 0 || sx > 1 || sy < 0 || sy > 1) return false;
+      /* ⚠ MIRROR. The canvas draws through setTransform(-1,...), so a point on
+         the LEFT of the box is on the RIGHT of the texture. */
       const u = 1 - sx;
       const ax = (u * aw) | 0, ay = (sy * ah) | 0;
-      if (ax < 0 || ay < 0 || ax >= aw || ay >= ah) { hover = 0; return; }
-      if (alpha[ay * aw + ax] < 40) { hover = 0; return; }   /* off the silhouette */
-      hover = 1; tgtX = u; tgtY = sy;
+      if (ax < 0 || ay < 0 || ax >= aw || ay >= ah) return false;
+      if (alpha[ay * aw + ax] < 40) return false;      /* off the silhouette */
+      tgtX = u; tgtY = sy;
+      return true;
     };
-    /* pointerdown/up/cancel were the touch path and are gone with it */
-    addEventListener('pointermove', aim, { passive: true });
+
+    addEventListener('pointermove', (e) => {
+      if (e.pointerType && e.pointerType !== 'mouse') return;   /* touch below */
+      hover = aimAt(e.clientX, e.clientY) ? 1 : 0;
+    }, { passive: true });
     document.addEventListener('pointerleave', () => { hover = 0; });
+
+    let dx0 = 0, dy0 = 0, dt0 = 0, armed = false, tapTimer = 0;
+    addEventListener('pointerdown', (e) => {
+      if (e.pointerType === 'mouse') return;
+      dx0 = e.clientX; dy0 = e.clientY; dt0 = performance.now(); armed = true;
+    }, { passive: true });
+    addEventListener('pointerup', (e) => {
+      if (e.pointerType === 'mouse' || !armed) return;
+      armed = false;
+      if (Math.hypot(e.clientX - dx0, e.clientY - dy0) > TAP_SLOP) return;  /* a drag */
+      if (performance.now() - dt0 > TAP_TIME) return;                       /* a press */
+      if (!aimAt(e.clientX, e.clientY)) return;
+      /* first tap: appear where the finger landed rather than flying in from
+         wherever the knot last was */
+      if (PULL < 0.05) { PX = tgtX; PY = tgtY; }
+      hover = 1;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => { hover = 0; }, TAP_HOLD);
+    }, { passive: true });
+    addEventListener('pointercancel', () => { armed = false; }, { passive: true });
   }
 })();
