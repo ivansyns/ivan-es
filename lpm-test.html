@@ -1,0 +1,48 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>LPM test — 12fps blur vs 24fps</title>
+<style>
+  :root{--ink:#0A0A0A;--fg:#EDE8E0;--dim:#8A8A8A;--line:#242424}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--fg);
+    font:15px/1.6 -apple-system,system-ui,sans-serif;
+    padding:28px 18px 70px;-webkit-font-smoothing:antialiased}
+  h1{font-size:17px;font-weight:600;margin:0 0 4px}
+  p.sub{color:var(--dim);font-size:13px;margin:0 0 26px}
+  .block{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:22px}
+  .stage{display:grid;place-items:center;padding:18px 10px;
+    background:radial-gradient(120% 90% at 50% 30%,#181818,#0A0A0A 72%)}
+  /* same sizing rule as the real .door-visual-piece, and NO blend */
+  .piece{display:block;height:clamp(260px,40vh,380px);width:auto;max-width:90%;
+    object-fit:contain;mix-blend-mode:normal}
+  .lab{padding:12px 15px;border-top:1px solid var(--line);font-size:13px}
+  .lab b{font-weight:600}
+  .lab span{color:var(--dim)}
+  .note{color:var(--dim);font-size:13px;border-top:1px solid var(--line);padding-top:18px}
+  .note b{color:var(--fg)}
+</style></head><body>
+
+<h1>Low Power Mode — which is smoother?</h1>
+<p class="sub">Turn Low Power Mode ON, then watch each for ~15 seconds. Neither uses a blend mode.</p>
+
+<div class="block">
+  <div class="stage"><img class="piece" src="assets/p1/sap.webp" alt=""></div>
+  <div class="lab"><b>A — 12 fps, motion blur</b><br>
+    <span>480×596 · 120 frames · 1.85 MB · currently shipped</span></div>
+</div>
+
+<div class="block">
+  <div class="stage"><img class="piece" src="assets/p1/sap-24.webp" alt=""></div>
+  <div class="lab"><b>B — 24 fps, no blur</b><br>
+    <span>480×596 · 240 frames · 3.72 MB · twice the decode work</span></div>
+</div>
+
+<div class="note">
+  <b>What we're testing.</b> If B is clearly smoother, the phone has decode headroom and we ship
+  it — it costs 1.9 MB more, below the fold, so it doesn't affect page load.
+  <br><br>
+  If B is the <b>same or worse</b>, the phone is decode-bound rather than frame-starved: Low Power
+  Mode has throttled the CPU and 240 frames is more work than 120, not smoother motion. In that
+  case more frames can never be the fix, and we drop the canvas size instead.
+</div>
+</body></html>
