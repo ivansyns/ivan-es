@@ -48,7 +48,7 @@
       --bone-soft:  rgba(255, 255, 255, 0.88);
       --bone-faint: rgba(255, 255, 255, 0.42);
       --bone-line:  rgba(255, 255, 255, 0.10);
-      --accent:       #7FA6D9;
+      --accent:       #FFDE32;
       /* Availability reads at a glance, so it is carried by colour, not by the
          words alone: green for sale, red for not. Muted rather than signal-bright
          — these sit on a jewellery page, not a dashboard. Both clear 6.4:1 on
@@ -75,7 +75,7 @@
                       0 1px 0 rgba(0, 0, 0, 0.62),
                       0 2px 3px rgba(0, 0, 0, 0.40);
       --accent-lift: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55));
-      --accent-soft:  rgba(127, 166, 217, 0.88);
+      --accent-soft:  rgba(255, 222, 50, 0.88);
 
       --f-display: 'Cinzel', 'Trajan Pro', Georgia, serif;
       --f-body: 'Karla',system-ui,sans-serif;
@@ -469,7 +469,11 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      padding: clamp(120px, 18vh, 200px) 24px clamp(60px, 10vh, 120px);
+      /* Bottom matches the top: the hero opened with a generous margin above the
+         name and closed with half of it, which made the column look like it had
+         run out of page rather than ended. The fixed legal strip sits in that
+         space too, so the last element needs to clear it. */
+      padding: clamp(120px, 18vh, 200px) 24px clamp(120px, 18vh, 200px);
       /* isolation removed — see .door-visual.hero-door below. */
       /* Mobile: the gradient lives on the panel itself (the wrapper has display:contents). */
       background:
@@ -694,7 +698,10 @@
       position: relative;
       order: 3;
       width: min(88vw, 420px);
-      margin-top: clamp(54px, 9vh, 104px);
+      /* The gap from the bust. They stack in one centred column on mobile, so
+         too little air here reads as one object with two halves rather than
+         the mark and then a piece. */
+      margin-top: clamp(88px, 14vh, 150px);
     }
     @media (min-width: 1024px) {
       .door-visual.hero-door {
@@ -831,7 +838,7 @@
       .lang-switcher { display: none; }
     }
     @media (max-width: 540px) {
-      .hero { padding: 96px 18px 90px; }
+      .hero { padding: 96px 18px 124px; }  /* bottom = the 124px the name gets at the top */
       .hero-plate { padding: 28px 12px; }
       .hero-frame { gap: 32px; }
       .door { min-height: 320px; padding: 32px 26px; }
@@ -1530,7 +1537,12 @@
     });
   }
 </script>
-  <!-- Legal strip — see .legal-strip in the stylesheet for why it is fixed. -->
+  <!-- ⚠ aviso-legal.html and privacidad.html are NOT in this deploy. They were
+       written but the LSSI art.10 fields (legal name, NIF, registered address)
+       are still placeholders, so they were pulled rather than published half
+       done — an incomplete legal notice is worse than a missing one. The drafts
+       are in WEB/_masters/ivan-es/legal-draft/; drop them back in when the
+       details are confirmed. These two links 404 until then, deliberately. -->
   <div class="legal-strip">
     <span>&copy; Iván Alzamora</span>
     <i>&middot;</i>

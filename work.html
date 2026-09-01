@@ -44,7 +44,7 @@
       --bone-soft:  rgba(255, 255, 255, 0.88);
       --bone-faint: rgba(255, 255, 255, 0.42);
       --bone-line:  rgba(255, 255, 255, 0.10);
-      --accent:       #7FA6D9;
+      --accent:       #FFDE32;
       /* Availability reads at a glance, so it is carried by colour, not by the
          words alone: green for sale, red for not. Muted rather than signal-bright
          — these sit on a jewellery page, not a dashboard. Both clear 6.4:1 on
@@ -63,7 +63,7 @@
                       0 1px 0 rgba(0, 0, 0, 0.62),
                       0 2px 3px rgba(0, 0, 0, 0.40);
       --accent-lift: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55));
-      --accent-soft:  rgba(127, 166, 217, 0.88);
+      --accent-soft:  rgba(255, 222, 50, 0.88);
 
       --f-display: 'Cinzel', 'Trajan Pro', Georgia, serif;
       --f-body: 'Karla',system-ui,sans-serif;
@@ -383,7 +383,7 @@
       gap: 20px;
       padding: clamp(32px, 5vw, 48px) clamp(24px, 4vw, 36px);
       background:
-        radial-gradient(ellipse 80% 60% at 50% 30%, rgba(127, 166, 217, 0.05) 0%, transparent 70%),
+        radial-gradient(ellipse 80% 60% at 50% 30%, rgba(255, 222, 50, 0.05) 0%, transparent 70%),
         linear-gradient(160deg, var(--ink-card) 0%, var(--ink-2) 100%);
       border: 1px solid var(--bone-line);
       transition: border-color 600ms var(--ease-out),
@@ -392,7 +392,7 @@
     }
     .contact-card:hover {
       transform: translateY(-3px);
-      border-color: rgba(127, 166, 217, 0.32);
+      border-color: rgba(255, 222, 50, 0.32);
     }
 
     /* No circle wrapper — the brand icons carry their own colored gradients. */
@@ -724,7 +724,12 @@
     if (document.readyState === 'complete') revealCardIcons();
     else window.addEventListener('load', revealCardIcons);
   </script>
-  <!-- Legal strip — see .legal-strip in the stylesheet for why it is fixed. -->
+  <!-- ⚠ aviso-legal.html and privacidad.html are NOT in this deploy. They were
+       written but the LSSI art.10 fields (legal name, NIF, registered address)
+       are still placeholders, so they were pulled rather than published half
+       done — an incomplete legal notice is worse than a missing one. The drafts
+       are in WEB/_masters/ivan-es/legal-draft/; drop them back in when the
+       details are confirmed. These two links 404 until then, deliberately. -->
   <div class="legal-strip">
     <span>&copy; Iván Alzamora</span>
     <i>&middot;</i>

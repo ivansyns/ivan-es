@@ -76,7 +76,7 @@
       --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 280 280' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.10'/%3E%3C/svg%3E");
       --bone: #FFFFFF; --bone-soft: rgba(255, 255, 255, 0.88);
       --bone-faint: rgba(255, 255, 255, .42); --bone-line: rgba(255, 255, 255, .10);
-      --accent: #7FA6D9;
+      --accent: #FFDE32;
       /* Availability reads at a glance, so it is carried by colour, not by the
          words alone: green for sale, red for not. Muted rather than signal-bright
          — these sit on a jewellery page, not a dashboard. Both clear 6.4:1 on
@@ -94,7 +94,7 @@
       --accent-raise: 0 -1px 0 rgba(255, 255, 255, 0.16),
                       0 1px 0 rgba(0, 0, 0, 0.62),
                       0 2px 3px rgba(0, 0, 0, 0.40);
-      --accent-lift: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55)); --accent-soft: rgba(127, 166, 217, 0.88); --accent-line: rgba(127, 166, 217, .28);
+      --accent-lift: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55)); --accent-soft: rgba(255, 222, 50, 0.88); --accent-line: rgba(255, 222, 50, .28);
       --f-display: 'Cinzel','Trajan Pro',Georgia,serif;
       --f-body: 'Karla',system-ui,sans-serif;
       --f-mono: 'JetBrains Mono',ui-monospace,monospace;
@@ -939,11 +939,11 @@
     }
     .cta-btn:hover {
       border-color: var(--accent);
-      background: rgba(127, 166, 217, 0.04);
+      background: rgba(255, 222, 50, 0.04);
     }
     .cta-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
     .cta-btn--primary { border-color: var(--accent-line); }
-    .cta-btn--primary:hover { background: rgba(127, 166, 217, 0.08); }
+    .cta-btn--primary:hover { background: rgba(255, 222, 50, 0.08); }
 
     /* ─── REVEAL ─── */
     .reveal {
@@ -1882,7 +1882,12 @@
       }, { passive: true });
     })();
   </script>
-  <!-- Legal strip — see .legal-strip in the stylesheet for why it is fixed. -->
+  <!-- ⚠ aviso-legal.html and privacidad.html are NOT in this deploy. They were
+       written but the LSSI art.10 fields (legal name, NIF, registered address)
+       are still placeholders, so they were pulled rather than published half
+       done — an incomplete legal notice is worse than a missing one. The drafts
+       are in WEB/_masters/ivan-es/legal-draft/; drop them back in when the
+       details are confirmed. These two links 404 until then, deliberately. -->
   <div class="legal-strip">
     <span>&copy; Iván Alzamora</span>
     <i>&middot;</i>

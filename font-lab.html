@@ -26,7 +26,7 @@
   :root{
     --plate:#161411; --bone:#FFFFFF; --soft:rgba(255,255,255,.88);
     --faint:rgba(255,255,255,.62); --line:rgba(255,255,255,.14);
-    --accent:#7FA6D9; --ok:#7BD88F;
+    --accent:#FFDE32; --ok:#7BD88F;
     --grain:url("data:image/svg+xml,%3Csvg viewBox='0 0 280 280' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.10'/%3E%3C/svg%3E");
   }
   *{box-sizing:border-box}
@@ -39,7 +39,7 @@
 
   .grid{padding:26px clamp(20px,4vw,48px) 90px;display:flex;flex-direction:column;gap:22px}
   .card{border:1px solid var(--line);padding:26px clamp(20px,2.6vw,34px) 30px;position:relative}
-  .card.is-current{border-color:rgba(127,166,217,.5)}
+  .card.is-current{border-color:rgba(255, 222, 50, .5)}
   .tag{position:absolute;top:-9px;left:18px;background:var(--plate);padding:0 9px;
        font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint)}
   .card.is-current .tag{color:var(--accent)}

@@ -25,7 +25,7 @@
     --ink:#0A0A0A; --plate:#1b1a1c;
     --bone:#F5F0E8; --bone-soft:#C9C3B8; --bone-faint:#7A756D;
     --line:rgba(245,240,232,.14);
-    --accent:#7FA6D9;
+    --accent:#FFDE32;
     --f-mono:'JetBrains Mono',monospace; --f-display:'Cinzel',Georgia,serif;
     --f-serif:'Cormorant Garamond',Georgia,serif;
   }
@@ -119,7 +119,7 @@
     <div class="panel">
       <h2>Candidates</h2>
       <div class="sw" id="sw"></div>
-      <label>Or pick freely<input type="color" id="pick" value="#7FA6D9"></label>
+      <label>Or pick freely<input type="color" id="pick" value="#FFDE32"></label>
     </div>
     <div class="panel">
       <h2>Checks</h2>
@@ -148,7 +148,7 @@ const STONES=[['yellow sapphire',40],['ruby',333],['aquamarine',182]];
 const CAND=[
   ['gold — current','#C9A84C'],['platinum','#C9C3B8'],
   ['sapphire blue','#5B8DEF'],['cobalt (fog tint)','#0047AB'],
-  ['steel blue — SHIPPED','#7FA6D9'],['violet','#8B6FD1'],
+  ['steel blue — SHIPPED','#FFDE32'],['violet','#8B6FD1'],
   ['crimson','#C0392B'],['deep crimson','#B3123B'],
 ];
 
@@ -204,7 +204,7 @@ CAND.forEach(([n,h])=>{
   $('sw').appendChild(b);
 });
 $('pick').addEventListener('input',e=>apply(e.target.value));
-apply('#7FA6D9');   // the shipped accent — keep in step with --accent in the pages
+apply('#FFDE32');   // the shipped accent — keep in step with --accent in the pages
 </script>
 </body>
 </html>
