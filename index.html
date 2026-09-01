@@ -130,7 +130,13 @@
       min-height: 100vh;
       min-height: 100dvh;
       z-index: var(--z, 1);
-      isolation: isolate;
+      /* ⚠ NO isolation HERE, unlike the other pages. `isolation: isolate` exists
+         on a sticky stack so panels do not blend into each other — but this page
+         has exactly one panel, so it isolates nothing and costs something: it
+         forms a stacking context, which cuts the doorway's
+         mix-blend-mode: lighten off from the ground painted above it and leaves
+         the clip's black matte rendering as a black box.
+         Restore it the moment a second panel comes back. */
     }
     /* Default background ensures each non-hero panel covers the panel beneath
        it during the sticky-stack. Hero keeps its own radial-glow gradient. */
@@ -164,11 +170,32 @@
         flex-wrap: nowrap;
         height: 100%;
         width: max-content;
-        will-change: transform;
+        /* ⚠ NO will-change HERE. This page has a single panel and the horizontal
+           scroll bails out, so the track never translates and the hint buys
+           nothing — but `will-change: transform` creates a STACKING CONTEXT even
+           when no transform is applied, which isolates the doorway's
+           mix-blend-mode: lighten from the ground painted on .hpanels above it.
+           The clip's black matte then has nothing to lose to and renders as a
+           black box. Restore this only alongside a second panel, and give the
+           doorway its own painted plate if you do. */
       }
       /* Both panels become transparent on desktop so the .hpanels backdrop shows
          through unbroken — no seam between hero and doorway. */
-      .hpanels .hero,
+      /* ⚠ THE HERO PAINTS ITS OWN GROUND, and must. .hero carries
+         `isolation: isolate`, so the doorway's mix-blend-mode: lighten can only
+         reach a backdrop painted INSIDE .hero — a transparent hero leaves the
+         clip's black matte with nothing to lose to, and it renders as a black
+         box. Painting here is safe because this page has one panel and the track
+         never translates, so .hero and .hpanels align exactly. */
+      .hpanels .hero {
+        background:
+          var(--grain),
+          radial-gradient(ellipse 60% 70% at 50% 32% in oklab, rgba(50, 42, 28, 0.6) 0%, transparent 70%),
+          linear-gradient(180deg in oklab, var(--ink-2) 0%, var(--ink) 100%);
+        background-blend-mode: screen, normal, normal;
+        background-size: 406px 406px, auto, auto;
+        background-repeat: repeat, no-repeat, no-repeat;
+      }
       .hpanels .doorways.panel {
         background: transparent;
       }
@@ -443,7 +470,7 @@
       align-items: center;
       justify-content: flex-start;
       padding: clamp(120px, 18vh, 200px) 24px clamp(60px, 10vh, 120px);
-      isolation: isolate;
+      /* isolation removed — see .door-visual.hero-door below. */
       /* Mobile: the gradient lives on the panel itself (the wrapper has display:contents). */
       background:
         var(--grain),
@@ -655,12 +682,19 @@
     /* ⚠ Written as .door-visual.hero-door, not .hero-door: `.door-visual` below
        sets width: 100% and is declared LATER, so at equal specificity it wins,
        which leaves the door anchored but stretched across the viewport. */
+    /* ⚠ NO z-index ON THIS ELEMENT, and .hero carries no `isolation` either.
+       The clip inside is opaque with a black matte knocked out by
+       mix-blend-mode: lighten, and a blend can only reach a backdrop painted
+       inside its own stacking context. `position` + `z-index` forms one, and
+       this element paints nothing — so the matte had nothing to lose to and
+       rendered as a black box. DOM order already puts the door above the bust;
+       they do not overlap, so the z-index bought nothing.
+       The ground it blends against is painted on .hpanels / .hero. */
     .door-visual.hero-door {
       position: relative;
       order: 3;
       width: min(88vw, 420px);
       margin-top: clamp(54px, 9vh, 104px);
-      z-index: 2;
     }
     @media (min-width: 1024px) {
       .door-visual.hero-door {
@@ -1050,19 +1084,29 @@
          (2026-09-01) and reverted: behind a scroll gesture the second half of the
          page is effectively invisible, and this page has to say what it is in one
          screen. Web work lives in the nav instead.
-         Three sources, ordered by browser-native alpha support:
-           1. equinoccio.mov  — HEVC alpha (Safari macOS + iOS)
-           2. equinoccio.webm — VP9 alpha (Chrome / Firefox / Edge)
-           3. equinoccio.mp4  — H.264 with black matte, knocked out by the
-              always-on mix-blend-mode: lighten, a no-op on the alpha formats.
-         All three come from _pipeline/alpha-video.py. The .mov CANNOT be produced
-         or verified with ffmpeg — read that file's docstring before regenerating. -->
+         OPAQUE, black matte, knocked out by the always-on mix-blend-mode:
+         lighten — the same build p1's hero uses, same crop, same frames.
+         ⚠ THIS USED TO BE A REAL-ALPHA .mov FOR SAFARI, AND WAS REVERTED.
+         HEVC alpha stores the alpha as a second coded layer, compressed at the
+         same crf as the picture. On a mask that is almost entirely 0 or 255 that
+         quantisation rings at the edges, and the ringing shows on iOS as a grey
+         halo hugging the piece — partially-opaque pixels where alpha should be
+         zero. Raising the quality only makes the halo fainter and the file
+         bigger; it cannot remove it, because the artefact is the codec.
+         A matte has no alpha to quantise. `lighten` takes a per-channel max, so
+         black loses to the page ground and nothing is left to ring. It also
+         works in every browser rather than Safari only, which is the other
+         reason the rest of the site already does it this way.
+         ⚠ The blend needs a PAINTED backdrop inside its own stacking context.
+         That holds here only because the index is a single panel and the
+         horizontal-scroll guard bails out, so nothing above applies a transform.
+         Add a second panel back and the track transforms, the blend isolates,
+         and the matte returns as a black box. -->
     <a href="aromazla.html" class="door-visual hero-door" aria-label="Enter Aromazla — jewellery collection">
       <video disablepictureinpicture class="door-visual-piece" id="doorVideo" loop muted playsinline
-             preload="metadata" aria-hidden="true" poster="assets/p1/equinoccio-poster.webp">
-        <source src="assets/p1/equinoccio.mov"  type="video/quicktime">
-        <source src="assets/p1/equinoccio.webm" type="video/webm">
-        <source src="assets/p1/equinoccio.mp4"  type="video/mp4">
+             preload="metadata" aria-hidden="true" poster="assets/p1/equinoccio-hero-poster.webp">
+        <source src="assets/p1/equinoccio-hero.webm" type="video/webm">
+        <source src="assets/p1/equinoccio-hero.mp4"  type="video/mp4">
       </video>
 
       <div class="door-visual-mark" aria-label="Aromazla">
@@ -1136,7 +1180,7 @@
     // So this path shows a single still with real alpha — 40KB, because 92%
     // of the frame is transparent. Smooth by construction, and sharper than
     // the animation ever was.
-    //   Source: FRAME 0 OF THE VIDEO ITSELF (equinoccio-poster.webp), produced
+    //   Source: FRAME 0 OF THE VIDEO ITSELF (equinoccio-hero-poster.webp), produced
     //   by the same _pipeline/alpha-video.py run — same crop, same key, same
     //   un-premultiply. That is the whole point: it is the identical framing,
     //   so the still needs no sizing rules of its own and the swap cannot jump.
@@ -1160,10 +1204,15 @@
         lpmFallbackTriggered = true;
         const savedScrollY = window.scrollY;
         const img = new Image(424, 730);    // frame 0 of the video, same framing
-        img.src = 'assets/p1/equinoccio-poster.webp';
+        img.src = 'assets/p1/equinoccio-hero-poster.webp';
         img.alt = '';
         img.className = doorVideo.className + ' door-visual-still';
-        // ⭐ DROP THE BLEND ON THIS PATH. mix-blend-mode: lighten is always on
+        // ⭐ KEEP THE BLEND ON THIS PATH. It used to be dropped here, because the
+        // still was a real-alpha WebP and the blend bought nothing. The still is
+        // now frame 0 of the MATTE build, so it carries a black ground that has
+        // to be knocked out exactly like the video's. Leaving it 'normal' would
+        // put a black rectangle on the page. The note below is why it was ever
+        // dropped: mix-blend-mode: lighten is always on
         // for the <video>, because the mp4 fallback carries a black matte that
         // has to be knocked out. This WebP has REAL ALPHA — 92% of frame 0 is
         // non-opaque — so the blend buys nothing here, and it is not free: a
@@ -1172,7 +1221,7 @@
         // That is 12 composites a second on a phone whose CPU Low Power Mode
         // has deliberately throttled — the one device that reaches this code.
         // Raising the frame rate would double that cost, not relieve it.
-        img.style.mixBlendMode = 'normal';
+        img.style.mixBlendMode = 'lighten';
         // .door-visual-piece is opacity: 0 in CSS (the timeline fades the video
         // in via an inline style, which className does not carry over), so the
         // still has to be made visible explicitly or the swap goes blank.
