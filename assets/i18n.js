@@ -357,7 +357,7 @@
       'p2.scroll.cue': 'desliza',
       'p2.story.eyebrow': 'Historia',
       'p2.story.line1': 'La lágrima, alquimizada — el peso que un día fue carga resultó valer más que el oro.',
-      'p2.story.line2': 'Colour arena, con la forma del Ojo del Sáhara, donde la belleza se encuentra en las condiciones más duras. Llamado <em>Lacrimosa</em> por el réquiem que Mozart nunca terminó — el silencio que quedó tras alcanzar la música su armonía más pura.',
+      'p2.story.line2': 'Color arena, con la forma del Ojo del Sáhara, donde la belleza se encuentra en las condiciones más duras. Llamado <em>Lacrimosa</em> por el réquiem que Mozart nunca terminó — el silencio que quedó tras alcanzar la música su armonía más pura.',
       'p2.story.line3': '<em>Pieza única.</em>',
       'p2.cert.eyebrow': 'Certificado',
       'p2.cert.aria': 'Informe IGI — Diamante Natural 0,90 ct',

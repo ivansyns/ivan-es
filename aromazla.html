@@ -74,7 +74,7 @@
       --accent-soft:  rgba(255, 222, 50, 0.88);
 
       --f-display: 'Cinzel', 'Trajan Pro', Georgia, serif;
-      --f-body: 'Karla',system-ui,sans-serif;
+      --f-body: 'JetBrains Mono', ui-monospace, monospace;
       --f-mono:    'JetBrains Mono', ui-monospace, monospace;
 
       --ease-out:  cubic-bezier(0.22, 1, 0.36, 1);
@@ -544,6 +544,14 @@
       background: currentColor; flex: none;
     }
     .piece-avail--available { color: var(--status-available); }
+    /* 0.56rem was set for the three-up mobile card and never revisited; on
+       desktop it came out smaller than the piece name it sits opposite, so the
+       one fact a buyer needs was the quietest thing on the card. The dot grows
+       with it so the pair stays in proportion. */
+    @media (min-width: 1024px) {
+      .piece-avail { font-size: 0.72rem; gap: 10px; }
+      .piece-avail::before { width: 6px; height: 6px; }
+    }
     /* Lab mark, top-right of every card. Reversed to a single white monochrome
        so three different house styles read as one set — the IGE seal is
        blue-and-gold at source and would otherwise be the most saturated thing
