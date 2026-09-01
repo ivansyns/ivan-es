@@ -32,17 +32,69 @@
 
   <link rel="icon" type="image/png" href="assets/aromazla-favicon.png" />
   <link rel="apple-touch-icon" href="assets/aromazla-favicon.png" />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/fonts.css" />
 
   <style>
     :root {
       --ink: #0A0A0A; --ink-2: #111111; --ink-3: #15140F; --ink-card: #18171A;
-      --bone: #F5F0E8; --bone-soft: rgba(245,240,232,.72);
-      --bone-faint: rgba(245,240,232,.42); --bone-line: rgba(245,240,232,.10);
-      --gold: #C9A84C; --gold-soft: rgba(201,168,76,.72); --gold-line: rgba(201,168,76,.28);
+      /* ⭐ THE PIECE PAGES' GROUND — flat, and flat on purpose.
+         The hero clip is opaque and relies on mix-blend-mode: lighten, and a
+         blend can only reach a backdrop painted INSIDE its own stacking context.
+         .hero-media and .hpanels-track both carry transforms, so each forms one;
+         the plate therefore has to paint its own ground. For the plate's edge to
+         disappear, that ground must equal the page's ground AT EVERY POINT — which
+         a gradient cannot do, since the plate would sample only one slice of it.
+         So both are the same flat colour plus the same grain, and the container
+         stops existing optically while the blend still has something to work
+         against. Measured before the change: plate #1e1d1e, page beside it
+         #201d19 — already within 3 levels, so the tell was the border and the
+         texture, not the colour.
+         The grain is TILED at 300px, not stretched — stretching a 280x280 noise
+         sprite across a 1440-wide page turns each noise pixel into ~5px of coarse
+         blotching, and tiling is also the only way the page and the plate can
+         agree exactly, since they are different sizes.
+         It is now the SAME GRAIN AS THE AROMAZLA PIECE CARDS, which is where
+         Ivan liked it: baseFrequency 0.85, 2 octaves, 20% strength. The card
+         gets that look because .piece::before has no background-size, so an
+         SVG carrying only a viewBox stretches to the element — 406x507 — and
+         the features land large. Tiling the same sprite at 240px was the
+         "television static" attempt; the sprite was never the problem, the
+         SCALE was. So the size here is the card's own box, squash and all.
+         (Tiled rather than stretched, because the page and the plate are
+         different sizes and a stretched sprite could never match across both —
+         which is what makes the plate's edge reappear.) */
+      /* Warm-leaning and DARK on purpose. It was #1b1a1c — near-neutral but
+         B28 over R27, i.e. very slightly cool — and `mix-blend-mode: lighten`
+         replaces every pixel of the piece that is darker than the plate with the
+         plate's own colour. On a rose-gold ring that repainted the whole shadow
+         range faintly blue. Warm now (R22 G20 B17), and darker, so far fewer of
+         the piece's pixels are overridden at all.
+         The tone also brings these pages down to the rest of the site: they were
+         reading at 47 against ~20 everywhere else, which made walking from
+         aromazla into a piece feel like the lights came up. */
+      --plate: #161411;
+      --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 280 280' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.10'/%3E%3C/svg%3E");
+      --bone: #FFFFFF; --bone-soft: rgba(255, 255, 255, 0.88);
+      --bone-faint: rgba(255, 255, 255, .42); --bone-line: rgba(255, 255, 255, .10);
+      --accent: #7FA6D9;
+      /* Availability reads at a glance, so it is carried by colour, not by the
+         words alone: green for sale, red for not. Muted rather than signal-bright
+         — these sit on a jewellery page, not a dashboard. Both clear 6.4:1 on
+         the darkest ground the site uses, so the small mono type still holds. */
+      --status-available: #7BD88F;
+      --status-unavailable: #E8796A;
+      /* ── THE ACCENT SITS ON TOP OF THE PAGE, NOT IN IT ──────────────────
+         A highlight along the top edge and a shadow under it, so the light
+         reads as coming from above-left and the mark casts downward — the
+         inverse of the engraved treatment on the hero name, where the shadow
+         is inside the glyph. Kept small: past about 2px of blur it stops
+         looking raised and starts looking blurred.
+         --accent-raise is for text, --accent-lift for SVG, which text-shadow
+         cannot reach. */
+      --accent-raise: 0 -1px 0 rgba(255, 255, 255, 0.16),
+                      0 1px 0 rgba(0, 0, 0, 0.62),
+                      0 2px 3px rgba(0, 0, 0, 0.40);
+      --accent-lift: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55)); --accent-soft: rgba(127, 166, 217, 0.88); --accent-line: rgba(127, 166, 217, .28);
       --f-display: 'Cinzel','Trajan Pro',Georgia,serif;
       --f-body: 'Inter',system-ui,sans-serif;
       --f-mono: 'JetBrains Mono',ui-monospace,monospace;
@@ -59,7 +111,7 @@
     }
     a { color: inherit; text-decoration: none; }
     img, svg { display: block; max-width: 100%; }
-    ::selection { background: var(--gold); color: var(--ink); }
+    ::selection { background: var(--accent); color: var(--ink); }
     body::after {
       content: ''; position: fixed; inset: 0;
       pointer-events: none; z-index: 90; opacity: .05;
@@ -84,10 +136,15 @@
     }
     .nav-links a::after {
       content: ''; position: absolute; left: 0; right: 0; bottom: -2px;
-      height: 1px; background: var(--gold);
+      height: 1px; background: var(--accent);
       transform: scaleX(0); transform-origin: left;
       transition: transform 360ms var(--ease-out);
     }
+    /* The featured item is the one a visitor who came for jewellery would not
+       think to look for, so its rule is always drawn rather than on hover. */
+    .nav-links a.is-featured { color: var(--accent); }
+    .nav-links a.is-featured::after { background: var(--accent); transform: scaleX(1); }
+    .menu-sheet a.is-featured { color: var(--accent); }
     .nav-links a:hover { color: var(--bone); }
     .nav-links a:hover::after { transform: scaleX(1); }
     .nav-links a.active { color: var(--bone); }
@@ -98,8 +155,9 @@
       transform: translateY(-50%);
       display: inline-flex; align-items: center; justify-content: center;
       width: 36px; height: 36px; padding: 4px;
-      color: var(--gold); background: transparent; border: 0;
+      color: var(--accent); background: transparent; border: 0;
       transition: color 240ms var(--ease-out);
+      filter: var(--accent-lift);
     }
     .nav-back svg {
       width: 22px; height: 22px; display: block; overflow: visible;
@@ -115,7 +173,8 @@
     .nav-card {
       display: none; width: 36px; height: 36px;
       cursor: pointer; background: transparent; border: 0; padding: 4px;
-      color: var(--gold);
+      color: var(--accent);
+      filter: var(--accent-lift);
     }
     .nav-card svg { display: block; width: 100%; height: 100%; overflow: visible; }
     .nav-card line {
@@ -136,10 +195,10 @@
     }
     .menu-sheet.open { opacity: 1; transform: translateY(0); pointer-events: auto; }
     .menu-sheet a {
-      font-family: var(--f-display); font-size: clamp(1.7rem, 7vw, 2.4rem);
+      font-family: var(--f-mono); font-size: clamp(1.7rem, 7vw, 2.4rem);
       font-weight: 500; letter-spacing: .18em; color: var(--bone); text-transform: uppercase;
     }
-    .menu-sheet a:hover { color: var(--gold); }
+    .menu-sheet a:hover { color: var(--accent); }
     .menu-sheet__icons { display: flex; gap: 36px; margin-top: 40px; }
     .menu-sheet__icons a {
       display: inline-flex; align-items: center; justify-content: center;
@@ -185,8 +244,8 @@
       color: var(--bone-soft); text-align: left; border-radius: 4px;
       transition: color 240ms var(--ease-out), background 240ms var(--ease-out);
     }
-    .lang-dropdown button:hover { color: var(--bone); background: rgba(245, 240, 232, 0.04); }
-    .lang-dropdown button[aria-current="true"] { color: var(--gold); }
+    .lang-dropdown button:hover { color: var(--bone); background: rgba(255, 255, 255, 0.04); }
+    .lang-dropdown button[aria-current="true"] { color: var(--accent); }
     .menu-sheet__lang { display: flex; gap: 14px; margin-bottom: 8px; }
     .menu-sheet__lang button {
       display: inline-flex; align-items: center; gap: 8px;
@@ -196,7 +255,7 @@
       letter-spacing: 0.22em; text-transform: uppercase; color: var(--bone-soft);
       transition: color 240ms var(--ease-out), border-color 240ms var(--ease-out);
     }
-    .menu-sheet__lang button[aria-current="true"] { color: var(--gold); border-color: var(--gold); }
+    .menu-sheet__lang button[aria-current="true"] { color: var(--accent); border-color: var(--accent); }
 
     /* ─── PANEL STACK (mobile) / HORIZONTAL SCROLL (desktop ≥1024px) ───
        Mirrors aromazla.html: panels stack vertically below 1024px and lay
@@ -205,7 +264,11 @@
     .stack .panel {
       position: relative;
       min-height: 100vh; min-height: 100dvh;
-      background: var(--ink);
+      background-color: var(--plate);
+      background-image: var(--grain);
+      background-blend-mode: screen;
+      background-size: 406px 406px;
+      background-repeat: repeat;
       max-width: none; margin: 0;
       padding: clamp(120px, 16vh, 200px) clamp(20px, 4vw, 48px) clamp(64px, 8vh, 96px);
       display: flex; align-items: center; justify-content: center;
@@ -219,9 +282,13 @@
         position: relative;
         width: 100%; height: 100vh;
         overflow: hidden;
-        background:
-          radial-gradient(ellipse 60% 70% at 50% 32% in oklab, rgba(50, 42, 28, 0.6) 0%, transparent 70%),
-          linear-gradient(180deg in oklab, var(--ink-2) 0%, var(--ink) 100%);
+        background-color: var(--plate);
+        background-image: var(--grain);
+        background-blend-mode: screen;
+        background-size: 406px 406px;
+        background-repeat: repeat;
+      background-size: 406px 406px;
+      background-repeat: repeat;
       }
       .hpanels-track {
         display: flex; flex-wrap: nowrap;
@@ -242,11 +309,13 @@
     .eyebrow {
       font-family: var(--f-mono); font-size: .72rem;
       letter-spacing: .42em; text-transform: uppercase;
-      color: var(--gold);
+      color: var(--accent);
       display: inline-flex; align-items: center; gap: 14px;
+      text-shadow: var(--accent-raise);
+      font-weight: 500;
     }
     .eyebrow::before {
-      content: ''; display: block; width: 32px; height: 1px; background: var(--gold);
+      content: ''; display: block; width: 32px; height: 1px; background: var(--accent);
     }
 
     /* ─── PANEL 1 — HERO ─── */
@@ -277,6 +346,11 @@
       .panel--hero .hero-copy { align-items: center; text-align: center; }
       .panel--hero .hero-title { margin-inline: auto; }
       .panel--hero .hero-title svg { display: block; margin: 0 auto; }
+      /* Mobile centres the whole copy block, so the title centres with it.
+         translateX(360px) is half the 720-unit viewBox — with the anchor back
+         at `middle` that puts the text's centre on the viewBox's centre, and it
+         needs no per-page constant. */
+      .panel--hero .hero-title text { text-anchor: middle; transform: translateX(360px); }
       .panel--hero .hero-lede { max-width: 36ch; margin-inline: auto; }
     }
 
@@ -307,18 +381,19 @@
       pointer-events: none;
       display: block;
     }
-    .hero-thumb:hover { border-color: var(--gold-soft); transform: translateY(-2px); }
-    .hero-thumb:focus-visible { border-color: var(--gold); outline: 1px solid var(--gold); outline-offset: 2px; }
+    .hero-thumb:hover { border-color: var(--accent-soft); transform: translateY(-2px); }
+    .hero-thumb:focus-visible { border-color: var(--accent); outline: 1px solid var(--accent); outline-offset: 2px; }
     .hero-thumb-tag {
       position: absolute;
       bottom: 6px; right: 6px;
       width: 20px; height: 20px;
       border-radius: 50%;
       background: rgba(10, 10, 10, 0.7);
-      color: var(--gold);
+      color: var(--accent);
       display: grid;
       place-items: center;
       pointer-events: none;
+      filter: var(--accent-lift);
     }
     .hero-thumb-tag svg { width: 10px; height: 10px; fill: currentColor; }
     @media (max-width: 900px) {
@@ -370,13 +445,14 @@
       font-size: 1.3rem; letter-spacing: 0.04em;
       color: var(--bone); font-weight: 500; text-transform: none;
     }
-    .lb-name .lb-sep { width: 24px; height: 1px; background: var(--gold-soft); }
-    .lb-pos { font-variant-numeric: tabular-nums; color: var(--gold-soft); }
+    .lb-name .lb-sep { width: 24px; height: 1px; background: var(--accent-soft); }
+    .lb-pos { font-variant-numeric: tabular-nums; color: var(--accent-soft); }
     .lb-close {
       width: 36px; height: 36px;
       cursor: pointer; background: transparent; border: 0; padding: 4px;
-      color: var(--gold);
+      color: var(--accent);
       transition: color 220ms var(--ease-out);
+      filter: var(--accent-lift);
     }
     .lb-close:hover { color: var(--bone); }
     .lb-close svg { display: block; width: 100%; height: 100%; overflow: visible; }
@@ -412,17 +488,18 @@
       transform: translateY(-50%);
       width: 56px; height: 56px;
       border-radius: 50%;
-      border: 1px solid var(--gold-line);
+      border: 1px solid var(--accent-line);
       background: rgba(10, 10, 10, 0.45);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
-      cursor: pointer; color: var(--gold);
+      cursor: pointer; color: var(--accent);
       display: grid; place-items: center;
       transition: transform 220ms var(--ease-out), border-color 220ms var(--ease-out), color 220ms var(--ease-out), opacity 220ms var(--ease-out);
+      filter: var(--accent-lift);
     }
-    .lb-arrow:hover { transform: translateY(-50%) scale(1.06); border-color: var(--gold); color: var(--bone); }
+    .lb-arrow:hover { transform: translateY(-50%) scale(1.06); border-color: var(--accent); color: var(--bone); }
     .lb-arrow:disabled { opacity: 0.25; cursor: default; }
-    .lb-arrow:disabled:hover { transform: translateY(-50%); border-color: var(--gold-line); color: var(--gold); }
+    .lb-arrow:disabled:hover { transform: translateY(-50%); border-color: var(--accent-line); color: var(--accent); }
     .lb-arrow svg {
       width: 18px; height: 18px; stroke: currentColor; stroke-width: 1.6;
       stroke-linecap: round; stroke-linejoin: round; fill: none;
@@ -452,12 +529,12 @@
     .lb-thumb img, .lb-thumb video {
       width: 100%; height: 100%; object-fit: cover; pointer-events: none;
     }
-    .lb-thumb:hover { border-color: var(--gold-soft); transform: translateY(-2px); }
-    .lb-thumb[aria-current="true"] { border-color: var(--gold); }
+    .lb-thumb:hover { border-color: var(--accent-soft); transform: translateY(-2px); }
+    .lb-thumb[aria-current="true"] { border-color: var(--accent); }
     .lb-thumb .lb-thumb-tag {
       position: absolute; bottom: 3px; right: 3px;
       width: 14px; height: 14px; border-radius: 50%;
-      background: rgba(10, 10, 10, 0.7); color: var(--gold);
+      background: rgba(10, 10, 10, 0.7); color: var(--accent);
       display: grid; place-items: center;
     }
     .lb-thumb .lb-thumb-tag svg { width: 8px; height: 8px; fill: currentColor; }
@@ -491,6 +568,8 @@
     .hero-media video,
     .hero-media img {
       width: 100%; height: 100%; object-fit: contain;
+      padding: 7% 10%;
+      box-sizing: border-box;
     }
     /* Mirrors the aromazla pieces card recipe — single hardcoded MP4
        (black matte) + mix-blend-mode: lighten ALWAYS on the video. The
@@ -498,6 +577,17 @@
        every browser. No source-picker, no .use-blend toggle — the JS
        branching version was dropping the blend on iOS Safari/Edge AND
        on some desktop Safari paths, leaving a visible black rectangle. */
+    /* The plate paints the SAME ground as the page — see --plate above for why
+       it has to paint anything at all. No border and no gradient of its own, so
+       there is nothing to mark its edge; the piece reads as sitting on the page. */
+    .hero-media {
+      background-color: var(--plate);
+      background-image: var(--grain);
+      background-blend-mode: screen;
+      background-size: 406px 406px;
+      background-repeat: repeat;
+      overflow: hidden;
+    }
     .hero-media video { mix-blend-mode: lighten; }
     .hero-copy { display: flex; flex-direction: column; gap: 22px; }
     /* The H1 wraps the carved-text SVG; the visible glyphs come from <text> below.
@@ -515,6 +605,12 @@
       overflow: visible;
     }
     .hero-title text {
+      /* Flush left, to sit under the eyebrow and over the lede — the rest of
+         .hero-copy is left-aligned on desktop and the centred title was the one
+         thing breaking that line. text-anchor lives in CSS rather than on the
+         element so the mobile rule can flip it; x is 0 so `start` lands on the
+         viewBox's left edge. */
+      text-anchor: start;
       font-family: var(--f-display);
       font-weight: 500;
       letter-spacing: 8px;
@@ -530,14 +626,85 @@
       stroke-dashoffset: 9999;
     }
     .hero-sub {
-      font-family: var(--f-display);
+      font-family: var(--f-body);
       font-size: clamp(1rem, 1.4vw, 1.15rem);
-      font-style: italic; font-weight: 400;
+      font-style: italic; font-weight: 500;
       letter-spacing: .02em;
-      color: var(--gold-soft);
+      color: var(--accent-soft);
+      text-shadow: var(--accent-raise);
     }
+    /* Cinzel is an inscriptional face: it has NO lowercase, so a lowercase
+       letter is drawn as a small capital and "1.6 g" renders as "1.6 G". The
+       unit is therefore set in the body face, at a size and weight tuned to sit
+       level with the display caps around it rather than to match its own metrics. */
+    .unit {
+      font-family: var(--f-body);
+      font-size: 0.82em;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+    }
+    /* Availability, stated plainly. One of these pieces is for sale and one is
+       not, and a visitor cannot tell by looking — so it is said rather than
+       implied. Quiet by design: this is a fact, not a call to action. */
+    .piece-status {
+      font-family: var(--f-mono);
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--status-unavailable);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .piece-status::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      flex: none;
+    }
+    .piece-status--available { color: var(--status-available); }
+    /* ⭐ SPECIFICATIONS ARE A TABLE, NOT A SENTENCE.
+       These read as a list of facts, and a reader scans them rather than reads
+       them — so they are laid out as label/value pairs in two columns instead
+       of being strung into prose with commas. The paragraph version ran four
+       lines and buried the metal at the end of a clause. */
+    .hero-specs {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(14px, 1.8vh, 20px) clamp(22px, 2.6vw, 44px);
+      margin: 0;
+      max-width: 46ch;
+    }
+    .hero-specs .spec { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .hero-specs dt {
+      font-family: var(--f-mono);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      /* NOT --bone-faint. That is white at 0.42, which measures 3.79:1 against
+         this ground — under the 4.5:1 floor for small text, and these labels are
+         the smallest type on the page. 0.62 puts them at 6.46:1. */
+      color: rgba(255, 255, 255, 0.62);
+    }
+    .hero-specs dd {
+      margin: 0;
+      font-family: var(--f-mono);
+      /* Mono, because these are DATA — 2.08 ct, 18k, 10.5 g — and mono is what
+         the rest of the site already uses for anything measured. Cinzel set them
+         as small caps, which made a spec table read like prose. A touch smaller
+         than the Cinzel version was, since mono runs wider per character. */
+      font-size: clamp(.92rem, 1.06vw, 1.02rem);
+      font-weight: 400;
+      letter-spacing: .01em;
+      line-height: 1.45;
+      color: var(--bone);
+    }
+    @media (max-width: 900px) { .hero-specs { margin-inline: auto; text-align: left; } }
     .hero-lede {
-      font-family: var(--f-display);
+      font-family: var(--f-body);
       font-size: clamp(1.05rem, 1.4vw, 1.2rem);
       line-height: 1.6;
       color: var(--bone-soft);
@@ -577,16 +744,21 @@
       color: var(--bone);
       text-transform: uppercase;
     }
-    .story-title em { font-style: italic; color: var(--gold); letter-spacing: 0; font-weight: 400; }
+    .story-title em { font-style: italic; color: var(--accent); letter-spacing: 0; font-weight: 500;
+      text-shadow: var(--accent-raise);
+    }
     .story-body {
-      font-family: var(--f-display);
+      font-family: var(--f-body);
       /* Body type scales 1.2rem → 1.55rem across the viewport. */
       font-size: clamp(1.2rem, 1.75vw, 1.55rem);
       line-height: 1.75;
       letter-spacing: .005em;
       color: var(--bone-soft);
     }
-    .story-body em { font-style: italic; color: var(--gold-soft); }
+    .story-body em { font-style: italic; color: var(--accent-soft);
+      text-shadow: var(--accent-raise);
+      font-weight: 500;
+    }
     /* Mobile: center the story column so short closing lines like
        "Made once." don't sit lonely at the left edge. */
     @media (max-width: 1023px) {
@@ -624,7 +796,7 @@
       color: var(--bone-faint); margin-bottom: 4px;
     }
     .spec-value {
-      font-family: var(--f-display); font-size: 1rem;
+      font-family: var(--f-mono); font-size: 1rem;
       color: var(--bone);
     }
     .spec-note {
@@ -640,7 +812,7 @@
       aspect-ratio: 8.5 / 11;
       max-height: 78vh;
       background: var(--bone);
-      border: 1px solid var(--gold-line);
+      border: 1px solid var(--accent-line);
       box-shadow: 0 24px 60px rgba(0,0,0,.45);
       overflow: hidden;
     }
@@ -671,7 +843,7 @@
       position: absolute; inset: 0;
       display: grid; place-items: center;
       padding: 32px;
-      font-family: var(--f-display); font-size: 1rem;
+      font-family: var(--f-body); font-size: 1rem;
       color: var(--ink); text-align: center;
     }
     .cert-actions {
@@ -687,10 +859,12 @@
       display: inline-flex; align-items: center; gap: 10px;
       font-family: var(--f-mono); font-size: .7rem;
       letter-spacing: .22em; text-transform: uppercase;
-      color: var(--gold-soft);
+      color: var(--accent-soft);
       transition: color 240ms var(--ease-out);
+      text-shadow: var(--accent-raise);
+      font-weight: 500;
     }
-    .cert-link:hover { color: var(--gold); }
+    .cert-link:hover { color: var(--accent); }
     .cert-link svg {
       width: 14px; height: 14px;
       stroke: currentColor; stroke-width: 1.6; fill: none;
@@ -713,38 +887,43 @@
       position: absolute;
       top: clamp(28px, 5vh, 64px);
       right: clamp(20px, 4vw, 56px);
-      font-family: var(--f-display);
+      font-family: var(--f-mono);
       font-style: italic;
       font-size: clamp(0.85rem, 1.05vw, 1rem);
       letter-spacing: .04em;
-      color: var(--gold-soft);
+      color: var(--accent-soft);
       z-index: 2;
       display: inline-flex; align-items: center; gap: 12px;
+      text-shadow: var(--accent-raise);
+      font-weight: 500;
     }
     .cta-numero::before {
       content: ''; display: inline-block;
       width: 26px; height: 1px;
-      background: var(--gold-soft);
+      background: var(--accent-soft);
     }
     /* Gold hairline opens the closing block — quiet structural anchor */
     .cta-rule {
       display: block;
       width: 64px; height: 1px;
-      background: var(--gold-soft);
+      background: var(--accent-soft);
       margin: 0 0 4px;
       transform-origin: left center;
     }
     /* The chain note IS the closing voice — bumped up so it reads as the page's
-       last word, not as a footnote. Body stays roman, italic em stays gold. */
+       last word, not as a footnote. Body stays roman, italic em takes the accent. */
     .cta-note {
-      font-family: var(--f-display);
+      font-family: var(--f-body);
       font-size: clamp(1.55rem, 2.6vw, 2.2rem);
       line-height: 1.45;
       letter-spacing: -0.005em;
       color: var(--bone);
       max-width: 28ch;
     }
-    .cta-note em { font-style: italic; color: var(--gold-soft); }
+    .cta-note em { font-style: italic; color: var(--accent-soft);
+      text-shadow: var(--accent-raise);
+      font-weight: 500;
+    }
     .cta-row {
       margin-top: 14px;
       display: flex; gap: 12px; flex-wrap: wrap;
@@ -759,12 +938,12 @@
       transition: border-color 360ms var(--ease-out), background 360ms var(--ease-out);
     }
     .cta-btn:hover {
-      border-color: var(--gold);
-      background: rgba(201, 168, 76, 0.04);
+      border-color: var(--accent);
+      background: rgba(127, 166, 217, 0.04);
     }
     .cta-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
-    .cta-btn--primary { border-color: var(--gold-line); }
-    .cta-btn--primary:hover { background: rgba(201, 168, 76, 0.08); }
+    .cta-btn--primary { border-color: var(--accent-line); }
+    .cta-btn--primary:hover { background: rgba(127, 166, 217, 0.08); }
 
     /* ─── REVEAL ─── */
     .reveal {
@@ -784,7 +963,7 @@
     }
 
     a:focus-visible, button:focus-visible {
-      outline: 1px solid var(--gold); outline-offset: 4px;
+      outline: 1px solid var(--accent); outline-offset: 4px;
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -795,6 +974,35 @@
       }
       .reveal { opacity: 1; transform: none; }
     }
+    /* ─── LEGAL STRIP ───────────────────────────────────────────────────────
+       Thin, fixed to the bottom, on every page. LSSI art. 10 wants the legal
+       notice reachable from anywhere, and the panel layout here has no footer to
+       hang it on — several pages are pinned 100vh tracks, so appending a footer
+       would either add scroll or sit inside a pinned panel. Fixed avoids both and
+       costs the index nothing, which has to stay one screen.
+       Deliberately quiet: this is a legal obligation, not a navigation item. */
+    .legal-strip {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 7px 16px;
+      font-family: var(--f-mono);
+      font-size: 9.5px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.34);
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.45) 60%);
+      pointer-events: none;
+    }
+    .legal-strip a, .legal-strip span { pointer-events: auto; }
+    .legal-strip a { color: inherit; text-decoration: none; transition: color 240ms var(--ease-out); }
+    .legal-strip a:hover { color: var(--accent); }
+    .legal-strip i { font-style: normal; opacity: .4; }
+    @media (max-width: 560px) { .legal-strip { gap: 12px; font-size: 8.6px; letter-spacing: .12em; } }
   </style>
 </head>
 <body>
@@ -828,7 +1036,7 @@
     </a>
     <ul class="nav-links">
       <li><a href="aromazla.html" class="active" data-i18n="nav.aromazla">Aromazla</a></li>
-      <li><a href="https://visuanza.es" target="_blank" rel="noopener" data-i18n="nav.visuanza">Visuanza</a></li>
+      <li><a href="work.html" class="is-featured" data-i18n="nav.work">Web work</a></li>
       <li><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
     </ul>
     <div class="lang-switcher">
@@ -876,7 +1084,7 @@
       </button>
     </div>
     <a href="aromazla.html" data-i18n="nav.aromazla">Aromazla</a>
-    <a href="https://visuanza.es" target="_blank" rel="noopener" data-i18n="nav.visuanza">Visuanza</a>
+    <a href="work.html" class="is-featured" data-i18n="nav.work">Web work</a>
     <a href="contact.html" data-i18n="nav.contact">Contact</a>
     <div class="menu-sheet__icons">
       <a href="https://www.instagram.com/ivan.alzam/" target="_blank" rel="noopener" aria-label="Instagram @ivan.alzam">
@@ -907,16 +1115,24 @@
          <div class="hero-grid">
           <div class="hero-media reveal">
             <!-- Three sources, ordered by browser-native alpha support:
-                   1. sap.mov  — HEVC alpha (Safari macOS + iOS)
-                   2. sap.webm — VP9 alpha (Chrome / Firefox / Edge desktop + Android)
-                   3. sap.mp4  — H.264 with black matte (universal fallback)
-                 The always-on `mix-blend-mode: lighten` in CSS knocks the
-                 mp4 matte out; on the real-alpha formats it's a no-op
-                 (transparent pixels don't contribute to compositing). -->
-            <video id="pieceVideo" autoplay loop muted playsinline preload="metadata" aria-hidden="true">
-              <source src="assets/p1/sap.mov"  type="video/quicktime">
-              <source src="assets/p1/sap.webm" type="video/webm">
-              <source src="assets/p1/sap.mp4"  type="video/mp4">
+                 OPAQUE, black matte, knocked out by the always-on
+                 `mix-blend-mode: lighten` in CSS — the same recipe as the
+                 aromazla piece cards, and for the same reason: lighten takes
+                 a per-channel max, so the matte loses to the page's own
+                 ground while the piece passes through untouched. No alpha
+                 means no keying artefacts on the piece's edge, which is what
+                 the transparent build kept producing at hero size. -->
+            <!-- ⭐ POSTER IS NOT OPTIONAL HERE. This video carries
+                 mix-blend-mode: lighten, and a <video> with no decoded frame and
+                 no poster paints a UA placeholder — which on a light placeholder
+                 plus lighten() is a white rectangle the size of the element. That
+                 is the flash on reload. The poster is frame 0 of this same clip,
+                 opaque on black, so lighten drops its matte and it is invisible
+                 against the plate the instant it decodes. -->
+              <video disablepictureinpicture id="pieceVideo" autoplay loop muted playsinline preload="metadata" aria-hidden="true"
+                   poster="assets/p1/equinoccio-hero-poster.webp">
+              <source src="assets/p1/equinoccio-hero.webm" type="video/webm">
+              <source src="assets/p1/equinoccio-hero.mp4"  type="video/mp4">
             </video>
           </div>
           <div class="hero-copy reveal">
@@ -946,37 +1162,43 @@
                     </feMerge>
                   </filter>
                 </defs>
-                <text id="equiText" x="360" y="76"
-                      text-anchor="middle"
+                <text id="equiText" x="0" y="76"
                       font-size="80"
                       filter="url(#carvedEqui)">EQUINOCCIO</text>
               </svg>
             </h1>
             <p class="hero-sub" data-i18n="p1.hero.sub">Yellow Sapphire · 2.08 ct · Sri Lanka · GIA</p>
-            <p class="hero-lede" data-i18n="p1.hero.lede">A natural yellow sapphire of 2.08 carats, set in 18k white gold and finished in rhodium.</p>
+            <dl class="hero-specs">
+              <div class="spec"><dt data-i18n="spec.label.stone">Stone</dt><dd data-i18n-html="p1.spec.stone">Yellow sapphire</dd></div>
+              <div class="spec"><dt data-i18n="spec.label.cut">Cut</dt><dd data-i18n-html="p1.spec.cut">Oval</dd></div>
+              <div class="spec"><dt data-i18n="spec.label.weight">Weight</dt><dd data-i18n-html="p1.spec.weight">2.08 ct</dd></div>
+              <div class="spec"><dt data-i18n="spec.label.origin">Origin</dt><dd data-i18n-html="p1.spec.origin">Sri Lanka</dd></div>
+              <div class="spec"><dt data-i18n="spec.label.cert">Certificate</dt><dd data-i18n-html="p1.spec.cert">GIA</dd></div>
+              <div class="spec"><dt data-i18n="spec.label.finish">Finish</dt><dd data-i18n-html="p1.spec.finish">Rhodium plated</dd></div>
+              <div class="spec"><dt data-i18n="spec.label.metal">Metal</dt><dd data-i18n-html="p1.spec.metal">18k white gold</dd></div>
+              <div class="spec"><dt data-i18n="spec.label.metalweight">Metal weight</dt><dd data-i18n-html="p1.spec.metalweight">1.6&nbsp;<span class="unit">g</span></dd></div>
+            </dl>
+            <span class="piece-status piece-status--available" data-i18n="p1.status">Available</span>
             <span class="scroll-cue" data-i18n="p1.scroll.cue">scroll</span>
           </div>
          </div><!-- /.hero-grid -->
 
          <!-- Pendant gallery thumbs — full-width row beneath both pendant + copy -->
          <div class="hero-thumbs reveal" id="heroThumbs" role="list" aria-label="Equinoccio gallery">
-           <button class="hero-thumb" type="button" data-idx="0" aria-label="Open gallery — video 1">
-             <!-- Pre-rendered first frame extracted from sap1.mov via ffmpeg
-                  so iOS Safari shows an actual frame from the video itself,
-                  not a generic still. Play glyph still signals it opens a
-                  video clip in the lightbox. -->
-             <img src="assets/p1/sap1-frame.jpg" alt="" loading="lazy">
+           <button class="hero-thumb" type="button" data-idx="0" aria-label="Open gallery — video">
+             <!-- First frame pulled out with ffmpeg: iOS Safari will not paint a
+                  poster from the video itself, so the tile would sit empty. -->
+             <img src="assets/p1/e1-frame.jpg" alt="" loading="lazy">
              <span class="hero-thumb-tag" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19"/></svg></span>
            </button>
-           <button class="hero-thumb" type="button" data-idx="1" aria-label="Open gallery — video 2">
-             <img src="assets/p1/sap3-frame.jpg" alt="" loading="lazy">
-             <span class="hero-thumb-tag" aria-hidden="true"><svg viewBox="0 0 24 24"><polygon points="8 5 19 12 8 19"/></svg></span>
-           </button>
-           <button class="hero-thumb" type="button" data-idx="2" aria-label="Open gallery — image 1">
-             <img src="assets/p1/sap5.jpeg" alt="" loading="lazy">
-           </button>
-           <button class="hero-thumb" type="button" data-idx="3" aria-label="Open gallery — image 2">
+           <button class="hero-thumb" type="button" data-idx="1" aria-label="Open gallery — image">
              <img src="assets/p1/sap6.png" alt="" loading="lazy">
+           </button>
+           <button class="hero-thumb" type="button" data-idx="2" aria-label="Open gallery — technical drawing">
+             <!-- The CAD sheet is a wide landscape; a square thumb cropped from its
+                  centre would land on empty paper, so this thumb is cut around the
+                  largest rendered view instead. -->
+             <img src="assets/p1/equinoccio-cad-thumb.webp" alt="" loading="lazy">
            </button>
          </div>
         </div>
@@ -1102,8 +1324,8 @@
   </div>
 
   <!-- GSAP + ScrollTrigger -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="assets/vendor/gsap.min.js"></script>
+  <script src="assets/vendor/ScrollTrigger.min.js"></script>
   <script>
     const navEl = document.getElementById('nav');
     const onScroll = () => navEl.classList.toggle('scrolled', window.scrollY > 30);
@@ -1188,7 +1410,7 @@
       tl.to(equiText, { fillOpacity: 1, duration: 1.6, ease: 'sine.inOut' }, '-=3.4');
       tl.to(equiText, { strokeOpacity: 0, duration: 1.6, ease: 'sine.inOut' }, '<');
       // 3. Carve — fill darkens to taupe and the floods rise.
-      tl.to(equiText, { fill: '#A89F90', duration: 1.0, ease: 'sine.inOut' }, '-=2.6');
+      tl.to(equiText, { fill: '#FFFFFF', duration: 1.0, ease: 'sine.inOut' }, '-=2.6');
       if (equiShadowFlood) {
         tl.to(equiShadowFlood, { attr: { 'flood-opacity': 0.92 }, duration: 1.0, ease: 'sine.inOut' }, '<');
       }
@@ -1227,7 +1449,7 @@
       }
     } else if (equiText) {
       equiText.style.fillOpacity = 1;
-      equiText.style.fill = '#A89F90';
+      equiText.style.fill = '#FFFFFF';
       equiText.style.strokeOpacity = 0;
       if (equiShadowFlood) equiShadowFlood.setAttribute('flood-opacity', '0.92');
       if (equiLightFlood) equiLightFlood.setAttribute('flood-opacity', '0.42');
@@ -1249,8 +1471,8 @@
       const swapToWebpFallback = () => {
         if (lpmFallbackTriggered || !pieceVideo) return;
         lpmFallbackTriggered = true;
-        const img = new Image(720, 894);
-        img.src = 'assets/p1/sap.webp';
+        const img = new Image(424, 730);
+        img.src = 'assets/p1/equinoccio-hero-poster.webp';   // frame 0 of the clip itself
         img.alt = '';
         img.id = 'pieceVideo';
         img.setAttribute('aria-hidden', 'true');
@@ -1373,11 +1595,17 @@
        gallery (no data-gallery key switching). Pinch / wheel / drag-pan
        zoom on image slides. */
     (function () {
+      // ⚠ WEB-ENCODED SOURCES ONLY. This list previously held sap1.mov (43 MB)
+      // and sap3.mov (18 MB) — camera originals served straight to the browser,
+      // which is why gallery videos took forever or appeared as a black slide.
+      // Anything added here goes through ffmpeg first; see WORKLOG.md §6.
       const items = [
-        { type: 'video', src: 'assets/p1/sap1.mov' },
-        { type: 'video', src: 'assets/p1/sap3.mov' },
-        { type: 'image', src: 'assets/p1/sap5.jpeg' },
+        { type: 'video', srcs: ['assets/p1/e1.webm', 'assets/p1/e1.mp4'] },
         { type: 'image', src: 'assets/p1/sap6.png' },
+        // last: the CAD sheet. A drawing by the maker, not a third-party
+        // document — which is why it belongs here among the views of the
+        // piece rather than beside the certificate.
+        { type: 'image', src: 'assets/p1/equinoccio-cad.webp' },
       ];
       const lb = document.getElementById('lightbox');
       if (!lb) return;
@@ -1502,9 +1730,28 @@
         let el;
         if (item.type === 'video') {
           el = document.createElement('video');
-          el.src = item.src;
+          // <source> children, not el.src, so a browser that cannot decode VP9
+          // still gets the H.264 copy instead of a black slide. Both are
+          // web-encoded and faststart; never point this at a camera original —
+          // a .mov keeps its metadata atom at the END of the file, so the
+          // browser has to fetch the whole thing before it can show a frame.
+          (item.srcs || [item.src]).forEach((u) => {
+            const so = document.createElement('source');
+            so.src = u;
+            so.type = u.endsWith('.webm') ? 'video/webm'
+                    : u.endsWith('.mp4')  ? 'video/mp4'
+                    : u.endsWith('.mov')  ? 'video/quicktime' : '';
+            el.appendChild(so);
+          });
           el.autoplay = true; el.loop = true; el.muted = true; el.playsInline = true;
           el.setAttribute('playsinline', '');
+          // No picture-in-picture. Chrome offers it on any <video> big enough,
+          // and one stray click detaches the piece into a floating window with
+          // the page left showing an empty box. Both the attribute and the
+          // property, because Safari honours only the property.
+          el.disablePictureInPicture = true;
+          el.setAttribute('disablepictureinpicture', '');
+          el.setAttribute('controlslist', 'nodownload noplaybackrate noremoteplayback');
           el.preload = 'metadata';
         } else {
           el = document.createElement('img');
@@ -1528,7 +1775,8 @@
           if (item.type === 'video') {
             btn.setAttribute('aria-label', `Video ${i + 1} of ${items.length}`);
             const v = document.createElement('video');
-            v.src = item.src; v.muted = true; v.preload = 'metadata'; v.playsInline = true;
+            v.src = (item.srcs || [item.src])[0]; v.muted = true; v.preload = 'metadata'; v.playsInline = true;
+            v.disablePictureInPicture = true; v.setAttribute('disablepictureinpicture', '');
             btn.appendChild(v);
             const tag = document.createElement('span');
             tag.className = 'lb-thumb-tag';
@@ -1634,5 +1882,14 @@
       }, { passive: true });
     })();
   </script>
+  <!-- Legal strip — see .legal-strip in the stylesheet for why it is fixed. -->
+  <div class="legal-strip">
+    <span>&copy; Iván Alzamora</span>
+    <i>&middot;</i>
+    <a href="aviso-legal.html" data-i18n="legal.notice">Legal notice</a>
+    <i>&middot;</i>
+    <a href="privacidad.html" data-i18n="legal.privacy">Privacy</a>
+  </div>
+
 </body>
 </html>

@@ -35,10 +35,7 @@
   <link rel="canonical" href="https://ivan.es" />
   <link rel="icon" type="image/png" href="assets/aromazla-favicon.png" />
   <link rel="apple-touch-icon" href="assets/aromazla-favicon.png" />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/fonts.css" />
 
   <style>
     /* ─── TOKENS ─── */
@@ -47,12 +44,38 @@
       --ink-2:      #111111;
       --ink-3:      #15140F;
       --ink-card:   #18171A;
-      --bone:       #F5F0E8;
-      --bone-soft:  rgba(245, 240, 232, 0.72);
-      --bone-faint: rgba(245, 240, 232, 0.42);
-      --bone-line:  rgba(245, 240, 232, 0.10);
-      --gold:       #C9A84C;
-      --gold-soft:  rgba(201, 168, 76, 0.72);
+      --bone:       #FFFFFF;
+      --bone-soft:  rgba(255, 255, 255, 0.88);
+      --bone-faint: rgba(255, 255, 255, 0.42);
+      --bone-line:  rgba(255, 255, 255, 0.10);
+      --accent:       #7FA6D9;
+      /* Availability reads at a glance, so it is carried by colour, not by the
+         words alone: green for sale, red for not. Muted rather than signal-bright
+         — these sit on a jewellery page, not a dashboard. Both clear 6.4:1 on
+         the darkest ground the site uses, so the small mono type still holds. */
+      --status-available: #7BD88F;
+      --status-unavailable: #E8796A;
+      /* One grain for the whole site — the same sprite the aromazla piece cards
+         carry, so every ground is made of the same material. It rides as an
+         extra background LAYER over each page's existing gradient, blended
+         `screen`, so tone and gradient are untouched; only the surface is added.
+         ⚠ The tile must stay SQUARE. This SVG has a viewBox and no width/height,
+         so preserveAspectRatio defaults to `meet` and a non-square size
+         letterboxes it, leaving ungrained bands that read as black stripes. */
+      --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 280 280' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.10'/%3E%3C/svg%3E");
+      /* ── THE ACCENT SITS ON TOP OF THE PAGE, NOT IN IT ──────────────────
+         A highlight along the top edge and a shadow under it, so the light
+         reads as coming from above-left and the mark casts downward — the
+         inverse of the engraved treatment on the hero name, where the shadow
+         is inside the glyph. Kept small: past about 2px of blur it stops
+         looking raised and starts looking blurred.
+         --accent-raise is for text, --accent-lift for SVG, which text-shadow
+         cannot reach. */
+      --accent-raise: 0 -1px 0 rgba(255, 255, 255, 0.16),
+                      0 1px 0 rgba(0, 0, 0, 0.62),
+                      0 2px 3px rgba(0, 0, 0, 0.40);
+      --accent-lift: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55));
+      --accent-soft:  rgba(127, 166, 217, 0.88);
 
       --f-display: 'Cinzel', 'Trajan Pro', Georgia, serif;
       --f-body:    'Inter', system-ui, sans-serif;
@@ -77,7 +100,7 @@
     }
     a { color: inherit; text-decoration: none; }
     img, svg { display: block; max-width: 100%; }
-    ::selection { background: var(--gold); color: var(--ink); }
+    ::selection { background: var(--accent); color: var(--ink); }
 
     /* ─── GRAIN — fixed overlay, dithers the radial-gradient ─── */
     /* Noise is served as a static file so no inline data: URI can be mangled by
@@ -129,8 +152,12 @@
         height: 100vh;
         overflow: hidden;
         background:
-          radial-gradient(ellipse 60% 70% at 50% 32% in oklab, rgba(50, 42, 28, 0.6) 0%, transparent 70%),
+        var(--grain),
+        radial-gradient(ellipse 60% 70% at 50% 32% in oklab, rgba(50, 42, 28, 0.6) 0%, transparent 70%),
           linear-gradient(180deg in oklab, var(--ink-2) 0%, var(--ink) 100%);
+      background-blend-mode: screen, normal, normal;
+      background-size: 406px 406px, auto, auto;
+      background-repeat: repeat, no-repeat, no-repeat;
       }
       .hpanels-track {
         display: flex;
@@ -192,11 +219,16 @@
       left: 0; right: 0;
       bottom: -2px;
       height: 1px;
-      background: var(--gold);
+      background: var(--accent);
       transform: scaleX(0);
       transform-origin: left;
       transition: transform 360ms var(--ease-out);
     }
+    /* The featured item is the one a visitor who came for jewellery would not
+       think to look for, so its rule is always drawn rather than on hover. */
+    .nav-links a.is-featured { color: var(--accent); }
+    .nav-links a.is-featured::after { background: var(--accent); transform: scaleX(1); }
+    .menu-sheet a.is-featured { color: var(--accent); }
     .nav-links a:hover { color: var(--bone); }
     .nav-links a:hover::after { transform: scaleX(1); }
 
@@ -209,7 +241,8 @@
       background: transparent;
       border: 0;
       padding: 4px;
-      color: var(--gold);
+      color: var(--accent);
+      filter: var(--accent-lift);
     }
     .nav-card svg {
       display: block;
@@ -260,14 +293,14 @@
       pointer-events: auto;
     }
     .menu-sheet a {
-      font-family: var(--f-display);
+      font-family: var(--f-mono);
       font-size: clamp(1.7rem, 7vw, 2.4rem);
       font-weight: 500;
       letter-spacing: 0.18em;
       color: var(--bone);
       text-transform: uppercase;
     }
-    .menu-sheet a:hover { color: var(--gold); }
+    .menu-sheet a:hover { color: var(--accent); }
     /* Icon row at the bottom of the mobile menu — Instagram + WhatsApp shortcuts.
        No circle border; brand-accurate logos with their own gradient fills. */
     .menu-sheet__icons {
@@ -370,9 +403,9 @@
     }
     .lang-dropdown button:hover {
       color: var(--bone);
-      background: rgba(245, 240, 232, 0.04);
+      background: rgba(255, 255, 255, 0.04);
     }
-    .lang-dropdown button[aria-current="true"] { color: var(--gold); }
+    .lang-dropdown button[aria-current="true"] { color: var(--accent); }
 
     /* ─── Mobile menu-sheet language pills ─── */
     .menu-sheet__lang {
@@ -397,8 +430,8 @@
       transition: color 240ms var(--ease-out), border-color 240ms var(--ease-out);
     }
     .menu-sheet__lang button[aria-current="true"] {
-      color: var(--gold);
-      border-color: var(--gold);
+      color: var(--accent);
+      border-color: var(--accent);
     }
 
     /* ─── HERO ─── */
@@ -413,14 +446,22 @@
       isolation: isolate;
       /* Mobile: the gradient lives on the panel itself (the wrapper has display:contents). */
       background:
+        var(--grain),
         radial-gradient(ellipse 70% 65% at 50% 28% in oklab, rgba(50, 42, 28, 0.55) 0%, transparent 70%),
         linear-gradient(180deg in oklab, var(--ink-2) 0%, var(--ink) 100%);
+      background-blend-mode: screen, normal, normal;
+      background-size: 406px 406px, auto, auto;
+      background-repeat: repeat, no-repeat, no-repeat;
     }
     /* Mobile: same backdrop on the doorway so the sticky-stack reads as one canvas */
     .doorways.panel {
       background:
+        var(--grain),
         radial-gradient(ellipse 70% 65% at 50% 28% in oklab, rgba(50, 42, 28, 0.55) 0%, transparent 70%),
         linear-gradient(180deg in oklab, var(--ink-2) 0%, var(--ink) 100%);
+      background-blend-mode: screen, normal, normal;
+      background-size: 406px 406px, auto, auto;
+      background-repeat: repeat, no-repeat, no-repeat;
     }
     /* Marble bust — left rail, looks up-right toward the name.
        Source faces left with gaze up-left, so we flip horizontally
@@ -503,22 +544,29 @@
     .hero-eyebrow {
       font-family: var(--f-mono);
       font-size: 0.7rem;
-      font-weight: 400;
+      font-weight: 500;
       letter-spacing: 0.42em;
       text-transform: uppercase;
-      color: var(--gold);
+      color: var(--accent);
       display: inline-flex;
       align-items: center;
       gap: 14px;
+      text-shadow: var(--accent-raise);
     }
     .hero-eyebrow::before, .hero-eyebrow::after {
       content: '';
       display: block;
       width: 22px; height: 1px;
-      background: var(--gold);
+      background: var(--accent);
     }
 
     .hero-name {
+      /* It is an <h1> — the page's only one. It was a <div>, which left the
+         document with no heading at all. Reset what the UA stylesheet adds to
+         an h1 so the change is purely semantic and nothing moves. */
+      margin: 0;
+      font-size: inherit;
+      font-weight: inherit;
       width: 100%;
       max-width: 460px;
       height: auto;
@@ -553,55 +601,16 @@
       transform: translateY(8px);
     }
 
-    /* scroll cue — pinned to viewport bottom, hints at the next panel */
-    .hero-cue {
-      position: absolute;
-      left: 50%;
-      bottom: clamp(28px, 5vh, 56px);
-      transform: translateX(-50%);
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      font-family: var(--f-mono);
-      font-size: 0.62rem;
-      letter-spacing: 0.42em;
-      text-transform: uppercase;
-      color: var(--bone-faint);
-      opacity: 0;
-      pointer-events: none;
-    }
-    .hero-cue .arrow {
-      display: inline-block;
-      width: 28px; height: 1px;
-      background: var(--bone-line);
-      position: relative;
-    }
-    .hero-cue .arrow::after {
-      content: '';
-      position: absolute;
-      right: 0; top: 50%;
-      width: 6px; height: 6px;
-      border-right: 1px solid var(--gold-soft);
-      border-bottom: 1px solid var(--gold-soft);
-      transform: translateY(-50%) rotate(-45deg);
-    }
-    @media (max-width: 1023px) {
-      /* Mobile stacks vertically — the user just scrolls down naturally,
-         no "AROMAZLA ↓" cue needed at the bottom of the hero. */
-      .hero-cue { display: none !important; }
-    }
-    @keyframes cue-pulse {
-      0%, 100% { opacity: 0.55; }
-      50%      { opacity: 0.95; }
-    }
-    .hero-cue.pulsing { animation: cue-pulse 2.6s ease-in-out infinite; }
-
     /* ─── DOORWAYS ─── */
     .doorways {
       padding: clamp(60px, 10vw, 132px) clamp(20px, 4vw, 48px);
       background:
+        var(--grain),
         radial-gradient(ellipse 70% 65% at 50% 28% in oklab, rgba(50, 42, 28, 0.55) 0%, transparent 70%),
         linear-gradient(180deg in oklab, var(--ink-2) 0%, var(--ink) 100%);
+      background-blend-mode: screen, normal, normal;
+      background-size: 406px 406px, auto, auto;
+      background-repeat: repeat, no-repeat, no-repeat;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -614,6 +623,55 @@
       max-width: 1100px;
       margin: 0 auto;
     }
+
+    /* ─── M-18 · moire-rays ──────────────────────────────────────────────────
+       _library/motion/moire-rays.js. Two radial gratings of the SAME ray count
+       with the second centre offset a few percent — the fringes come from the
+       offset, not from differing counts (the library's own note records that
+       differing counts were swept at 3/6/14/40 and produce nothing).
+       Two departures from the library demo, both forced by this page:
+       · LIGHT INK. The part is authored dark-on-paper; the demo page even sets
+         a #d8ccae ground because on black it is ink on ink. Here the ink is
+         bone at a very low alpha, so it reads as a faint sunburst rather than
+         as line-work.
+       · orbit: 0 — STATIC. With orbit the second centre drifts and the fringes
+         breathe; at the library's own 0.03/0.05 that drift is so slow it reads
+         as still anyway. Set `orbit: .03, spin: .05` on the second set to turn
+         it back on. See catalogue/pages/M-18.html for it moving. */
+    .hero-rays {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;              /* the hero timeline brings it up */
+      display: block;
+    }
+
+    /* The door's place in the hero. Under 1024px it drops into the hero's own
+       flex column, after the bust (which takes order: 2 there) — so order: 3.
+       From 1024px it becomes the hero's right anchor, mirroring the bust on
+       the left, both sitting on the same baseline. */
+    /* ⚠ Written as .door-visual.hero-door, not .hero-door: `.door-visual` below
+       sets width: 100% and is declared LATER, so at equal specificity it wins,
+       which leaves the door anchored but stretched across the viewport. */
+    .door-visual.hero-door {
+      position: relative;
+      order: 3;
+      width: min(88vw, 420px);
+      margin-top: clamp(54px, 9vh, 104px);
+      z-index: 2;
+    }
+    @media (min-width: 1024px) {
+      .door-visual.hero-door {
+        position: absolute;
+        right: clamp(24px, 5vw, 110px);
+        bottom: clamp(20px, 5vh, 72px);
+        width: clamp(300px, 34vw, 500px);
+        margin-top: 0;
+      }
+    }
+    .hero-door .door-visual-mark { width: 100%; }
 
     /* Frameless doorway — pendant + wordmark float on the page background.
        No card, no border, no glow rectangle, no contained box. */
@@ -631,7 +689,12 @@
     }
     .door-visual-piece {
       display: block;
-      height: clamp(260px, 40vh, 380px);
+      /* Sized so the PENDANT — not the frame — renders at a chosen size. The
+         video is cropped to the piece's union bbox across all frames, so the
+         pendant is 98.6% of the frame height; the frame is very nearly the
+         subject. When the framing changes, rescale these by
+         (old pendant % / new pendant %) and the piece stays put. */
+      height: clamp(161px, 25vh, 236px);
       width: auto;
       max-width: 90%;
       object-fit: contain;
@@ -645,29 +708,58 @@
       mix-blend-mode: lighten;
       transition: filter 600ms var(--ease-out), transform 600ms var(--ease-out);
     }
+    /* On desktop the piece is no longer a thumbnail under a heading — it is
+       the hero's right-hand subject, opposite a bust that stands 82vh tall.
+       Sized to hold that side of the composition; tuned against the bust's
+       measured on-screen height, not guessed. */
     @media (min-width: 1024px) {
-      .door-visual-piece { height: clamp(320px, 46vh, 480px); }
+      .door-visual-piece { height: clamp(300px, 54vh, 640px); }
     }
-    /* ⭐ THE LOW POWER MODE STILL IS SIZED SEPARATELY, because it is framed
-       differently. The video carries a lot of empty space — the pendant is
-       only 44% of its height — while the still is trimmed to the piece and
-       fills 96%. At the same CSS height the still would therefore render the
-       pendant 2.2x larger by accident. These rules make that deliberate:
-       roughly double the video's apparent pendant on mobile (Ivan's ask,
-       since a still can afford to be bigger), and unchanged on desktop.
-       Two classes, so this beats the rules above regardless of order. */
-    .door-visual-piece.door-visual-still { height: clamp(240px, 36vh, 380px); }
-    @media (min-width: 1024px) {
-      .door-visual-piece.door-visual-still { height: clamp(150px, 21vh, 220px); }
-    }
+    /* The LPM still no longer needs sizing of its own. It is frame 0 of the
+       very same file, cropped identically, so it inherits .door-visual-piece
+       and lands at exactly the size the video had. The three rules that used
+       to live here existed only to correct for a still framed at 96% standing
+       in for a video framed at 61%. */
 
     /* Carved wordmark — same filter recipe as the hero name, baked-in (no animation). */
+    /* Inside the hero rail the wordmark fills the rail, at every breakpoint —
+       the viewport-based clamp below is the standalone default and overflows a
+       rail narrower than itself. */
+    .hero-door .door-visual-mark { width: 100%; }
     .door-visual-mark {
       width: clamp(300px, 64vw, 420px);
       height: auto;
       display: block;
     }
     .door-visual-mark svg { width: 100%; height: auto; overflow: visible; }
+    /* The type door carries its half alone, so its wordmark runs larger than
+       AROMAZLA's, which shares its panel with the piece. */
+    .door-visual-mark--lg { width: clamp(340px, 52vw, 560px); }
+    .door-visual--type { gap: clamp(22px, 3vw, 38px); }
+    .door-visual-lede {
+      margin: 0;
+      max-width: 34ch;
+      text-align: center;
+      font-family: var(--f-body);
+      font-size: clamp(1rem, 1.3vw, 1.18rem);
+      line-height: 1.5;
+      color: var(--bone-soft);
+    }
+    /* Mirrors .hero-name path exactly — same draw-on, same pre-hidden state.
+       Stroke width differs only because this svg renders at a smaller scale:
+       the name is 0.8 at ~0.91, so 1.3 here lands at the same hairline. */
+    .door-visual-mark svg path {
+      fill: var(--bone);
+      fill-opacity: 0;
+      stroke: var(--bone);
+      stroke-width: 1.3;
+      stroke-dasharray: 9999;
+      stroke-dashoffset: 9999;
+    }
+    /* Hidden until the hero timeline brings them in — same reasoning as
+       .hero-statue's opacity: 0. The timeline's reduced-motion branch sets the
+       final state, so nothing is left invisible if the animation never runs. */
+    .door-visual-piece, .door-visual-cue { opacity: 0; }
 
     /* Clickability cue — tells visitors the pendant is a door, not just an image. */
     .door-visual-cue {
@@ -679,12 +771,14 @@
       font-size: 0.7rem;
       letter-spacing: 0.42em;
       text-transform: uppercase;
-      color: var(--gold-soft);
+      color: var(--accent-soft);
+      text-shadow: var(--accent-raise);
+      font-weight: 500;
     }
     .door-visual-cue::before {
       content: '';
       width: 26px; height: 1px;
-      background: var(--gold-soft);
+      background: var(--accent-soft);
     }
     .door-visual-cue .glyph { display: inline-block; }
 
@@ -711,7 +805,7 @@
 
     /* ─── FOCUS ─── */
     a:focus-visible, button:focus-visible {
-      outline: 1px solid var(--gold);
+      outline: 1px solid var(--accent);
       outline-offset: 4px;
     }
 
@@ -752,7 +846,36 @@
       /* ⚠ z-index 2: .hero-statue is z-index 1, so a canvas at auto paints
          UNDER the bust and is invisible however correct its contents are */
       .markfog{position:absolute;pointer-events:none;z-index:2}
-    </style>
+      /* ─── LEGAL STRIP ───────────────────────────────────────────────────────
+       Thin, fixed to the bottom, on every page. LSSI art. 10 wants the legal
+       notice reachable from anywhere, and the panel layout here has no footer to
+       hang it on — several pages are pinned 100vh tracks, so appending a footer
+       would either add scroll or sit inside a pinned panel. Fixed avoids both and
+       costs the index nothing, which has to stay one screen.
+       Deliberately quiet: this is a legal obligation, not a navigation item. */
+    .legal-strip {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 7px 16px;
+      font-family: var(--f-mono);
+      font-size: 9.5px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.34);
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.45) 60%);
+      pointer-events: none;
+    }
+    .legal-strip a, .legal-strip span { pointer-events: auto; }
+    .legal-strip a { color: inherit; text-decoration: none; transition: color 240ms var(--ease-out); }
+    .legal-strip a:hover { color: var(--accent); }
+    .legal-strip i { font-style: normal; opacity: .4; }
+    @media (max-width: 560px) { .legal-strip { gap: 12px; font-size: 8.6px; letter-spacing: .12em; } }
+  </style>
 </head>
 <body>
 
@@ -760,7 +883,7 @@
   <nav id="nav">
     <ul class="nav-links">
       <li><a href="aromazla.html" data-i18n="nav.aromazla">Aromazla</a></li>
-      <li><a href="https://visuanza.es" target="_blank" rel="noopener" data-i18n="nav.visuanza">Visuanza</a></li>
+      <li><a href="work.html" class="is-featured" data-i18n="nav.work">Web work</a></li>
       <li><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
     </ul>
 
@@ -816,7 +939,7 @@
       </button>
     </div>
     <a href="aromazla.html" data-i18n="nav.aromazla">Aromazla</a>
-    <a href="https://visuanza.es" target="_blank" rel="noopener" data-i18n="nav.visuanza">Visuanza</a>
+    <a href="work.html" class="is-featured" data-i18n="nav.work">Web work</a>
     <a href="contact.html" data-i18n="nav.contact">Contact</a>
     <div class="menu-sheet__icons">
       <a href="https://www.instagram.com/ivan.alzam/" target="_blank" rel="noopener" aria-label="Instagram @ivan.alzam">
@@ -882,7 +1005,7 @@
          decoding="async" fetchpriority="low" />
     <div class="hero-frame">
       <div class="hero-plate">
-        <div class="hero-name" aria-label="Ivan Alzamora">
+        <h1 class="hero-name" aria-label="Ivan Alzamora">
           <svg viewBox="-20 -10 504 175" preserveAspectRatio="xMidYMid meet" role="img" aria-hidden="true">
             <defs>
               <!-- Carved-into-stone filter: dark inner shadow on top-left + soft light edge on bottom-right.
@@ -911,75 +1034,70 @@
                   filter="url(#carved)"
                   d="M142.72 9.0V65.0H137.52V9.0ZM137.76 59.16V65.0H131.36V64.2Q131.36 64.2 131.88 64.2Q132.4 64.2 132.4 64.2Q134.48 64.2 135.95999999999998 62.72Q137.44 61.24 137.52 59.16ZM137.76 14.839999999999996H137.52Q137.44 12.759999999999998 135.95999999999998 11.279999999999998Q134.48 9.799999999999997 132.4 9.799999999999997Q132.4 9.799999999999997 131.88 9.799999999999997Q131.36 9.799999999999997 131.36 9.799999999999997V9.0H137.76ZM142.48 59.16H142.72Q142.8 61.24 144.28 62.72Q145.76 64.2 147.84 64.2Q147.84 64.2 148.32 64.2Q148.8 64.2 148.88 64.2V65.0H142.48ZM142.48 14.839999999999996V9.0H148.88V9.799999999999997Q148.8 9.799999999999997 148.32 9.799999999999997Q147.84 9.799999999999997 147.84 9.799999999999997Q145.76 9.799999999999997 144.28 11.279999999999998Q142.8 12.759999999999998 142.72 14.839999999999996Z M182.95999999999998 66.12 158.16 9.479999999999997H164.95999999999998L184.56 58.519999999999996ZM182.95999999999998 66.12 182.24 60.519999999999996 203.51999999999998 9.240000000000002H208.32L186.64 57.88Q186.64 57.88 186.2 58.88Q185.76 59.88 185.16 61.32Q184.56 62.76 184.12 64.12Q183.68 65.48 183.68 66.12ZM201.28 14.759999999999998Q202.16 12.36 200.95999999999998 11.079999999999998Q199.76 9.799999999999997 198.24 9.799999999999997H197.51999999999998V9.0H213.6V9.799999999999997Q213.6 9.799999999999997 213.24 9.799999999999997Q212.88 9.799999999999997 212.88 9.799999999999997Q211.12 9.799999999999997 209.12 10.959999999999997Q207.12 12.119999999999997 205.84 14.839999999999996ZM167.12 14.759999999999998 160.48 14.839999999999996Q159.28 12.119999999999997 157.28 10.959999999999997Q155.28 9.799999999999997 153.44 9.799999999999997Q153.44 9.799999999999997 153.12 9.799999999999997Q152.79999999999998 9.799999999999997 152.79999999999998 9.799999999999997V9.0H170.79999999999998V9.799999999999997H170.07999999999998Q168.56 9.799999999999997 167.4 11.079999999999998Q166.24 12.36 167.12 14.759999999999998Z M241.52 7.8799999999999955 265.2 64.52H258.40000000000003L239.92000000000002 15.479999999999997ZM224.32000000000002 59.16Q223.76000000000002 60.76 224.16000000000003 61.879999999999995Q224.56 63.0 225.48000000000002 63.6Q226.4 64.2 227.36 64.2H228.08V65.0H212.0V64.2Q212.0 64.2 212.36 64.2Q212.72 64.2 212.72 64.2Q214.56 64.2 216.52 63.040000000000006Q218.48000000000002 61.88 219.76000000000002 59.16ZM241.52 7.8799999999999955 242.24 13.479999999999997 222.16000000000003 64.76H217.36L237.84 16.119999999999997Q237.84 16.119999999999997 238.28000000000003 15.119999999999997Q238.72000000000003 14.119999999999997 239.32000000000002 12.68Q239.92000000000002 11.240000000000002 240.36 9.879999999999999Q240.8 8.519999999999996 240.8 7.8799999999999955ZM252.8 43.16V45.56H227.76000000000002V43.16ZM256.40000000000003 59.16H262.96000000000004Q264.16 61.88 266.16 63.040000000000006Q268.16 64.2 270.0 64.2Q270.0 64.2 270.32 64.2Q270.64 64.2 270.64 64.2V65.0H252.64000000000001V64.2H253.36Q254.88 64.2 256.08000000000004 62.88Q257.28000000000003 61.56 256.40000000000003 59.16Z M279.84 7.799999999999997 326.32 57.4 327.03999999999996 66.12 280.56 16.6ZM280.0 59.32V65.0H273.36V64.2Q273.36 64.2 274.08000000000004 64.2Q274.8 64.2 274.88 64.2Q276.88 64.2 278.32 62.760000000000005Q279.76 61.32 279.76 59.32ZM283.44 59.32Q283.44 61.32 284.88 62.760000000000005Q286.32 64.2 288.32 64.2Q288.4 64.2 289.12 64.2Q289.84 64.2 289.84 64.2V65.0H283.2V59.32ZM279.84 7.799999999999997 283.36 12.280000000000001 283.44 65.0H279.76V17.799999999999997Q279.76 13.719999999999999 279.4 10.759999999999998Q279.03999999999996 7.799999999999997 279.03999999999996 7.799999999999997ZM327.03999999999996 9.0V55.879999999999995Q327.03999999999996 58.44 327.2 60.8Q327.36 63.16 327.56 64.64Q327.76 66.12 327.76 66.12H327.03999999999996L323.44 61.88V9.0ZM333.44 9.0V9.799999999999997Q333.44 9.799999999999997 332.72 9.799999999999997Q332.0 9.799999999999997 332.0 9.799999999999997Q330.0 9.799999999999997 328.56 11.2Q327.12 12.600000000000001 327.03999999999996 14.68H326.8V9.0ZM316.96 9.0H323.6V14.68H323.44Q323.36 12.600000000000001 321.96000000000004 11.2Q320.56 9.799999999999997 318.48 9.799999999999997Q318.48 9.799999999999997 317.76 9.799999999999997Q317.03999999999996 9.799999999999997 316.96 9.799999999999997Z M28.72 77.88 52.4 134.52H45.6L27.12 85.47999999999999ZM11.52 129.16Q10.96 130.76 11.36 131.88Q11.76 133.0 12.68 133.6Q13.6 134.2 14.56 134.2H15.280000000000001V135.0H-0.8V134.2Q-0.8 134.2 -0.44 134.2Q-0.08 134.2 -0.08 134.2Q1.76 134.2 3.7199999999999998 133.04Q5.68 131.88 6.96 129.16ZM28.72 77.88 29.44 83.47999999999999 9.36 134.76H4.5600000000000005L25.04 86.12Q25.04 86.12 25.48 85.12Q25.92 84.12 26.520000000000003 82.68Q27.12 81.24000000000001 27.560000000000002 79.88Q28.0 78.52 28.0 77.88ZM40.0 113.16V115.56H14.96V113.16ZM43.6 129.16H50.160000000000004Q51.36 131.88 53.36 133.04Q55.36 134.2 57.2 134.2Q57.2 134.2 57.52 134.2Q57.84 134.2 57.84 134.2V135.0H39.84V134.2H40.56Q42.08 134.2 43.28 132.88Q44.480000000000004 131.56 43.6 129.16Z M73.12 79.0V135.0H67.92V79.0ZM94.72 132.52V135.0H72.88V132.52ZM99.6 122.03999999999999 94.96000000000001 135.0H81.68L84.56 132.52Q88.8 132.52 91.47999999999999 131.2Q94.16 129.88 95.84 127.47999999999999Q97.52000000000001 125.08 98.80000000000001 122.03999999999999ZM68.16 129.16V135.0H61.76V134.2Q61.76 134.2 62.28 134.2Q62.8 134.2 62.8 134.2Q64.88 134.2 66.36 132.72Q67.84 131.24 67.92 129.16ZM68.16 84.84H67.92Q67.84 82.75999999999999 66.36 81.28Q64.88 79.8 62.8 79.8Q62.8 79.8 62.28 79.8Q61.76 79.8 61.76 79.8V79.0H68.16ZM72.88 84.84V79.0H79.28V79.8Q79.2 79.8 78.72 79.8Q78.24000000000001 79.8 78.24000000000001 79.8Q76.16 79.8 74.68 81.28Q73.2 82.75999999999999 73.12 84.84Z M148.32 77.88Q148.32 77.88 148.32 78.24Q148.32 78.6 148.32 78.6L112.64 135.0H106.72V134.28L140.32 81.32H107.84V78.92H139.84Q141.44 78.92 143.24 78.75999999999999Q145.04 78.6 146.44 78.36Q147.84 78.12 148.32 77.88ZM148.88 132.6 148.4 135.0H111.84V132.6ZM151.28 122.68 148.64 135.0H138.08L138.64 133.0L139.52 132.6Q144.0 132.6 146.68 129.72Q149.36 126.84 150.48000000000002 122.68ZM113.36 81.32Q111.36 81.4 110.0 82.76Q108.64 84.12 108.64 86.12V87.56H107.84V81.08H113.36ZM107.84 77.47999999999999Q108.64 77.8 110.28 78.12Q111.92 78.44 113.92 78.68Q115.92 78.92 117.6 78.92L107.84 79.8Z M182.72 77.88 206.4 134.52H199.6L181.12 85.47999999999999ZM165.52 129.16Q164.96 130.76 165.36 131.88Q165.76 133.0 166.68 133.6Q167.6 134.2 168.56 134.2H169.28V135.0H153.2V134.2Q153.2 134.2 153.56 134.2Q153.92 134.2 153.92 134.2Q155.76 134.2 157.72 133.04Q159.68 131.88 160.96 129.16ZM182.72 77.88 183.44 83.47999999999999 163.36 134.76H158.56L179.04 86.12Q179.04 86.12 179.48000000000002 85.12Q179.92000000000002 84.12 180.52 82.68Q181.12 81.24000000000001 181.56 79.88Q182.0 78.52 182.0 77.88ZM194.0 113.16V115.56H168.96V113.16ZM197.6 129.16H204.16Q205.36 131.88 207.36 133.04Q209.36 134.2 211.2 134.2Q211.2 134.2 211.51999999999998 134.2Q211.84 134.2 211.84 134.2V135.0H193.84V134.2H194.56Q196.07999999999998 134.2 197.28 132.88Q198.48000000000002 131.56 197.6 129.16Z M270.24 77.88 270.88 83.24000000000001 250.8 127.96Q250.8 127.96 250.20000000000002 129.32Q249.60000000000002 130.68 248.96 132.56Q248.32 134.44 248.08 136.12H247.28L246.16000000000003 131.08ZM221.04000000000002 129.16V135.0H212.16V134.2Q212.24 134.2 212.84 134.2Q213.44 134.2 213.44 134.2Q215.6 134.2 217.28 132.88Q218.96 131.56 219.28 129.16ZM223.36 130.44Q223.36 130.52 223.36 130.60000000000002Q223.36 130.68 223.36 130.84Q223.36 132.12 224.28000000000003 133.2Q225.20000000000002 134.28 226.48000000000002 134.28H227.68V135.0H222.8V130.44ZM225.28 77.88H226.08L227.68 82.6L222.96 135.0H218.64000000000001ZM226.08 77.88 249.12 127.72 247.28 136.12 224.56 86.84ZM270.96000000000004 77.88 277.84000000000003 135.0H271.6L267.2 86.52L270.24 77.88ZM275.44 129.16H277.12Q277.52 131.56 279.2 132.88Q280.88 134.2 282.96000000000004 134.2Q282.96000000000004 134.2 283.6 134.2Q284.24 134.2 284.24 134.2V135.0H275.44ZM271.2 130.44H271.76V135.0H266.88V134.28H268.08000000000004Q269.44 134.28 270.32 133.2Q271.2 132.12 271.2 130.84Q271.2 130.68 271.2 130.60000000000002Q271.2 130.52 271.2 130.44Z M319.76 77.88Q328.32 77.88 334.79999999999995 81.52Q341.28 85.16 344.91999999999996 91.72Q348.56 98.28 348.56 107.0Q348.56 115.72 344.91999999999996 122.28Q341.28 128.84 334.79999999999995 132.48000000000002Q328.32 136.12 319.76 136.12Q311.28 136.12 304.79999999999995 132.48000000000002Q298.32 128.84 294.68 122.28Q291.04 115.72 291.04 107.0Q291.04 98.28 294.68 91.72Q298.32 85.16 304.79999999999995 81.52Q311.28 77.88 319.76 77.88ZM319.76 133.72Q326.56 133.72 331.64 130.36Q336.72 127.0 339.56 121.0Q342.4 115.0 342.4 107.0Q342.4 99.0 339.56 93.0Q336.72 87.0 331.64 83.64Q326.56 80.28 319.76 80.28Q313.04 80.28 307.96000000000004 83.64Q302.88 87.0 300.03999999999996 93.0Q297.2 99.0 297.2 107.0Q297.2 115.0 300.03999999999996 121.0Q302.88 127.0 307.96000000000004 130.36Q313.04 133.72 319.76 133.72Z M367.6 79.0H378.88Q382.48 79.0 385.40000000000003 80.03999999999999Q388.32000000000005 81.08 390.32000000000005 83.03999999999999Q392.32000000000005 85.0 393.40000000000003 87.75999999999999Q394.48 90.52 394.48 94.03999999999999Q394.48 97.88 392.68 101.4Q390.88 104.92 387.8 107.12Q384.72 109.32 380.88 109.32Q382.24 109.88 383.84000000000003 111.6Q385.44 113.32 386.64000000000004 114.92Q386.64000000000004 114.92 387.72 116.47999999999999Q388.8 118.03999999999999 390.44000000000005 120.28Q392.08000000000004 122.52 393.76 124.68Q395.44 126.84 396.64000000000004 128.12Q398.24 129.88 399.84000000000003 131.24Q401.44 132.6 403.32000000000005 133.39999999999998Q405.20000000000005 134.2 407.52000000000004 134.2V135.0H403.12Q399.44 135.0 396.76 133.88Q394.08000000000004 132.76 392.24 131.12Q390.40000000000003 129.48 389.12 127.96Q388.88 127.64 387.8 126.12Q386.72 124.6 385.24 122.47999999999999Q383.76 120.36 382.32 118.28Q380.88 116.2 379.84000000000003 114.72Q378.8 113.24 378.64000000000004 113.0Q377.12 111.0 375.28 109.32Q373.44 107.64 371.28000000000003 107.64V106.84Q371.28000000000003 106.84 372.52 106.88Q373.76 106.92 375.52000000000004 106.84Q377.6 106.75999999999999 380.08000000000004 106.19999999999999Q382.56 105.64 384.72 103.88Q386.88 102.12 388.0 98.52Q388.24 97.64 388.4 96.32Q388.56 95.0 388.48 93.72Q388.40000000000003 88.28 385.72 85.03999999999999Q383.04 81.8 378.56 81.56Q376.32 81.4 373.96000000000004 81.44Q371.6 81.47999999999999 370.0 81.47999999999999Q368.40000000000003 81.47999999999999 368.40000000000003 81.47999999999999Q368.40000000000003 81.4 368.20000000000005 80.8Q368.0 80.19999999999999 367.8 79.6Q367.6 79.0 367.6 79.0ZM368.64000000000004 79.0V135.0H363.44V79.0ZM363.68 129.16V135.0H357.28000000000003V134.2Q357.28000000000003 134.2 357.8 134.2Q358.32 134.2 358.32 134.2Q360.40000000000003 134.2 361.88 132.72Q363.36 131.24 363.44 129.16ZM363.68 84.84H363.44Q363.36 82.75999999999999 361.88 81.28Q360.40000000000003 79.8 358.32 79.8Q358.32 79.8 357.8 79.8Q357.28000000000003 79.8 357.28000000000003 79.8V79.0H363.68ZM368.40000000000003 129.16H368.64000000000004Q368.64000000000004 131.24 370.16 132.72Q371.68 134.2 373.76 134.2Q373.76 134.2 374.24 134.2Q374.72 134.2 374.72 134.2V135.0H368.40000000000003Z M435.36 77.88 459.04 134.52H452.24000000000007L433.76000000000005 85.47999999999999ZM418.16 129.16Q417.6 130.76 418.0 131.88Q418.40000000000003 133.0 419.32000000000005 133.6Q420.24000000000007 134.2 421.20000000000005 134.2H421.9200000000001V135.0H405.84000000000003V134.2Q405.84000000000003 134.2 406.20000000000005 134.2Q406.56000000000006 134.2 406.56000000000006 134.2Q408.40000000000003 134.2 410.36 133.04Q412.32000000000005 131.88 413.6 129.16ZM435.36 77.88 436.08000000000004 83.47999999999999 416.00000000000006 134.76H411.20000000000005L431.68000000000006 86.12Q431.68000000000006 86.12 432.12000000000006 85.12Q432.56000000000006 84.12 433.1600000000001 82.68Q433.76000000000005 81.24000000000001 434.20000000000005 79.88Q434.64000000000004 78.52 434.64000000000004 77.88ZM446.64000000000004 113.16V115.56H421.6V113.16ZM450.24000000000007 129.16H456.80000000000007Q458.00000000000006 131.88 460.00000000000006 133.04Q462.00000000000006 134.2 463.84000000000003 134.2Q463.84000000000003 134.2 464.16 134.2Q464.48 134.2 464.48 134.2V135.0H446.48V134.2H447.20000000000005Q448.72 134.2 449.9200000000001 132.88Q451.12000000000006 131.56 450.24000000000007 129.16Z" />
           </svg>
-        </div>
+        </h1>
 
         <div class="hero-tagline">aut viam inveniam aut faciam</div>
       </div>
     </div>
 
-    <!-- scroll cue — pinned to viewport bottom; pulses lightly to invite the next panel -->
-    <div class="hero-cue" id="heroCue" aria-hidden="true">
-      <span>Aromazla</span>
-      <span class="arrow"></span>
-    </div>
-  </section>
+    <!-- M-18 · moire-rays — the hero's ground. Behind everything: .hero-frame is
+         z-index 2, the bust 1, this 0. -->
+    <canvas class="hero-rays" id="heroRays" aria-hidden="true"></canvas>
 
-  <!-- DOORWAY — single visual door, no labels -->
-  <section class="doorways panel hpanel" id="doorways" style="--z:2;">
-    <a href="aromazla.html" class="door-visual reveal" aria-label="Enter Aromazla — jewellery collection">
-      <!-- Three sources, ordered by browser-native alpha support. The
-           browser picks the first it can decode:
-             1. sap.mov  — HEVC alpha (Safari macOS + iOS)
-             2. sap.webm — VP9 alpha (Chrome / Firefox / Edge desktop + Android)
-             3. sap.mp4  — H.264 with black matte (universal fallback)
-           The mp4 fallback relies on the always-on `mix-blend-mode: lighten`
-           in CSS to knock the matte out. The blend is a no-op on real-alpha
-           formats (transparent pixels don't contribute to compositing), so
-           leaving it on for all sources is safe. -->
-      <video class="door-visual-piece" id="doorVideo" autoplay loop muted playsinline preload="metadata" aria-hidden="true">
-        <source src="assets/p1/sap.mov"  type="video/quicktime">
-        <source src="assets/p1/sap.webm" type="video/webm">
-        <source src="assets/p1/sap.mp4"  type="video/mp4">
+
+    <!-- THE DOOR — the piece and the wordmark share the hero with the bust rather
+         than sitting in their own panel. Tried as a separate horizontal panel
+         (2026-09-01) and reverted: behind a scroll gesture the second half of the
+         page is effectively invisible, and this page has to say what it is in one
+         screen. Web work lives in the nav instead.
+         Three sources, ordered by browser-native alpha support:
+           1. equinoccio.mov  — HEVC alpha (Safari macOS + iOS)
+           2. equinoccio.webm — VP9 alpha (Chrome / Firefox / Edge)
+           3. equinoccio.mp4  — H.264 with black matte, knocked out by the
+              always-on mix-blend-mode: lighten, a no-op on the alpha formats.
+         All three come from _pipeline/alpha-video.py. The .mov CANNOT be produced
+         or verified with ffmpeg — read that file's docstring before regenerating. -->
+    <a href="aromazla.html" class="door-visual hero-door" aria-label="Enter Aromazla — jewellery collection">
+      <video disablepictureinpicture class="door-visual-piece" id="doorVideo" loop muted playsinline
+             preload="metadata" aria-hidden="true" poster="assets/p1/equinoccio-poster.webp">
+        <source src="assets/p1/equinoccio.mov"  type="video/quicktime">
+        <source src="assets/p1/equinoccio.webm" type="video/webm">
+        <source src="assets/p1/equinoccio.mp4"  type="video/mp4">
       </video>
 
-      <!-- AROMAZLA wordmark, statically carved with the same filter recipe as the hero name -->
       <div class="door-visual-mark" aria-label="Aromazla">
         <svg viewBox="0 0 600 86" preserveAspectRatio="xMidYMid meet" role="img" aria-hidden="true">
           <defs>
+            <!-- Same recipe as the hero name's #carved: the floods start at 0 so
+                 the carve is a no-op until the timeline raises them. -->
             <filter id="carvedStatic" x="-10%" y="-10%" width="120%" height="120%">
-              <feFlood flood-color="#000000" flood-opacity="0.92" result="sFlood"/>
+              <feFlood id="doorShadowFlood" flood-color="#000000" flood-opacity="0" result="sFlood"/>
               <feComposite in="sFlood" in2="SourceAlpha" operator="out" result="sOut"/>
               <feOffset in="sOut" dx="1.4" dy="1.8" result="sOff"/>
               <feGaussianBlur in="sOff" stdDeviation="1.2" result="sBlur"/>
               <feComposite in="sBlur" in2="SourceAlpha" operator="in" result="shadow"/>
-
-              <feFlood flood-color="#FFFFFF" flood-opacity="0.42" result="lFlood"/>
+              <feFlood id="doorLightFlood" flood-color="#FFFFFF" flood-opacity="0" result="lFlood"/>
               <feComposite in="lFlood" in2="SourceAlpha" operator="out" result="lOut"/>
               <feOffset in="lOut" dx="-1.0" dy="-1.3" result="lOff"/>
               <feGaussianBlur in="lOff" stdDeviation="0.85" result="lBlur"/>
               <feComposite in="lBlur" in2="SourceAlpha" operator="in" result="light"/>
-
-              <feMerge>
-                <feMergeNode in="SourceGraphic"/>
-                <feMergeNode in="light"/>
-                <feMergeNode in="shadow"/>
-              </feMerge>
+              <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="light"/><feMergeNode in="shadow"/></feMerge>
             </filter>
           </defs>
-          <text x="300" y="58"
-                text-anchor="middle"
-                font-family="Cinzel, 'Trajan Pro', Georgia, serif"
-                font-weight="500"
-                font-size="40"
-                letter-spacing="12.8"
-                fill="#A89F90"
-                filter="url(#carvedStatic)">AROMAZLA</text>
+          <!-- OUTLINES, not live <text>: a stroke-draw needs a path, or the dash
+               offset dashes each glyph independently and the letters all draw at
+               once instead of the word being written. Cinzel 500 at the same size,
+               letter-spacing and anchor the <text> used, verified to 0.7px. -->
+          <path id="doorMarkPath" filter="url(#carvedStatic)" d="M145.775234375 29.35904296875 158.02001953125 57.76H153.36518554687498L144.432822265625 34.462451171875ZM137.175234375 55.08Q136.87904296874999 55.88 137.07904296875 56.44Q137.27904296875 57.0 137.747138671875 57.3Q138.215234375 57.6 138.69523437499998 57.6H139.055234375V58.0H130.83712890625V57.6Q130.83712890625 57.6 131.01712890624998 57.6Q131.19712890625 57.6 131.19712890625 57.6Q132.11712890625 57.6 133.09712890625 57.019999999999996Q134.07712890624998 56.44 134.71712890625 55.08ZM145.775234375 29.35904296875 146.062373046875 32.8552734375 136.0628515625 57.88H133.49284179687498L143.7733203125 33.851445312500005Q143.813798828125 33.778583984375004 144.05808593749998 33.221914062500005Q144.302373046875 32.665244140625 144.618564453125 31.904765625Q144.934755859375 31.144287109375 145.170947265625 30.431904296875Q145.40713867187497 29.719521484375 145.41523437499998 29.35904296875ZM150.937587890625 47.541455078125V48.903369140625H138.660458984375V47.541455078125ZM152.33280273437498 55.08H156.85954101562498Q157.475732421875 56.44 158.46763671875 57.019999999999996Q159.45954101562498 57.6 160.379541015625 57.6Q160.379541015625 57.6 160.539541015625 57.6Q160.699541015625 57.6 160.699541015625 57.6V58.0H150.45280273437498V57.6H150.812802734375Q151.5808984375 57.6 152.1849462890625 56.94Q152.788994140625 56.28 152.33280273437498 55.08Z M181.33910156249996 30.0H186.8171875Q188.61718749999997 30.0 190.16219238281246 30.479521484375Q191.70719726562498 30.959042968749998 192.82053710937498 31.90666015625Q193.93387695312498 32.85427734375 194.55888183593748 34.2545166015625Q195.18388671875 35.654755859375 195.18388671875 37.528095703125004Q195.18388671875 39.367138671875 194.35270019531248 41.0988037109375Q193.52151367187497 42.83046875 192.01389648437498 43.954755859375Q190.50627929687496 45.07904296875 188.46484374999997 45.16Q189.34723632812498 45.480478515625 190.23628906249996 46.4011962890625Q191.12534179687498 47.3219140625 191.74962890624997 48.20287109375Q191.76582031249998 48.227158203125 192.26129394531247 48.9626318359375Q192.75676757812496 49.69810546875 193.51200195312498 50.7573876953125Q194.26723632812497 51.816669921875 195.05056640624997 52.85619140625Q195.83389648437497 53.895712890625 196.42580078124996 54.56Q197.25008789062497 55.512861328125 198.02580078124998 56.184765625Q198.80151367187497 56.856669921875 199.69293945312498 57.224287109375Q200.58436523437499 57.591904296875 201.70388671874997 57.6V58.0H198.93718749999996Q196.98384765624996 58.0 195.50217285156248 57.496669921875Q194.020498046875 56.99333984375 192.95882324218746 56.1450048828125Q191.89714843749996 55.296669921875 191.13571289062497 54.26951171875Q190.95094726562496 53.996171875 190.46356933593745 53.244267578125005Q189.97619140624997 52.49236328125 189.34548339843747 51.509272460937495Q188.71477539062496 50.526181640625 188.11216308593748 49.5711865234375Q187.50955078124997 48.616191406249996 187.07050781249995 47.90857421875Q186.63146484374997 47.20095703125 186.53527343749997 47.0Q185.84813476562496 45.910947265625 185.00099609374996 45.135712890625Q184.153857421875 44.360478515625 183.17910156249997 44.32V43.92Q183.21148437499997 43.92 183.74647949218746 43.9359521484375Q184.28147460937498 43.951904296875 184.999560546875 43.92Q186.05575195312497 43.888095703125 187.222890625 43.559521484375Q188.39002929687499 43.230947265625 189.37288085937496 42.31046875Q190.35573242187496 41.389990234375 190.84287109374998 39.606181640624996Q190.94667968749997 39.19046875 191.01858398437497 38.587138671874996Q191.09048828124997 37.98380859375 191.05048828124998 37.36Q190.98620117187497 34.591425781249995 189.65429687499997 33.0645263671875Q188.32239257812498 31.537626953125 186.17144531249997 31.4419140625Q185.23764648437498 31.37810546875 184.23170410156246 31.3940576171875Q183.22576171874996 31.410009765625 182.51481445312498 31.410009765625Q181.80386718749997 31.410009765625 181.73910156249997 31.410009765625Q181.73910156249997 31.37810546875 181.63910156249997 31.033579101562502Q181.53910156249998 30.689052734375 181.43910156249996 30.3445263671875Q181.33910156249996 30.0 181.33910156249996 30.0ZM181.85910156249997 30.0V58.0H178.11760742187496V30.0ZM178.23760742187497 55.08V58.0H175.03760742187498V57.6Q175.05379882812497 57.6 175.30165527343746 57.6Q175.54951171874998 57.6 175.55760742187496 57.6Q176.59760742187498 57.6 177.33760742187496 56.86Q178.07760742187497 56.12 178.11760742187496 55.08ZM178.23760742187497 32.92H178.11760742187496Q178.07760742187497 31.88 177.33760742187496 31.14Q176.59760742187498 30.4 175.55760742187496 30.4Q175.54951171874998 30.4 175.30165527343746 30.4Q175.05379882812497 30.4 175.03760742187498 30.4V30.0H178.23760742187497ZM181.73910156249997 55.08H181.85910156249997Q181.85910156249997 56.12 182.61910156249996 56.86Q183.37910156249998 57.6 184.41910156249997 57.6Q184.43529296874996 57.6 184.66314941406247 57.6Q184.89100585937499 57.6 184.89910156249996 57.6V58.0H181.73910156249997Z M230.97000976562498 29.439999999999998Q235.42811523437499 29.439999999999998 238.76931152343747 31.243808593749996Q242.11050781249997 33.047617187499995 243.9669384765625 36.319521484374995Q245.823369140625 39.591425781249995 245.823369140625 44.0Q245.823369140625 48.400478515625 243.9669384765625 51.676430664062494Q242.11050781249997 54.9523828125 238.76931152343747 56.75619140625Q235.42811523437499 58.56 230.97000976562498 58.56Q226.54380859375 58.56 223.20666015625 56.75619140625Q219.86951171874998 54.9523828125 218.01308105468746 51.680478515625Q216.15665039062497 48.40857421875 216.15665039062497 44.0Q216.15665039062497 39.599521484375 218.01308105468746 36.3235693359375Q219.86951171874998 33.047617187499995 223.20666015625 31.243808593749996Q226.54380859375 29.439999999999998 230.97000976562498 29.439999999999998ZM230.97000976562498 57.1980859375Q234.18380859374997 57.1980859375 236.56189453124998 55.5545166015625Q238.93998046874998 53.910947265625 240.2587841796875 50.951425781249995Q241.57758789062498 47.991904296875 241.57758789062498 44.0Q241.57758789062498 40.008095703125 240.2587841796875 37.048574218750005Q238.93998046874998 34.089052734375 236.56189453124998 32.4454833984375Q234.18380859374997 30.8019140625 230.97000976562498 30.8019140625Q227.79621093749998 30.8019140625 225.41812499999997 32.4454833984375Q223.0400390625 34.089052734375 221.72123535156248 37.048574218750005Q220.402431640625 40.008095703125 220.402431640625 44.0Q220.402431640625 47.991904296875 221.72123535156248 50.951425781249995Q223.0400390625 53.910947265625 225.41812499999997 55.5545166015625Q227.79621093749998 57.1980859375 230.97000976562498 57.1980859375Z M290.67812499999997 29.439999999999998 290.99812499999996 32.678603515625 280.34285156249996 54.4476171875Q280.34285156249996 54.4476171875 280.0145166015625 55.135712890625Q279.68618164062497 55.82380859375 279.3459423828125 56.788095703125Q279.00570312499997 57.7523828125 278.9180859375 58.64095703125H278.526181640625L277.626162109375 55.79712890625ZM265.23617187499997 55.08V58.0H260.79617187499997V57.6Q260.836171875 57.6 261.13617187499995 57.6Q261.43617187499996 57.6 261.43617187499996 57.6Q262.516171875 57.6 263.356171875 56.94Q264.196171875 56.28 264.356171875 55.08ZM266.598564453125 55.72Q266.598564453125 55.76 266.598564453125 55.8Q266.598564453125 55.84 266.598564453125 55.92Q266.598564453125 56.56 267.058564453125 57.1Q267.518564453125 57.64 268.158564453125 57.64H268.76666015625V58.0H266.31856445312496V55.72ZM267.461416015625 29.439999999999998H267.8533203125L268.855712890625 32.3505078125L266.382373046875 58.0H264.01998046874996ZM267.8533203125 29.439999999999998 279.89144531249997 53.21041015625 278.526181640625 58.64095703125 267.004267578125 35.58771484375ZM291.038125 29.439999999999998 294.59956054687495 58.0H290.378544921875L288.23521484375 35.711064453125005L290.67812499999997 29.439999999999998ZM293.383369140625 55.08H294.23146484374996Q294.43146484375 56.28 295.26741699218746 56.94Q296.103369140625 57.6 297.15146484375 57.6Q297.15146484375 57.6 297.4674169921875 57.6Q297.783369140625 57.6 297.79146484374996 57.6V58.0H293.383369140625ZM290.162353515625 55.72H290.442353515625V58.0H287.9942578125V57.64H288.602353515625Q289.27425781249997 57.64 289.7183056640625 57.1Q290.162353515625 56.56 290.162353515625 55.92Q290.162353515625 55.84 290.162353515625 55.8Q290.162353515625 55.76 290.162353515625 55.72Z M325.135234375 29.35904296875 337.38001953124996 57.76H332.72518554687497L323.792822265625 34.462451171875ZM316.53523437499996 55.08Q316.23904296874997 55.88 316.43904296874996 56.44Q316.63904296874995 57.0 317.10713867187496 57.3Q317.575234375 57.6 318.055234375 57.6H318.41523437499995V58.0H310.19712890625V57.6Q310.19712890625 57.6 310.37712890625 57.6Q310.55712890625 57.6 310.55712890625 57.6Q311.47712890624996 57.6 312.45712890625 57.019999999999996Q313.43712890625 56.44 314.07712890625 55.08ZM325.135234375 29.35904296875 325.42237304687495 32.8552734375 315.4228515625 57.88H312.852841796875L323.13332031249996 33.851445312500005Q323.173798828125 33.778583984375004 323.4180859375 33.221914062500005Q323.66237304687496 32.665244140625 323.97856445312493 31.904765625Q324.29475585937496 31.144287109375 324.53094726562495 30.431904296875Q324.767138671875 29.719521484375 324.77523437499997 29.35904296875ZM330.297587890625 47.541455078125V48.903369140625H318.02045898437495V47.541455078125ZM331.692802734375 55.08H336.219541015625Q336.835732421875 56.44 337.82763671875 57.019999999999996Q338.81954101562496 57.6 339.739541015625 57.6Q339.739541015625 57.6 339.899541015625 57.6Q340.059541015625 57.6 340.059541015625 57.6V58.0H329.812802734375V57.6H330.17280273437495Q330.9408984375 57.6 331.54494628906247 56.94Q332.14899414062495 56.28 331.692802734375 55.08Z M375.731923828125 29.439999999999998Q375.731923828125 29.439999999999998 375.731923828125 29.619999999999997Q375.731923828125 29.8 375.731923828125 29.8L358.58005859375 58.0H354.39760742187497V57.64L370.48518554687496 31.3219140625H354.95760742187497V29.96H371.491923828125Q372.291923828125 29.96 373.191923828125 29.880000000000003Q374.091923828125 29.8 374.791923828125 29.68Q375.491923828125 29.56 375.731923828125 29.439999999999998ZM375.769052734375 56.6380859375 375.529052734375 58.0H357.038564453125V56.6380859375ZM377.098583984375 51.20853515625 375.73810546875 58.0H369.77806640625L370.1390234375 56.9028515625L370.6437890625 56.6380859375Q373.0133203125 56.6380859375 374.539521484375 55.1009375Q376.06572265625 53.5637890625 376.698583984375 51.20853515625ZM358.284306640625 31.3219140625Q356.992861328125 31.3619140625 356.175234375 32.183588867187495Q355.357607421875 33.005263671875 355.357607421875 34.28861328125V34.92765625H354.95760742187497V31.2019140625H358.284306640625ZM354.95760742187497 29.24Q355.357607421875 29.4 356.177607421875 29.56Q356.997607421875 29.72 357.997607421875 29.84Q358.997607421875 29.96 359.83760742187496 29.96L354.95760742187497 30.4Z M400.13052734375 30.0V58.0H396.39712890625V30.0ZM410.84957031249996 56.5980859375 411.17339843749994 58.0H400.01052734374997V56.5980859375ZM413.45148437499995 50.95330078125 411.29339843749995 58.0H404.24861328124996L405.68861328124996 56.5980859375Q407.76813476562495 56.5980859375 409.17290039062493 55.897607421875Q410.57766601562497 55.19712890625 411.49862304687497 53.9121240234375Q412.41958007812497 52.627119140625 413.0545981069711 50.95330078125ZM396.51712890625 55.08V58.0H393.31712890625V57.6Q393.31712890625 57.6 393.57712890625 57.6Q393.83712890625 57.6 393.83712890625 57.6Q394.87712890625 57.6 395.61712890624995 56.86Q396.35712890624995 56.12 396.39712890625 55.08ZM396.51712890625 32.92H396.39712890625Q396.35712890624995 31.88 395.61712890624995 31.14Q394.87712890625 30.4 393.83712890625 30.4Q393.83712890625 30.4 393.57712890625 30.4Q393.31712890625 30.4 393.31712890625 30.4V30.0H396.51712890625ZM400.01052734374997 32.92V30.0H403.21052734374996V30.4Q403.17052734375 30.4 402.93052734375 30.4Q402.69052734375 30.4 402.69052734375 30.4Q401.65052734374996 30.4 400.91052734375 31.14Q400.17052734375 31.88 400.13052734375 32.92Z M441.455234375 29.35904296875 453.70001953124995 57.76H449.04518554687496L440.11282226562497 34.462451171875ZM432.85523437499995 55.08Q432.55904296874996 55.88 432.75904296874995 56.44Q432.95904296874994 57.0 433.42713867187496 57.3Q433.895234375 57.6 434.375234375 57.6H434.73523437499995V58.0H426.51712890625V57.6Q426.51712890625 57.6 426.69712890625 57.6Q426.87712890625 57.6 426.87712890625 57.6Q427.79712890624995 57.6 428.77712890624997 57.019999999999996Q429.75712890625 56.44 430.39712890625 55.08ZM441.455234375 29.35904296875 441.74237304687495 32.8552734375 431.7428515625 57.88H429.172841796875L439.45332031249995 33.851445312500005Q439.49379882812497 33.778583984375004 439.73808593749993 33.221914062500005Q439.98237304687495 32.665244140625 440.298564453125 31.904765625Q440.61475585937495 31.144287109375 440.850947265625 30.431904296875Q441.087138671875 29.719521484375 441.09523437499996 29.35904296875ZM446.617587890625 47.541455078125V48.903369140625H434.34045898437495V47.541455078125ZM448.012802734375 55.08H452.539541015625Q453.155732421875 56.44 454.14763671874994 57.019999999999996Q455.13954101562496 57.6 456.059541015625 57.6Q456.059541015625 57.6 456.21954101562494 57.6Q456.37954101562497 57.6 456.37954101562497 57.6V58.0H446.132802734375V57.6H446.49280273437495Q447.2608984375 57.6 447.86494628906246 56.94Q448.46899414062494 56.28 448.012802734375 55.08Z"/>
         </svg>
       </div>
 
       <span class="door-visual-cue">Enter <span class="glyph" aria-hidden="true">↗</span></span>
     </a>
   </section>
+
+
+
 
     </div><!-- /.hpanels-track -->
    </div><!-- /.hpanels -->
@@ -989,8 +1107,8 @@
 
 
   <!-- GSAP + ScrollTrigger -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="assets/vendor/gsap.min.js"></script>
+  <script src="assets/vendor/ScrollTrigger.min.js"></script>
   <script>
     // ─── NAV scroll state ───
     const navEl = document.getElementById('nav');
@@ -1018,17 +1136,21 @@
     // So this path shows a single still with real alpha — 40KB, because 92%
     // of the frame is transparent. Smooth by construction, and sharper than
     // the animation ever was.
-    //   Source: the LAST frame of e1.mp4 (the Kling render), not a frame of
-    //   sap.webm — that model matches the real pendant more closely. It came
-    //   on pure black, so the key uses alpha recovery: on black C = F*a, so
-    //   F = C/a. Skip that un-multiply and the feathered edge keeps the black
-    //   it was blended with and reads as a dark fringe on a light ground.
-    //   It is composited onto the video's own 1292x1604 frame at the same
-    //   scale and centre (bbox within 3px, centre x identical at 646) so the
-    //   swap does not jump.
-    //   ⚠ Do NOT trim the transparent padding. CSS sizes this by height with
-    //     width:auto, so the framing must match the video's or the pendant
-    //     renders larger here than it does everywhere else.
+    //   Source: FRAME 0 OF THE VIDEO ITSELF (equinoccio-poster.webp), produced
+    //   by the same _pipeline/alpha-video.py run — same crop, same key, same
+    //   un-premultiply. That is the whole point: it is the identical framing,
+    //   so the still needs no sizing rules of its own and the swap cannot jump.
+    //   It used to be the last frame of a DIFFERENT render (e1.mp4) padded onto
+    //   the old video's 1292x1604 canvas, which is why a pile of compensating
+    //   CSS existed underneath. Keep them generated together and none of it
+    //   comes back.
+    // The door's clip stays PAUSED through the hero's entrance and is released
+    // by the timeline once its fade-in completes, so the piece arrives the way
+    // the bust does — materialising — rather than already rotating. Everything
+    // that could start it early has to respect the gate: the offscreen-resume
+    // observer below, and the tap-to-play safety net.
+    let doorReleased = false;
+    let releaseDoor = () => {};
     let doorVideo = document.getElementById('doorVideo');
     if (doorVideo) {
       let lpmFallbackTriggered = false;
@@ -1037,8 +1159,8 @@
         if (lpmFallbackTriggered || !doorVideo) return;
         lpmFallbackTriggered = true;
         const savedScrollY = window.scrollY;
-        const img = new Image(621, 1057);   // trimmed to the pendant; see .door-visual-still
-        img.src = 'assets/p1/sap-still.webp';
+        const img = new Image(424, 730);    // frame 0 of the video, same framing
+        img.src = 'assets/p1/equinoccio-poster.webp';
         img.alt = '';
         img.className = doorVideo.className + ' door-visual-still';
         // ⭐ DROP THE BLEND ON THIS PATH. mix-blend-mode: lighten is always on
@@ -1051,6 +1173,10 @@
         // has deliberately throttled — the one device that reaches this code.
         // Raising the frame rate would double that cost, not relieve it.
         img.style.mixBlendMode = 'normal';
+        // .door-visual-piece is opacity: 0 in CSS (the timeline fades the video
+        // in via an inline style, which className does not carry over), so the
+        // still has to be made visible explicitly or the swap goes blank.
+        img.style.opacity = '1';
         img.id = 'doorVideo';
         img.setAttribute('aria-hidden', 'true');
         doorVideo.replaceWith(img);
@@ -1065,7 +1191,7 @@
       // play() on intersection. If it still fails (LPM), swap to WebP.
       if ('IntersectionObserver' in window) {
         const resumeObs = new IntersectionObserver((entries) => {
-          if (lpmFallbackTriggered) return;
+          if (lpmFallbackTriggered || !doorReleased) return;
           entries.forEach((entry) => {
             if (entry.isIntersecting && doorVideo && doorVideo.tagName === 'VIDEO' && doorVideo.paused) {
               doorVideo.play().catch(() => swapToWebpFallback());
@@ -1077,10 +1203,20 @@
 
       // Click-fix safety net: tap on the (paused) video calls play() instead
       // of bubbling to the parent anchor and navigating away.
+      releaseDoor = () => {
+        if (doorReleased) return;
+        doorReleased = true;
+        if (doorVideo && doorVideo.tagName === 'VIDEO') {
+          doorVideo.play().catch(() => swapToWebpFallback());
+        }
+      };
+
       const doorVisual = doorVideo.closest('.door-visual');
       if (doorVisual) {
         doorVisual.addEventListener('click', (e) => {
-          if (lpmFallbackTriggered || !doorVideo) return;
+          // Before release the clip is paused on purpose, so a tap should just
+          // follow the link rather than being swallowed to start playback.
+          if (lpmFallbackTriggered || !doorVideo || !doorReleased) return;
           if (doorVideo.tagName !== 'VIDEO' || !doorVideo.paused) return;
           const r = doorVideo.getBoundingClientRect();
           const insideVideo = e.clientX >= r.left && e.clientX <= r.right
@@ -1128,8 +1264,10 @@
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const path = document.getElementById('namePath');
     const tagline = document.querySelector('.hero-tagline');
-    const heroCue = document.getElementById('heroCue');
     const heroStatue = document.getElementById('heroStatue');
+    const doorPiece = document.getElementById('doorVideo');
+    const doorMark = document.getElementById('doorMarkPath');
+    const doorCue = document.querySelector('.door-visual-cue');
     /* the brand mark is a second layer of the same object — every tween that
        touches the statue must touch it too, or the two drift apart */
     /* the fog canvas reads the bust's own computed opacity every frame, so
@@ -1167,29 +1305,72 @@
       if (tagline) {
         tl.to(tagline, { opacity: 1, y: 0, duration: 1.2, ease: 'sine.out' }, '<');
       }
-      // Cue rises alongside the name's fill phase — they share the same beat.
-      if (heroCue) {
-        tl.to(heroCue, { opacity: 0.75, duration: 1.4, ease: 'sine.out' }, '<');
-        tl.add(() => heroCue.classList.add('pulsing'));
-      }
       // 3. Carve catches the tail of phase 2 — starts ~2.8s earlier than its previous beat
       //    so the recess feels like a domino chasing the fill. Same smoothness (sine.inOut).
-      //    Floods rise + fill darkens to #A89F90 over the same 1.0s window.
-      tl.to(path, { fill: '#A89F90', duration: 1.0, ease: 'sine.inOut' }, '-=2.6');
+      //    Floods rise + fill darkens to #FFFFFF over the same 1.0s window.
+      tl.to(path, { fill: '#FFFFFF', duration: 1.0, ease: 'sine.inOut' }, '-=2.6');
       tl.to(shadowFlood, { attr: { 'flood-opacity': 0.92 }, duration: 1.0, ease: 'sine.inOut' }, '<');
       tl.to(lightFlood, { attr: { 'flood-opacity': 0.42 }, duration: 1.0, ease: 'sine.inOut' }, '<');
+
+      // ── THE DOOR, on the name's own beats ──
+      // Positions are ABSOLUTE, not relative. The tweens above use '-=' and
+      // '<', which resolve against the timeline's end AS IT STANDS when each is
+      // added — so appending anything with a relative position would land it
+      // somewhere unintended. The name's beats work out to: draw 0.6-4.6,
+      // fill 1.2-2.8, carve 2.0-3.0, and the bust fades 0.4-4.4. The door
+      // reuses those numbers so the two headings are written together and the
+      // piece materialises exactly as the marble does.
+      if (doorPiece) {
+        tl.to(doorPiece, { opacity: 1, duration: 4.0, ease: 'sine.out' }, 0.4);
+        // The turn starts at 2.4s — partway through the 0.4-4.4s fade, not after
+        // it. Waiting for the fade to finish left the piece sitting still for too
+        // long; starting it while the marble is still coming up means the two
+        // arrive together instead of in sequence.
+        tl.add(releaseDoor, 2.4);
+      }
+      if (doorMark) {
+        const dlen = doorMark.getTotalLength();
+        gsap.set(doorMark, { strokeDasharray: dlen, strokeDashoffset: dlen, fillOpacity: 0, strokeOpacity: 1 });
+        const doorShadow = document.getElementById('doorShadowFlood');
+        const doorLight = document.getElementById('doorLightFlood');
+        tl.to(doorMark, { strokeDashoffset: 0, duration: 4, ease: 'power1.inOut' }, 0.6);
+        tl.to(doorMark, { fillOpacity: 1, duration: 1.6, ease: 'sine.inOut' }, 1.2);
+        tl.to(doorMark, { strokeOpacity: 0, duration: 1.6, ease: 'sine.inOut' }, 1.2);
+        tl.to(doorMark, { fill: '#FFFFFF', duration: 1.0, ease: 'sine.inOut' }, 2.0);
+        tl.to(doorShadow, { attr: { 'flood-opacity': 0.92 }, duration: 1.0, ease: 'sine.inOut' }, 2.0);
+        tl.to(doorLight, { attr: { 'flood-opacity': 0.42 }, duration: 1.0, ease: 'sine.inOut' }, 2.0);
+      }
+      if (doorCue) tl.to(doorCue, { opacity: 1, duration: 1.2, ease: 'sine.out' }, 1.2);
+      // The rays settle last and slowest — they are ground, so they should be
+      // noticed after the name rather than arriving with it.
+      const heroRays = document.getElementById('heroRays');
+      if (heroRays) tl.to(heroRays, { opacity: 1, duration: 2.6, ease: 'sine.out' }, 2.2);
     } else {
       if (path) {
         path.style.fillOpacity = 1;
-        path.style.fill = '#A89F90';
+        path.style.fill = '#FFFFFF';
       }
       const sf = document.getElementById('carveShadowFlood');
       const lf = document.getElementById('carveLightFlood');
       if (sf) sf.setAttribute('flood-opacity', '0.92');
       if (lf) lf.setAttribute('flood-opacity', '0.42');
       if (tagline) { tagline.style.opacity = 1; tagline.style.transform = 'none'; }
-      if (heroCue) { heroCue.style.opacity = 0.75; }
       if (heroStatue) { heroStatue.style.opacity = '0.88'; }
+      if (doorPiece) doorPiece.style.opacity = '1';
+      if (doorCue) doorCue.style.opacity = '1';
+      const hr = document.getElementById('heroRays');
+      if (hr) hr.style.opacity = '1';
+      if (doorMark) {
+        doorMark.style.strokeDashoffset = '0';
+        doorMark.style.fillOpacity = '1';
+        doorMark.style.fill = '#FFFFFF';
+        doorMark.style.strokeOpacity = '0';
+        const ds = document.getElementById('doorShadowFlood');
+        const dl = document.getElementById('doorLightFlood');
+        if (ds) ds.setAttribute('flood-opacity', '0.92');
+        if (dl) dl.setAttribute('flood-opacity', '0.42');
+      }
+      releaseDoor();
     }
 
     // ─── Horizontal scroll (desktop only) ───
@@ -1207,6 +1388,12 @@
         if (!track || !wrapper) return;
         const panels = track.querySelectorAll('.hpanel');
         const slides = panels.length;
+        // The doorway was folded into the hero, so there is normally exactly
+        // one panel and nothing to scrub. Pinning with a zero-length distance
+        // leaves ScrollTrigger holding the viewport for 0px, which reads as a
+        // stutter at the top of the page. Bail out and let the hero behave as
+        // an ordinary full-height section. Restores itself if a panel is added.
+        if (slides < 2) return;
         const distance = () => (slides - 1) * window.innerWidth;
         const tween = gsap.to(track, {
           x: () => -distance(),
@@ -1262,5 +1449,46 @@
     }
   </script>
 <script src="assets/mark-fog.js"></script>
+<script type="module">
+  /* M-18 · moire-rays. These numbers were chosen by Ivan in the catalogue's own
+     M-18 page (Animated + On black), so they are his, not defaults:
+       spin .14   — ANIMATED, ~3x the library's .05. The second centre goes round
+                    in tens of seconds rather than minutes, so the fringes
+                    visibly breathe instead of appearing frozen.
+       orbit .03  — the library's own ceiling. Past ~.04 the two convergence
+                    points separate far enough to read as two dark blemishes.
+       270 rays   — spacing at a given radius is 2*pi*R/count; the far corner of
+                    a 1440x900 canvas sits at R~890, so this is ~21px apart. At
+                    130 you see individual diagonals instead of a field.
+       alpha .032 — under a fifth of the library's .17. Held right back so the
+                    rays are felt rather than seen; at .055 they still read as
+                    line-work. This is the dial to touch first, before count.
+       core .34   — the erased centre, widened so the convergence does not
+                    gather behind the wordmark.
+     Desktop only, and the part stops itself off-screen and under
+     prefers-reduced-motion. */
+  import { moireRays } from './assets/moire-rays.js';
+  const c = document.getElementById('heroRays');
+  if (c && window.matchMedia('(min-width: 1024px)').matches) {
+    moireRays(c, {
+      ink: '#FFFFFF',
+      sets: [
+        { count: 270, alpha: .032, width: 1 },
+        { count: 270, alpha: .032, width: 1, orbit: .03, spin: .14 },
+      ],
+      origin: [.5, .46],
+      core: .34,
+    });
+  }
+</script>
+  <!-- Legal strip — see .legal-strip in the stylesheet for why it is fixed. -->
+  <div class="legal-strip">
+    <span>&copy; Iván Alzamora</span>
+    <i>&middot;</i>
+    <a href="aviso-legal.html" data-i18n="legal.notice">Legal notice</a>
+    <i>&middot;</i>
+    <a href="privacidad.html" data-i18n="legal.privacy">Privacy</a>
+  </div>
+
 </body>
 </html>

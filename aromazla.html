@@ -31,10 +31,7 @@
   <link rel="canonical" href="https://ivan.es/aromazla" />
   <link rel="icon" type="image/png" href="assets/aromazla-favicon.png" />
   <link rel="apple-touch-icon" href="assets/aromazla-favicon.png" />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/fonts.css" />
 
   <style>
     /* ─── TOKENS ─── */
@@ -43,12 +40,38 @@
       --ink-2:      #111111;
       --ink-3:      #15140F;
       --ink-card:   #18171A;
-      --bone:       #F5F0E8;
-      --bone-soft:  rgba(245, 240, 232, 0.72);
-      --bone-faint: rgba(245, 240, 232, 0.42);
-      --bone-line:  rgba(245, 240, 232, 0.10);
-      --gold:       #C9A84C;
-      --gold-soft:  rgba(201, 168, 76, 0.72);
+      --bone:       #FFFFFF;
+      --bone-soft:  rgba(255, 255, 255, 0.88);
+      --bone-faint: rgba(255, 255, 255, 0.42);
+      --bone-line:  rgba(255, 255, 255, 0.10);
+      --accent:       #7FA6D9;
+      /* Availability reads at a glance, so it is carried by colour, not by the
+         words alone: green for sale, red for not. Muted rather than signal-bright
+         — these sit on a jewellery page, not a dashboard. Both clear 6.4:1 on
+         the darkest ground the site uses, so the small mono type still holds. */
+      --status-available: #7BD88F;
+      --status-unavailable: #E8796A;
+      /* One grain for the whole site — the same sprite the aromazla piece cards
+         carry, so every ground is made of the same material. It rides as an
+         extra background LAYER over each page's existing gradient, blended
+         `screen`, so tone and gradient are untouched; only the surface is added.
+         ⚠ The tile must stay SQUARE. This SVG has a viewBox and no width/height,
+         so preserveAspectRatio defaults to `meet` and a non-square size
+         letterboxes it, leaving ungrained bands that read as black stripes. */
+      --grain: url("data:image/svg+xml,%3Csvg viewBox='0 0 280 280' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.10'/%3E%3C/svg%3E");
+      /* ── THE ACCENT SITS ON TOP OF THE PAGE, NOT IN IT ──────────────────
+         A highlight along the top edge and a shadow under it, so the light
+         reads as coming from above-left and the mark casts downward — the
+         inverse of the engraved treatment on the hero name, where the shadow
+         is inside the glyph. Kept small: past about 2px of blur it stops
+         looking raised and starts looking blurred.
+         --accent-raise is for text, --accent-lift for SVG, which text-shadow
+         cannot reach. */
+      --accent-raise: 0 -1px 0 rgba(255, 255, 255, 0.16),
+                      0 1px 0 rgba(0, 0, 0, 0.62),
+                      0 2px 3px rgba(0, 0, 0, 0.40);
+      --accent-lift: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55));
+      --accent-soft:  rgba(127, 166, 217, 0.88);
 
       --f-display: 'Cinzel', 'Trajan Pro', Georgia, serif;
       --f-body:    'Inter', system-ui, sans-serif;
@@ -73,7 +96,7 @@
     }
     a { color: inherit; text-decoration: none; }
     img, svg { display: block; max-width: 100%; }
-    ::selection { background: var(--gold); color: var(--ink); }
+    ::selection { background: var(--accent); color: var(--ink); }
 
     /* ─── GRAIN — fixed overlay, dithers the radial-gradient ─── */
     /* Noise served as a static file so no inline data: URI can be mangled by
@@ -127,8 +150,12 @@
         height: 100vh;
         overflow: hidden;
         background:
-          radial-gradient(ellipse 60% 70% at 50% 32% in oklab, rgba(50, 42, 28, 0.6) 0%, transparent 70%),
+        var(--grain),
+        radial-gradient(ellipse 60% 70% at 50% 32% in oklab, rgba(50, 42, 28, 0.6) 0%, transparent 70%),
           linear-gradient(180deg in oklab, var(--ink-2) 0%, var(--ink) 100%);
+      background-blend-mode: screen, normal, normal;
+      background-size: 406px 406px, auto, auto;
+      background-repeat: repeat, no-repeat, no-repeat;
       }
       .hpanels-track {
         display: flex;
@@ -204,11 +231,16 @@
       left: 0; right: 0;
       bottom: -2px;
       height: 1px;
-      background: var(--gold);
+      background: var(--accent);
       transform: scaleX(0);
       transform-origin: left;
       transition: transform 360ms var(--ease-out);
     }
+    /* The featured item is the one a visitor who came for jewellery would not
+       think to look for, so its rule is always drawn rather than on hover. */
+    .nav-links a.is-featured { color: var(--accent); }
+    .nav-links a.is-featured::after { background: var(--accent); transform: scaleX(1); }
+    .menu-sheet a.is-featured { color: var(--accent); }
     .nav-links a:hover { color: var(--bone); }
     .nav-links a:hover::after { transform: scaleX(1); }
     .nav-links a.active { color: var(--bone); }
@@ -218,7 +250,7 @@
        Drop-in: <a class="nav-back" href="index.html" aria-label="Inicio">…svg…</a>
        Absolute-positioned so it doesn't take flex flow space — ensures the
        right-side nav-links land at the EXACT same x-position across all
-       subpages and the home page. Same 36px hit-target and gold color as
+       subpages and the home page. Same 36px hit-target and accent colour as
        .nav-card so the optical balance reads correctly. */
     .nav-back {
       position: absolute;
@@ -231,10 +263,11 @@
       width: 36px;
       height: 36px;
       padding: 4px;
-      color: var(--gold);
+      color: var(--accent);
       background: transparent;
       border: 0;
       transition: color 240ms var(--ease-out);
+      filter: var(--accent-lift);
     }
     .nav-back svg {
       width: 22px;
@@ -261,7 +294,8 @@
       background: transparent;
       border: 0;
       padding: 4px;
-      color: var(--gold);
+      color: var(--accent);
+      filter: var(--accent-lift);
     }
     .nav-card svg {
       display: block;
@@ -305,14 +339,14 @@
       pointer-events: auto;
     }
     .menu-sheet a {
-      font-family: var(--f-display);
+      font-family: var(--f-mono);
       font-size: clamp(1.7rem, 7vw, 2.4rem);
       font-weight: 500;
       letter-spacing: 0.18em;
       color: var(--bone);
       text-transform: uppercase;
     }
-    .menu-sheet a:hover { color: var(--gold); }
+    .menu-sheet a:hover { color: var(--accent); }
     /* Brand-icon row at the bottom of the mobile menu — Instagram + WhatsApp.
        No circle border; icons carry their own brand-accurate gradient fills. */
     .menu-sheet__icons {
@@ -366,8 +400,8 @@
       color: var(--bone-soft); text-align: left; border-radius: 4px;
       transition: color 240ms var(--ease-out), background 240ms var(--ease-out);
     }
-    .lang-dropdown button:hover { color: var(--bone); background: rgba(245, 240, 232, 0.04); }
-    .lang-dropdown button[aria-current="true"] { color: var(--gold); }
+    .lang-dropdown button:hover { color: var(--bone); background: rgba(255, 255, 255, 0.04); }
+    .lang-dropdown button[aria-current="true"] { color: var(--accent); }
     .menu-sheet__lang { display: flex; gap: 14px; margin-bottom: 8px; }
     .menu-sheet__lang button {
       display: inline-flex; align-items: center; gap: 8px;
@@ -377,123 +411,19 @@
       letter-spacing: 0.22em; text-transform: uppercase; color: var(--bone-soft);
       transition: color 240ms var(--ease-out), border-color 240ms var(--ease-out);
     }
-    .menu-sheet__lang button[aria-current="true"] { color: var(--gold); border-color: var(--gold); }
+    .menu-sheet__lang button[aria-current="true"] { color: var(--accent); border-color: var(--accent); }
 
     /* ─── PAGE HEAD ─── */
-    /* Top-anchored hero stack — mirrors index.html so the two pages feel like a pair.
-       AROMAZLA sits high in the panel, lede directly beneath it, scroll cue at the bottom. */
-    .page-head {
-      position: relative;
-      padding: clamp(120px, 18vh, 200px) clamp(20px, 4vw, 48px) clamp(80px, 10vh, 120px);
-      isolation: isolate;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      text-align: center;
-    }
-
-    .page-head-grid {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 22px;
-      max-width: 760px;
-      margin: 0 auto;
-    }
-    /* The H1 wraps the carved-text SVG; the visible glyphs come from <text> below.
-       max-width matches the IVAN ALZAMORA hero name on index.html (460px) so
-       the two pages' titles render at the same visual scale + same vertical
-       position (both panels use the same `clamp(120px, 18vh, 200px)` top pad). */
-    .page-title {
-      width: 100%;
-      /* Sized to match the IVAN ALZAMORA hero on index.html. The index
-         glyphs render at ~51px tall (path-based, viewBox 504 wide).
-         AROMAZLA uses a wider viewBox (600) with font-size 56 — at the
-         old max-width 460 the letters were only 43px tall, visibly
-         smaller than the index hero. 548px lifts AROMAZLA's letters to
-         ~51px (56 × 548/600), matching the index hero's letter height. */
-      max-width: 548px;
-      display: block;
-      line-height: 0;
-      margin: 0;
-    }
-    .page-title svg {
-      width: 100%;
-      height: auto;
-      overflow: visible;
-    }
-    .page-title text {
-      font-family: var(--f-display);
-      font-weight: 500;
-      letter-spacing: 8px;
-      fill: var(--bone);
-      fill-opacity: 0;
-      stroke: var(--bone);
-      stroke-width: 0.8;
-      stroke-opacity: 1;
-      /* Pre-hidden via dash-offset so the stroke isn't visible during the
-         microsecond between first paint and gsap.set() running. JS overwrites
-         with the precise length once the timeline starts. Same fix as the
-         hero name on index.html. */
-      stroke-dasharray: 9999;
-      stroke-dashoffset: 9999;
-    }
-    .page-lede {
-      font-family: var(--f-display);
-      font-size: clamp(1.05rem, 1.4vw, 1.2rem);
-      line-height: 1.65;
-      color: var(--bone-soft);
-      max-width: 44ch;
-      letter-spacing: 0.005em;
-      opacity: 0;
-      transform: translateY(8px);
-    }
-    .page-lede em { color: var(--gold); font-style: italic; }
-
-    /* Scroll cue — pinned to the bottom of the panel; mirrors index. */
-    .page-cue {
+    /* The page's <h1>, present for the document outline but not laid out.
+       clip-path over display:none deliberately — display:none is skipped by
+       most screen readers, which would leave the page with no heading at all. */
+    .a11y-title {
       position: absolute;
-      left: 50%;
-      bottom: clamp(28px, 5vh, 56px);
-      transform: translateX(-50%);
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      font-family: var(--f-mono);
-      font-size: 0.62rem;
-      letter-spacing: 0.42em;
-      text-transform: uppercase;
-      color: var(--bone-faint);
-      pointer-events: none;
-      animation: page-cue-pulse 2.6s ease-in-out 0.2s infinite;
-    }
-    .page-cue .arrow {
-      display: inline-block;
-      width: 28px; height: 1px;
-      background: var(--bone-line);
-      position: relative;
-    }
-    .page-cue .arrow::after {
-      content: '';
-      position: absolute;
-      right: 0; top: 50%;
-      width: 6px; height: 6px;
-      border-right: 1px solid var(--gold-soft);
-      border-bottom: 1px solid var(--gold-soft);
-      transform: translateY(-50%) rotate(-45deg);
-    }
-    @media (max-width: 1023px) {
-      .page-cue { writing-mode: vertical-rl; bottom: clamp(20px, 4vh, 40px); }
-      .page-cue .arrow { width: 1px; height: 28px; }
-      .page-cue .arrow::after {
-        right: 50%; top: auto; bottom: 0;
-        transform: translateX(50%) rotate(45deg);
-      }
-    }
-    @keyframes page-cue-pulse {
-      0%, 100% { opacity: 0.55; }
-      50%      { opacity: 0.95; }
+      width: 1px; height: 1px;
+      margin: -1px; padding: 0; border: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
     }
 
     /* ─── GALLERY ─── */
@@ -530,52 +460,139 @@
       display: grid;
       gap: 20px;
     }
-    /* Pieces — single card sized to match a stone card. Mirrors the
-       stones' 3-column track and slots the pendant into the centre
-       column so widths match exactly across both galleries. */
+    /* Pieces — two cards, each sized to match a stone card exactly, and the
+       pair centred. The stones sit on a 3-column track, so a stone card is
+       (T - 2*gap)/3 wide; two of those plus one gap is (2T - gap)/3, which
+       is what the max-width computes. Keeping the width formula rather than
+       switching to a plain 2-column track is what keeps the two galleries
+       reading as one system when you scroll between them.
+       Add a third piece -> drop the max-width and use repeat(3, 1fr). */
     .gallery--pieces .panel-inner { max-width: none; }
     .gallery--pieces .gallery-grid {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-width: calc((200% - 20px) / 3);
+      margin-inline: auto;
     }
-    .gallery--pieces .piece--video {
-      grid-column: 2;
+    /* Stones — two cards since the diamond came out, so they take the same
+       centred two-up track as the pieces above and the two galleries keep
+       reading as one system. */
+    .gallery--stones .gallery-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-width: calc((200% - 20px) / 3);
+      margin-inline: auto;
     }
-    /* Stones — 3 cards in one row, full viewport width. */
-    .gallery--stones .gallery-grid { grid-template-columns: repeat(3, 1fr); }
     .gallery--stones .panel-inner { max-width: none; }
     .piece {
       position: relative;
       aspect-ratio: 4/5;
       overflow: hidden;
       background:
-        radial-gradient(ellipse 80% 60% at 50% 30% in oklab, rgba(201, 168, 76, 0.10) 0%, transparent 65%),
+        radial-gradient(ellipse 80% 60% at 50% 30% in oklab, rgba(127, 166, 217, 0.10) 0%, transparent 65%),
         linear-gradient(160deg in oklab, var(--ink-card) 0%, var(--ink-2) 100%);
       border: 1px solid var(--bone-line);
       transition: transform 600ms var(--ease-out), border-color 600ms var(--ease-out);
     }
     .piece.span-2 { grid-column: span 2; aspect-ratio: 16/10; }
-    /* Video tile — the pendant card with a live looping clip. Uses
-       object-fit: cover so the video fills the card (cropped where
-       needed) at the same scale as the stone cards. No mix-blend-mode
-       — the sap1.mov source is treated as a regular opaque video,
-       framed inside the card like a stone clip. */
+    /* Video tile — a piece card with a live looping clip.
+       COVER, and the clip is opaque. The clips are cropped 4:5 to match the
+       card, so cover fills it with no crop of the piece, and their black
+       ground is knocked out by mix-blend-mode: lighten against the panel.
+       This replaced a transparent-alpha + object-fit: contain arrangement:
+       alpha was the right call for the index doorway, which sits on a near
+       black ground, but on this card it fought the design twice over. lighten
+       against a non-black ground greyed the piece off, and a damping scrim
+       had to be added underneath to win the colour back; and the ring's
+       reflection, baked into the render and impossible to key cleanly, came
+       through as a dark smudge. With a black matte both problems vanish —
+       lighten takes a per-channel max, so anything darker than the card's own
+       ground (the matte, and the reflection at ~12/255 against a ground of
+       ~33) is simply discarded, while the piece itself is bright and passes
+       through untouched. Less machinery, better result. */
     .piece-video {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
+      mix-blend-mode: lighten;
       pointer-events: none;
     }
+
     /* Top-left card label — Cinzel, mirrors the p1.html hero title font.
        Sized down for the card-corner placement, kept above the video
        (z-index: 2) and the piece-meta. Bone color so it reads against
        the typically warm/dark video bg. */
-    .piece-pendant-label {
+    /* Availability on the card, so the gallery does not imply both are for sale.
+       Sits top-right, opposite the piece name, and stays quiet — a fact, not a
+       badge. The dot is the only thing carrying colour. */
+    .piece-avail {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--f-mono);
+      font-size: 0.56rem;
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--status-unavailable);
+      text-shadow: 0 1px 2px rgba(0,0,0,.7);
+      pointer-events: none;
+    }
+    .piece-avail::before {
+      content: '';
+      width: 5px; height: 5px; border-radius: 50%;
+      background: currentColor; flex: none;
+    }
+    .piece-avail--available { color: var(--status-available); }
+    /* Lab mark, top-right of every card. Reversed to a single white monochrome
+       so three different house styles read as one set — the IGE seal is
+       blue-and-gold at source and would otherwise be the most saturated thing
+       on the card, competing with the piece.
+       Bounded by BOTH width and height: GIA and IGI are ~3:1 lockups and IGE is
+       a 1:1 seal, so matching them on height alone would make GIA three times
+       the width of IGE. Constraining both lets each sit at its own aspect while
+       occupying a comparable area. */
+    .piece-lab {
+      position: absolute;
+      top: clamp(14px, 2.2vw, 22px);
+      right: clamp(14px, 2.2vw, 22px);
+      z-index: 3;
+      max-width: 66px;
+      max-height: 26px;
+      width: auto; height: auto;
+      object-fit: contain;
+      opacity: 0.62;
+      pointer-events: none;
+    }
+    /* Dark variants were tried on the stone cards and reverted: the top of every
+       card carries the legibility scrim, so a mark sits on that rather than on
+       the bare photograph, and reversed white reads better there. The dark files
+       were removed in the asset clear-out; regenerate from the source logos by
+       tinting the ink mask near-black instead of white if a light-ground card
+       ever appears. */
+    /* Name and stone as one block in the top-left corner, so the card answers
+       "what is it" in one place instead of splitting it across two corners. */
+    .piece-id {
       position: absolute;
       top: clamp(14px, 2.2vw, 22px);
       left: clamp(14px, 2.2vw, 22px);
+      right: 78px;
       z-index: 3;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      pointer-events: none;
+    }
+    .piece-stone {
+      font-family: var(--f-mono);
+      font-size: 0.62rem;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--bone-soft);
+      text-shadow: 0 1px 2px rgba(0,0,0,.7);
+    }
+    .piece-pendant-label {
       font-family: var(--f-display);
       font-weight: 500;
       font-size: clamp(0.95rem, 1.4vw, 1.25rem);
@@ -605,12 +622,14 @@
       font-family: var(--f-mono);
       font-size: 0.66rem;
       letter-spacing: 0.32em;
-      color: var(--gold);
+      color: var(--accent);
       text-transform: uppercase;
+      text-shadow: var(--accent-raise);
+      font-weight: 500;
     }
     .piece:hover {
       transform: translateY(-3px);
-      border-color: rgba(201, 168, 76, 0.32);
+      border-color: rgba(127, 166, 217, 0.32);
     }
     .piece::before {
       content: '';
@@ -635,7 +654,7 @@
       z-index: 1;
     }
     /* Default emblem (used by the Pendant card) — full-card, centered.
-       The pendant card hosts its <video class="piece-video"> INSIDE
+       The pendant card hosts its <video disablepictureinpicture class="piece-video"> INSIDE
        .piece-emblem, so this rule must keep the emblem full-bleed
        so the alpha video fills the whole card. */
     .piece-emblem {
@@ -649,7 +668,7 @@
       width: 38%;
       height: auto;
       max-width: 140px;
-      stroke: var(--gold-soft);
+      stroke: var(--accent-soft);
       stroke-width: 0.8;
       fill: none;
       opacity: 0.55;
@@ -688,7 +707,20 @@
     .piece-top-label__sep {
       width: 18px;
       height: 1px;
-      background: rgba(245, 240, 232, 0.45);
+      background: rgba(255, 255, 255, 0.45);
+    }
+    /* The certificate leads the label — it is the claim that carries weight on
+       a loose stone, so it reads GIA — RUBY — 1.02 CT. It used to sit alone in
+       the bottom-left corner, where it was disconnected from the thing it
+       certifies and collided with the card's other corner text. */
+    .piece-top-label__cert {
+      font-family: var(--f-mono);
+      font-size: 0.82rem;
+      letter-spacing: 0.24em;
+      color: var(--accent);
+      text-transform: uppercase;
+      text-shadow: var(--accent-raise);
+      font-weight: 500;
     }
     .piece-top-label__carat {
       font-family: var(--f-mono);
@@ -717,19 +749,32 @@
       letter-spacing: 0.32em;
       color: var(--bone-faint);
       text-transform: uppercase;
+      /* Never let the reference number wrap. It is the shorter of the two
+         flex children, so without this the longer piece name wins the space
+         and "No. 001" breaks across two lines and collides with it — which
+         is exactly what happened once a second, shorter-named piece put the
+         two cards side by side. */
+      white-space: nowrap;
+      flex: none;
     }
     .piece-name {
-      font-family: var(--f-display);
-      font-size: 0.96rem;
+      font-family: var(--f-body);
+      /* 0.96rem needed 292px in the 280px a card leaves once "No. 001" and the
+         gap are taken, so the longest name broke across two lines and orphaned
+         its separator. 0.88rem fits with room to spare; right-aligned so a
+         longer name added later still wraps tidily instead of raggedly. */
+      font-size: 0.88rem;
       font-weight: 500;
       letter-spacing: 0.16em;
       text-transform: uppercase;
+      text-align: right;
       color: var(--bone);
     }
     .piece-name em {
       font-style: italic;
-      color: var(--gold);
-      font-weight: 400;
+      color: var(--accent);
+      font-weight: 500;
+      text-shadow: var(--accent-raise);
     }
 
     /* ─── CARD AFFORDANCE: count pill + hover chevron trail ─── */
@@ -737,27 +782,32 @@
        "N photos · M video" so the click destination is announced before
        hover. Gold-line ring; mono micro-type; never competes with the
        emblem (centered) or piece-meta (bottom-left). */
+    /* .piece-pill — the "4 photos · 1 video · IGI" chip that sat bottom-right
+       on the stone cards. Removed from the markup 2026-09-01: it collided with
+       the piece name and read as a chip, not as design. Rules kept for reuse. */
     .piece-pill {
       position: absolute;
       bottom: 16px;
       right: 16px;
       padding: 4px 10px;
-      border: 1px solid var(--gold-line);
+      border: 1px solid var(--accent-line);
       border-radius: 9999px;
       font-family: var(--f-mono);
       font-size: 0.65rem;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--gold-soft);
+      color: var(--accent-soft);
       background: rgba(10, 10, 10, 0.62);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
       z-index: 3;
       transition: color 220ms var(--ease-out), border-color 220ms var(--ease-out);
+      text-shadow: var(--accent-raise);
+      font-weight: 500;
     }
-    .piece:hover .piece-pill { color: var(--gold); border-color: var(--gold); }
+    .piece:hover .piece-pill { color: var(--accent); border-color: var(--accent); }
 
-    /* Hover-only chevron trail on the right edge — three thin gold
+    /* Hover-only chevron trail on the right edge — three thin accent
        chevrons fading in + drifting 4px right→left on hover, gated by
        hover-capable input so touch devices don't see a static cluster. */
     .piece-trail {
@@ -775,7 +825,7 @@
     .piece-trail svg {
       width: 14px;
       height: 14px;
-      stroke: var(--gold-soft);
+      stroke: var(--accent-soft);
       stroke-width: 1.4;
       stroke-linecap: round;
       stroke-linejoin: round;
@@ -844,11 +894,11 @@
     .lb-name .lb-sep {
       width: 24px;
       height: 1px;
-      background: var(--gold-soft);
+      background: var(--accent-soft);
     }
     .lb-pos {
       font-variant-numeric: tabular-nums;
-      color: var(--gold-soft);
+      color: var(--accent-soft);
     }
     .lb-close {
       width: 36px; height: 36px;
@@ -856,8 +906,9 @@
       background: transparent;
       border: 0;
       padding: 4px;
-      color: var(--gold);
+      color: var(--accent);
       transition: color 220ms var(--ease-out);
+      filter: var(--accent-lift);
     }
     .lb-close:hover { color: var(--bone); }
     .lb-close svg { display: block; width: 100%; height: 100%; overflow: visible; }
@@ -909,7 +960,7 @@
     .lb-stage.is-ready img,
     .lb-stage.is-ready video { opacity: 1; }
 
-    /* Side arrows — gold-line circles, scale 1.06 on hover */
+    /* Side arrows — accent-line circles, scale 1.06 on hover */
     .lb-arrow {
       position: absolute;
       top: 50%;
@@ -917,19 +968,20 @@
       width: 56px;
       height: 56px;
       border-radius: 50%;
-      border: 1px solid var(--gold-line);
+      border: 1px solid var(--accent-line);
       background: rgba(10, 10, 10, 0.45);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
       cursor: pointer;
-      color: var(--gold);
+      color: var(--accent);
       display: grid;
       place-items: center;
       transition: transform 220ms var(--ease-out), border-color 220ms var(--ease-out), color 220ms var(--ease-out), opacity 220ms var(--ease-out);
+      filter: var(--accent-lift);
     }
-    .lb-arrow:hover { transform: translateY(-50%) scale(1.06); border-color: var(--gold); color: var(--bone); }
+    .lb-arrow:hover { transform: translateY(-50%) scale(1.06); border-color: var(--accent); color: var(--bone); }
     .lb-arrow:disabled { opacity: 0.25; cursor: default; }
-    .lb-arrow:disabled:hover { transform: translateY(-50%); border-color: var(--gold-line); color: var(--gold); }
+    .lb-arrow:disabled:hover { transform: translateY(-50%); border-color: var(--accent-line); color: var(--accent); }
     .lb-arrow svg {
       width: 18px; height: 18px;
       stroke: currentColor;
@@ -978,15 +1030,15 @@
       object-fit: cover;
       pointer-events: none;
     }
-    .lb-thumb:hover { border-color: var(--gold-soft); transform: translateY(-2px); }
-    .lb-thumb[aria-current="true"] { border-color: var(--gold); }
+    .lb-thumb:hover { border-color: var(--accent-soft); transform: translateY(-2px); }
+    .lb-thumb[aria-current="true"] { border-color: var(--accent); }
     .lb-thumb .lb-thumb-tag {
       position: absolute;
       bottom: 3px; right: 3px;
       width: 14px; height: 14px;
       border-radius: 50%;
       background: rgba(10, 10, 10, 0.7);
-      color: var(--gold);
+      color: var(--accent);
       display: grid;
       place-items: center;
     }
@@ -1002,11 +1054,13 @@
       font-size: 0.7rem;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: var(--gold-soft);
+      color: var(--accent-soft);
       margin-left: 6px;
+      text-shadow: var(--accent-raise);
+      font-weight: 500;
     }
 
-    /* Certificate slide — bone frame with gold-line border. Each PDF carries
+    /* Certificate slide — bone frame with accent-line border. Each PDF carries
        its own page aspect (W/H) via the inline custom property `--pdf-aspect`
        set in JS at render time. Three real shapes are in play: letter portrait
        (612/792 = 0.773), A4 landscape (595.28/419.53 = 1.419), and half-letter
@@ -1057,7 +1111,7 @@
       width: var(--pdf-w);
       height: calc(var(--pdf-w) / var(--pdf-aspect) + var(--pdf-toolbar));
       background: var(--bone);
-      border: 1px solid var(--gold-line);
+      border: 1px solid var(--accent-line);
       box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
       margin: 0 auto;
       overflow: hidden;
@@ -1084,7 +1138,7 @@
       display: grid; place-items: center;
       width: 100%; height: 100%;
       padding: 32px;
-      font-family: var(--f-display);
+      font-family: var(--f-body);
       font-size: 1rem;
       color: var(--ink);
       text-align: center;
@@ -1096,7 +1150,7 @@
       position: absolute;
       top: 12px; right: 12px;
       padding: 4px 10px;
-      border: 1px solid var(--gold-line);
+      border: 1px solid var(--accent-line);
       border-radius: 9999px;
       background: var(--bone);
       font-family: var(--f-mono);
@@ -1108,9 +1162,9 @@
       transition: background 220ms var(--ease-out), color 220ms var(--ease-out), border-color 220ms var(--ease-out);
     }
     .lightbox-pdf-open:hover {
-      background: var(--gold);
+      background: var(--accent);
       color: var(--ink);
-      border-color: var(--gold);
+      border-color: var(--accent);
     }
     /* Pointer-events stay enabled on the embed so the browser's native PDF
        viewer handles zoom, scroll, and pan with proper re-rasterization at
@@ -1190,23 +1244,24 @@
     .about-label {
       font-family: var(--f-mono);
       font-size: 0.7rem;
-      font-weight: 400;
+      font-weight: 500;
       letter-spacing: 0.32em;
       text-transform: uppercase;
-      color: var(--gold);
+      color: var(--accent);
       align-self: start;
       position: relative;
       padding-top: 6px;
+      text-shadow: var(--accent-raise);
     }
     .about-label::before {
       content: '';
       position: absolute;
       top: 0; left: 0;
       width: 32px; height: 1px;
-      background: var(--gold);
+      background: var(--accent);
     }
     .about-body p {
-      font-family: var(--f-display);
+      font-family: var(--f-body);
       font-size: clamp(1.2rem, 2.1vw, 1.7rem);
       line-height: 1.5;
       color: var(--bone);
@@ -1214,7 +1269,10 @@
       letter-spacing: 0.005em;
     }
     .about-body p + p { margin-top: 22px; }
-    .about-body em { font-style: italic; color: var(--gold); }
+    .about-body em { font-style: italic; color: var(--accent);
+      text-shadow: var(--accent-raise);
+      font-weight: 500;
+    }
     .about-body .quiet { color: var(--bone-soft); }
     /* ─── COMMISSION ─── */
     .commission {
@@ -1230,17 +1288,19 @@
       font-size: 0.72rem;
       letter-spacing: 0.42em;
       text-transform: uppercase;
-      color: var(--gold);
+      color: var(--accent);
       display: inline-flex;
       align-items: center;
       gap: 14px;
       margin-bottom: 28px;
+      text-shadow: var(--accent-raise);
+      font-weight: 500;
     }
     .commission-eyebrow::before, .commission-eyebrow::after {
       content: '';
       display: block;
       width: 22px; height: 1px;
-      background: var(--gold);
+      background: var(--accent);
     }
     .commission h2 {
       font-family: var(--f-display);
@@ -1253,7 +1313,10 @@
       margin: 0 auto 22px;
       text-transform: uppercase;
     }
-    .commission h2 em { font-style: italic; color: var(--gold); }
+    .commission h2 em { font-style: italic; color: var(--accent);
+      text-shadow: var(--accent-raise);
+      font-weight: 500;
+    }
     /* Two-line headline pattern.
        Each .commission-h2-line is inline by default — text wraps naturally
        on mid-size viewports with the space between spans preserved. On
@@ -1262,7 +1325,7 @@
     .commission-h2-line { display: inline; }
     .commission-eyebrow__sep { display: inline; }
     /* Narrow mobile (<540px): stack the eyebrow vertically — "Commission"
-       / "per request" — with the gold hairlines as horizontal rules top
+       / "per request" — with the accent hairlines as horizontal rules top
        and bottom. Drop the dot separator. */
     @media (max-width: 540px) {
       .commission-eyebrow {
@@ -1301,9 +1364,9 @@
       transition: border-color 360ms var(--ease-out), color 360ms var(--ease-out), background 360ms var(--ease-out);
     }
     .commission .cta:hover {
-      border-color: var(--gold);
-      color: var(--gold);
-      background: rgba(201, 168, 76, 0.04);
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(127, 166, 217, 0.04);
     }
     .commission .cta svg {
       width: 18px; height: 12px;
@@ -1337,8 +1400,8 @@
       flex-shrink: 0;
     }
     .commission__contact:hover {
-      border-color: var(--gold);
-      background: rgba(201, 168, 76, 0.04);
+      border-color: var(--accent);
+      background: rgba(127, 166, 217, 0.04);
     }
 
     /* ─── REVEAL ─── */
@@ -1351,22 +1414,15 @@
 
     /* ─── RESPONSIVE ─── */
     @media (max-width: 1023px) {
-      .page-head-grid { grid-template-columns: 1fr; gap: 28px; }
-      /* Pieces: 1 col on mobile, placeholder hidden — only the real pendant.
-         Stones: 1 col stack, 3 cards visible (no horizontal scroll on mobile). */
+      /* Pieces: both cards stack in 1 col on mobile.
+         Stones: 1 col stack, 3 cards visible (no horizontal scroll on mobile).
+         max-width is reset because the desktop rule centres the pair at
+         two-thirds width — on a single column that would squeeze the cards. */
       .gallery--pieces .gallery-grid {
         grid-template-columns: 1fr;
+        max-width: none;
       }
       .gallery--stones .gallery-grid { grid-template-columns: 1fr; }
-      .gallery--pieces .gallery-grid { max-width: none; }
-      /* The desktop rule slots the pendant into the CENTRE column of a
-         3-column track (`grid-column: 2`). That rule is not scoped to a
-         breakpoint, so on mobile — where the track drops to a single
-         column — the card is placed in an implicit second column that has
-         no 1fr to size against, and collapses. Measured at 390px: the
-         card rendered 2x3px with the video playing perfectly behind it.
-         Reset it to the only column that exists. */
-      .gallery--pieces .piece--video { grid-column: 1; }
       .piece.span-2 { grid-column: span 1; aspect-ratio: 4/5; }
     }
     @media (max-width: 768px) {
@@ -1380,7 +1436,7 @@
     }
 
     a:focus-visible, button:focus-visible {
-      outline: 1px solid var(--gold);
+      outline: 1px solid var(--accent);
       outline-offset: 4px;
     }
 
@@ -1393,6 +1449,35 @@
       }
       .reveal { opacity: 1; transform: none; }
     }
+    /* ─── LEGAL STRIP ───────────────────────────────────────────────────────
+       Thin, fixed to the bottom, on every page. LSSI art. 10 wants the legal
+       notice reachable from anywhere, and the panel layout here has no footer to
+       hang it on — several pages are pinned 100vh tracks, so appending a footer
+       would either add scroll or sit inside a pinned panel. Fixed avoids both and
+       costs the index nothing, which has to stay one screen.
+       Deliberately quiet: this is a legal obligation, not a navigation item. */
+    .legal-strip {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      padding: 7px 16px;
+      font-family: var(--f-mono);
+      font-size: 9.5px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.34);
+      background: linear-gradient(180deg, transparent, rgba(0,0,0,.45) 60%);
+      pointer-events: none;
+    }
+    .legal-strip a, .legal-strip span { pointer-events: auto; }
+    .legal-strip a { color: inherit; text-decoration: none; transition: color 240ms var(--ease-out); }
+    .legal-strip a:hover { color: var(--accent); }
+    .legal-strip i { font-style: normal; opacity: .4; }
+    @media (max-width: 560px) { .legal-strip { gap: 12px; font-size: 8.6px; letter-spacing: .12em; } }
   </style>
 </head>
 <body>
@@ -1407,7 +1492,7 @@
     </a>
     <ul class="nav-links">
       <li><a href="aromazla.html" class="active" data-i18n="nav.aromazla">Aromazla</a></li>
-      <li><a href="https://visuanza.es" target="_blank" rel="noopener" data-i18n="nav.visuanza">Visuanza</a></li>
+      <li><a href="work.html" class="is-featured" data-i18n="nav.work">Web work</a></li>
       <li><a href="contact.html" data-i18n="nav.contact">Contact</a></li>
     </ul>
     <div class="lang-switcher">
@@ -1455,7 +1540,7 @@
       </button>
     </div>
     <a href="aromazla.html" data-i18n="nav.aromazla">Aromazla</a>
-    <a href="https://visuanza.es" target="_blank" rel="noopener" data-i18n="nav.visuanza">Visuanza</a>
+    <a href="work.html" class="is-featured" data-i18n="nav.work">Web work</a>
     <a href="contact.html" data-i18n="nav.contact">Contact</a>
     <div class="menu-sheet__icons">
       <a href="https://www.instagram.com/ivan.alzam/" target="_blank" rel="noopener" aria-label="Instagram @ivan.alzam">
@@ -1497,55 +1582,19 @@
     </div>
   </div>
 
-  <!-- STICKY STACK — page-head, gallery, commission, footer.
+  <!-- STICKY STACK — gallery, commission, footer.
        Each panel sticks at top:0 with rising z-index; later panels rise up and cover earlier ones. -->
   <main class="stack">
    <div class="hpanels" id="hpanels">
     <div class="hpanels-track" id="hpanelsTrack">
 
-  <!-- PAGE HEAD -->
-  <header class="page-head panel hpanel" style="--z:1;">
-   <div class="panel-inner">
-    <div class="page-head-grid">
-      <h1 class="page-title" aria-label="Aromazla">
-        <svg viewBox="0 0 600 90" preserveAspectRatio="xMidYMid meet" role="img" aria-hidden="true">
-          <defs>
-            <!-- Same carved recipe as index.html — flood opacities start at 0 so the filter is a no-op
-                 until phase 3 of the timeline drives them up. -->
-            <filter id="carvedAroma" x="-10%" y="-10%" width="120%" height="120%">
-              <feFlood id="aromaShadowFlood" flood-color="#000000" flood-opacity="0" result="sFlood"/>
-              <feComposite in="sFlood" in2="SourceAlpha" operator="out" result="sOut"/>
-              <feOffset in="sOut" dx="1.4" dy="1.8" result="sOff"/>
-              <feGaussianBlur in="sOff" stdDeviation="1.2" result="sBlur"/>
-              <feComposite in="sBlur" in2="SourceAlpha" operator="in" result="shadow"/>
-
-              <feFlood id="aromaLightFlood" flood-color="#FFFFFF" flood-opacity="0" result="lFlood"/>
-              <feComposite in="lFlood" in2="SourceAlpha" operator="out" result="lOut"/>
-              <feOffset in="lOut" dx="-1.0" dy="-1.3" result="lOff"/>
-              <feGaussianBlur in="lOff" stdDeviation="0.85" result="lBlur"/>
-              <feComposite in="lBlur" in2="SourceAlpha" operator="in" result="light"/>
-
-              <feMerge>
-                <feMergeNode in="SourceGraphic"/>
-                <feMergeNode in="light"/>
-                <feMergeNode in="shadow"/>
-              </feMerge>
-            </filter>
-          </defs>
-          <text id="aromaText" x="300" y="64"
-                text-anchor="middle"
-                font-size="56"
-                filter="url(#carvedAroma)">AROMAZLA</text>
-        </svg>
-      </h1>
-      <p class="page-lede" data-i18n-html="aroma.pageLede">Symbolic art forged in gold and set with certified precious stones. <em>Wearable meaning, made once.</em></p>
-    </div>
-   </div>
-   <div class="page-cue" aria-hidden="true">
-     <span data-i18n="aroma.pageCue.pieces">Pieces</span>
-     <span class="arrow"></span>
-   </div>
-  </header>
+  <!-- The AROMAZLA title panel used to open this page; removed 2026-09-01 so
+       the page lands directly on the pieces. Its <h1> was the document's only
+       one, so the heading moves here rather than disappearing: the page still
+       needs to say what it is to a crawler and a screen reader, it just no
+       longer spends a full screen doing it. The name is already carved into
+       the index doorway that links here. -->
+  <h1 class="a11y-title">Aromazla</h1>
 
   <!-- GALLERY — PIECES -->
   <section class="gallery gallery--pieces panel hpanel" style="--z:2;">
@@ -1560,16 +1609,48 @@
         <!-- Top-left card label with the piece name in Cinzel — mirrors
              p1.html's hero title font and reads as a quiet identification
              tag on the card. -->
-        <span class="piece-pendant-label" aria-hidden="true">Equinoccio</span>
+        <span class="piece-id" aria-hidden="true">
+          <span class="piece-pendant-label">Equinoccio</span>
+          <span class="piece-stone" data-i18n="aroma.piece.p1.name">Yellow Sapphire</span>
+        </span>
+        <img class="piece-lab" src="assets/gia-mark.webp" alt="GIA certified" width="66" height="26" loading="lazy">
         <span class="piece-emblem" aria-hidden="true">
-          <video class="piece-video" autoplay loop muted playsinline preload="metadata" poster="assets/p1/sap.webp">
-            <source src="assets/p1/sap.webm" type="video/webm">
-            <source src="assets/p1/sap.mp4" type="video/mp4">
+          <!-- OPAQUE on purpose, unlike the index doorway. These are cropped
+               4:5 to match the card and keep their black ground; the card's
+               `mix-blend-mode: lighten` drops that ground out against the
+               panel. No alpha means no keying artefacts on the card — the
+               ring's baked-in reflection is darker than the card's ground, so
+               the blend simply discards it. Built by the ffmpeg recipe in
+               _pipeline/RUNBOOK, not by alpha-video.py.
+               No autoplay: the viewport observer starts it and swaps in the
+               poster if playback is refused (iOS Low Power Mode). -->
+          <video disablepictureinpicture class="piece-video" loop muted playsinline preload="metadata" poster="assets/p1/equinoccio-card-poster.webp">
+            <source src="assets/p1/equinoccio-card.webm" type="video/webm">
+            <source src="assets/p1/equinoccio-card.mp4" type="video/mp4">
           </video>
         </span>
         <div class="piece-meta">
           <span class="piece-num">No. 001</span>
-          <span class="piece-name" data-i18n-html="aroma.piece.p1.name">Yellow Sapphire <em>·</em> pendant</span>
+          <span class="piece-avail piece-avail--available" data-i18n="p1.avail">Available</span>
+        </div>
+      </a>
+
+      <!-- No. 002 — Lacrimosa -->
+      <a href="p2.html" class="piece piece--video reveal" style="--i:1;">
+        <span class="piece-id" aria-hidden="true">
+          <span class="piece-pendant-label">Lacrimosa</span>
+          <span class="piece-stone" data-i18n="aroma.piece.p2.name">Natural Diamond</span>
+        </span>
+        <img class="piece-lab" src="assets/igi-mark.webp" alt="IGI certified" width="66" height="26" loading="lazy">
+        <span class="piece-emblem" aria-hidden="true">
+          <video disablepictureinpicture class="piece-video" loop muted playsinline preload="metadata" poster="assets/p2/lacrimosa-card-poster.webp">
+            <source src="assets/p2/lacrimosa-card.webm" type="video/webm">
+            <source src="assets/p2/lacrimosa-card.mp4" type="video/mp4">
+          </video>
+        </span>
+        <div class="piece-meta">
+          <span class="piece-num">No. 002</span>
+          <span class="piece-avail" data-i18n="p2.avail">Not for sale</span>
         </div>
       </a>
 
@@ -1586,38 +1667,16 @@
     </header>
 
     <div class="gallery-grid">
-      <!-- IGI Diamond -->
-      <a href="#" class="piece reveal" data-gallery="s3" style="--i:0;">
-        <span class="piece-top-label" aria-hidden="true">
-          <span class="piece-top-label__name" data-i18n="aroma.stones.diamond.name">Diamond</span>
-          <span class="piece-top-label__sep"></span>
-          <span class="piece-top-label__carat">0.90 ct</span>
-        </span>
-        <video class="piece-video-stone" loop muted playsinline preload="metadata"
-               poster="assets/s3/dia2.webp" aria-hidden="true">
-          <source src="assets/s3/dia.webm" type="video/webm">
-          <source src="assets/s3/dia.mp4" type="video/mp4">
-        </video>
-        <span class="piece-trail" aria-hidden="true">
-          <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
-          <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
-          <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
-        </span>
-        <span class="piece-pill" aria-hidden="true" data-i18n="aroma.stones.diamond.pill">4 photos · 1 video · IGI</span>
-        <div class="piece-meta">
-          <span class="piece-cert">IGI</span>
-          <span class="piece-name" data-i18n="aroma.stones.diamond.name">Diamond</span>
-        </div>
-      </a>
 
       <!-- GIA Ruby -->
       <a href="#" class="piece reveal" data-gallery="s1" style="--i:1;">
+        <img class="piece-lab" src="assets/gia-mark.webp" alt="GIA certified" width="66" height="26" loading="lazy">
         <span class="piece-top-label" aria-hidden="true">
           <span class="piece-top-label__name" data-i18n="aroma.stones.ruby.name">Ruby</span>
           <span class="piece-top-label__sep"></span>
           <span class="piece-top-label__carat">1.02 ct</span>
         </span>
-        <video class="piece-video-stone" loop muted playsinline preload="metadata"
+        <video disablepictureinpicture class="piece-video-stone" loop muted playsinline preload="metadata"
                poster="assets/s1/ru2.webp" aria-hidden="true">
           <source src="assets/s1/ru.webm" type="video/webm">
           <source src="assets/s1/ru.mp4" type="video/mp4">
@@ -1627,15 +1686,11 @@
           <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
           <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
         </span>
-        <span class="piece-pill" aria-hidden="true" data-i18n="aroma.stones.ruby.pill">4 photos · 1 video · GIA</span>
-        <div class="piece-meta">
-          <span class="piece-cert">GIA</span>
-          <span class="piece-name" data-i18n="aroma.stones.ruby.name">Ruby</span>
-        </div>
       </a>
 
       <!-- IGE Aquamarine — uses a still photo (no video on this card) -->
       <a href="#" class="piece reveal" data-gallery="s2" style="--i:2;">
+        <img class="piece-lab" src="assets/ige-mark.webp" alt="IGE certified" width="66" height="26" loading="lazy">
         <span class="piece-top-label" aria-hidden="true">
           <span class="piece-top-label__name" data-i18n="aroma.stones.aquamarine.name">Aquamarine</span>
           <span class="piece-top-label__sep"></span>
@@ -1647,11 +1702,6 @@
           <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
           <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
         </span>
-        <span class="piece-pill" aria-hidden="true" data-i18n="aroma.stones.aquamarine.pill">1 photo · 1 video · IGE</span>
-        <div class="piece-meta">
-          <span class="piece-cert">IGE</span>
-          <span class="piece-name" data-i18n="aroma.stones.aquamarine.name">Aquamarine</span>
-        </div>
       </a>
 
     </div>
@@ -1733,8 +1783,8 @@
   </div>
 
   <!-- GSAP + ScrollTrigger -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="assets/vendor/gsap.min.js"></script>
+  <script src="assets/vendor/ScrollTrigger.min.js"></script>
   <script>
     const navEl = document.getElementById('nav');
     const onScroll = () => navEl.classList.toggle('scrolled', window.scrollY > 30);
@@ -1782,7 +1832,13 @@
     {
       // Only observe real <video> elements — the aquamarine card uses an <img>
       // for its still visual and shouldn't go through the play() cycle.
-      const stoneVideos = Array.from(document.querySelectorAll('video.piece-video-stone'));
+      // Includes the PIECE cards as well as the stones. Both want the same
+      // treatment: don't autoplay off-screen, and if playback is refused —
+      // iOS Low Power Mode is the case that matters — replace the element
+      // with its poster, which is frame 0 of that same clip, so the card
+      // shows the piece as a still instead of a black rectangle.
+      const stoneVideos = Array.from(
+        document.querySelectorAll('video.piece-video-stone, video.piece-video'));
       if (stoneVideos.length && 'IntersectionObserver' in window) {
         const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -1817,58 +1873,12 @@
         stoneVideos.forEach((v) => playObs.observe(v));
 
         document.addEventListener('visibilitychange', () => {
-          document.querySelectorAll('video.piece-video-stone').forEach((v) => {
+          document.querySelectorAll('video.piece-video-stone, video.piece-video').forEach((v) => {
             if (document.hidden) v.pause();
             else if (!reducedMotion && v.classList.contains('ready')) v.play().catch(() => swapToPoster(v));
           });
         });
       }
-    }
-
-    // ─── AROMAZLA hero — same draw → fill → carve sequence as index.html ───
-    // SVG <text> doesn't expose getTotalLength(), so the dasharray uses a fixed
-    // overestimate of the glyph perimeter. 3000 is comfortably above what the
-    // 8 Cinzel glyphs at font-size 56 actually need, so the stroke draws fully.
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const aromaText = document.getElementById('aromaText');
-    const aromaShadowFlood = document.getElementById('aromaShadowFlood');
-    const aromaLightFlood = document.getElementById('aromaLightFlood');
-    const aromaLede = document.querySelector('.page-lede');
-
-    if (aromaText && window.gsap && !reduce) {
-      const len = 3000;
-      gsap.set(aromaText, {
-        strokeDasharray: len,
-        strokeDashoffset: len,
-        fillOpacity: 0,
-        strokeOpacity: 1,
-      });
-
-      const tl = gsap.timeline();
-      // 1. Draw the stroke.
-      tl.to(aromaText, { strokeDashoffset: 0, duration: 4, ease: 'power1.inOut' }, 0.6);
-      // 2. Fill catches the draw early; stroke crossfades down across the same window.
-      tl.to(aromaText, { fillOpacity: 1, duration: 1.6, ease: 'sine.inOut' }, '-=3.4');
-      tl.to(aromaText, { strokeOpacity: 0, duration: 1.6, ease: 'sine.inOut' }, '<');
-      // Lede rides the same beat as the fill — the role "aut viam inveniam aut faciam" plays on index.
-      if (aromaLede) {
-        tl.to(aromaLede, { opacity: 1, y: 0, duration: 1.2, ease: 'sine.out' }, '<');
-      }
-      // 3. Carve — fill darkens to taupe and the floods rise.
-      tl.to(aromaText, { fill: '#A89F90', duration: 1.0, ease: 'sine.inOut' }, '-=2.6');
-      if (aromaShadowFlood) {
-        tl.to(aromaShadowFlood, { attr: { 'flood-opacity': 0.92 }, duration: 1.0, ease: 'sine.inOut' }, '<');
-      }
-      if (aromaLightFlood) {
-        tl.to(aromaLightFlood, { attr: { 'flood-opacity': 0.42 }, duration: 1.0, ease: 'sine.inOut' }, '<');
-      }
-    } else if (aromaText) {
-      aromaText.style.fillOpacity = 1;
-      aromaText.style.fill = '#A89F90';
-      aromaText.style.strokeOpacity = 0;
-      if (aromaShadowFlood) aromaShadowFlood.setAttribute('flood-opacity', '0.92');
-      if (aromaLightFlood) aromaLightFlood.setAttribute('flood-opacity', '0.42');
-      if (aromaLede) { aromaLede.style.opacity = 1; aromaLede.style.transform = 'none'; }
     }
 
     // ─── Horizontal scroll (desktop only) — mirrors index.html ───
@@ -1907,7 +1917,7 @@
     (function () {
       const galleries = {
         s1: { name: 'Ruby',       cert: 'GIA', items: [
-          { type: 'video', src: 'assets/s1/ru.webm' },
+          { type: 'video', srcs: ['assets/s1/ru.webm', 'assets/s1/ru.mp4'] },
           { type: 'image', src: 'assets/s1/ru2.webp' },
           { type: 'image', src: 'assets/s1/ru3.webp' },
           { type: 'image', src: 'assets/s1/ru4.webp' },
@@ -1916,11 +1926,14 @@
         ]},
         s2: { name: 'Aquamarine', cert: 'IGE', items: [
           { type: 'image', src: 'assets/s2/aq1.webp' },
-          { type: 'video', src: 'assets/s2/aq.webm' },
+          { type: 'video', srcs: ['assets/s2/aq.webm', 'assets/s2/aq.mp4'] },
           { type: 'pdf',   src: 'assets/s2/Aquamarina_IGE.pdf', label: 'IGE Report · Aquamarine', aspect: 595.28/419.53 },
         ]},
+        /* UNREFERENCED as of 2026-09-01 — the diamond card was removed from the
+           Stones grid (Ivan: the stone now reads as part of Lacrimosa). Kept so
+           restoring it is one <a data-gallery="s3"> away; delete both together. */
         s3: { name: 'Diamond',    cert: 'IGI', items: [
-          { type: 'video', src: 'assets/s3/dia.webm' },
+          { type: 'video', srcs: ['assets/s3/dia.webm', 'assets/s3/dia.mp4'] },
           { type: 'image', src: 'assets/s3/dia2.webp' },
           { type: 'image', src: 'assets/s3/dia3.webp' },
           { type: 'image', src: 'assets/s3/dia4.webp' },
@@ -2150,9 +2163,28 @@
         let el;
         if (item.type === 'video') {
           el = document.createElement('video');
-          el.src = item.src;
+          // <source> children, not el.src, so a browser that cannot decode VP9
+          // still gets the H.264 copy instead of a black slide. Both are
+          // web-encoded and faststart; never point this at a camera original —
+          // a .mov keeps its metadata atom at the END of the file, so the
+          // browser has to fetch the whole thing before it can show a frame.
+          (item.srcs || [item.src]).forEach((u) => {
+            const so = document.createElement('source');
+            so.src = u;
+            so.type = u.endsWith('.webm') ? 'video/webm'
+                    : u.endsWith('.mp4')  ? 'video/mp4'
+                    : u.endsWith('.mov')  ? 'video/quicktime' : '';
+            el.appendChild(so);
+          });
           el.autoplay = true; el.loop = true; el.muted = true; el.playsInline = true;
           el.setAttribute('playsinline', '');
+          // No picture-in-picture. Chrome offers it on any <video> big enough,
+          // and one stray click detaches the piece into a floating window with
+          // the page left showing an empty box. Both the attribute and the
+          // property, because Safari honours only the property.
+          el.disablePictureInPicture = true;
+          el.setAttribute('disablepictureinpicture', '');
+          el.setAttribute('controlslist', 'nodownload noplaybackrate noremoteplayback');
           el.preload = 'metadata';
         } else {
           el = document.createElement('img');
@@ -2184,7 +2216,8 @@
           } else if (item.type === 'video') {
             btn.setAttribute('aria-label', `Video ${i + 1} of ${items.length}`);
             const v = document.createElement('video');
-            v.src = item.src; v.muted = true; v.preload = 'metadata'; v.playsInline = true;
+            v.src = (item.srcs || [item.src])[0]; v.muted = true; v.preload = 'metadata'; v.playsInline = true;
+            v.disablePictureInPicture = true; v.setAttribute('disablepictureinpicture', '');
             btn.appendChild(v);
             const tag = document.createElement('span');
             tag.className = 'lb-thumb-tag';
@@ -2322,5 +2355,14 @@
       }, { passive: true });
     })();
   </script>
+  <!-- Legal strip — see .legal-strip in the stylesheet for why it is fixed. -->
+  <div class="legal-strip">
+    <span>&copy; Iván Alzamora</span>
+    <i>&middot;</i>
+    <a href="aviso-legal.html" data-i18n="legal.notice">Legal notice</a>
+    <i>&middot;</i>
+    <a href="privacidad.html" data-i18n="legal.privacy">Privacy</a>
+  </div>
+
 </body>
 </html>

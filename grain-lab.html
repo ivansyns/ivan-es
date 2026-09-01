@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Grain lab — Aromazla</title>
+<!--
+  EXPERIMENTAL. Not linked from anywhere and marked noindex; delete it or keep
+  it, nothing depends on it.
+
+  What it is for: the piece pages paint their ground twice — once on the page and
+  once on the hero plate — and the two must be IDENTICAL or the plate's edge
+  reappears. So the ground is one recipe with a few numbers, and this page is
+  where those numbers get chosen against the actual piece rather than in the
+  abstract. Whatever you settle on, the "CSS to paste" box at the bottom is the
+  literal block to drop into p1.html and p2.html — both of them, same values.
+
+  The ring is a still, and it is the black-matte poster frame, not a cutout:
+  `mix-blend-mode: lighten` drops the matte against whatever ground is behind it.
+  That is the same mechanism the real pages use, which is the point — if the
+  piece looks right here it will look right there.
+-->
+  <link rel="stylesheet" href="assets/fonts.css" />
+<style>
+  :root{
+    --bone:#F5F0E8; --bone-soft:#C9C3B8; --bone-faint:#7A756D;
+    --gold:#C9A84C; --line:rgba(245,240,232,.14);
+    --f-mono:'JetBrains Mono',monospace; --f-display:'Cinzel',Georgia,serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#0E0D0F;color:var(--bone-soft);font-family:var(--f-mono);font-size:13px}
+  header{padding:28px clamp(20px,4vw,48px) 0;display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
+  h1{font-family:var(--f-display);font-weight:500;font-size:1.5rem;letter-spacing:.14em;color:var(--bone);margin:0}
+  header p{margin:0;color:var(--bone-faint);max-width:62ch;line-height:1.6}
+
+  .wrap{display:grid;grid-template-columns:1fr 340px;gap:28px;padding:28px clamp(20px,4vw,48px) 64px;align-items:start}
+  @media (max-width:900px){ .wrap{grid-template-columns:1fr} }
+
+  /* THE STAGE — page ground and plate ground, side by side and touching, so any
+     mismatch between them shows as a seam. That is the whole test. */
+  .stage{position:relative;min-height:520px;display:grid;place-items:center;
+         border:1px solid var(--line);overflow:hidden}
+  .plate{position:absolute;inset:18% 26%;display:grid;place-items:center}
+  .plate.outlined{outline:1px dashed rgba(201,168,76,.55);outline-offset:0}
+  .piece{width:100%;height:100%;object-fit:contain;mix-blend-mode:lighten;pointer-events:none}
+
+  .panel{border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;gap:16px}
+  .panel h2{font-family:var(--f-display);font-size:.95rem;letter-spacing:.12em;color:var(--bone);margin:0 0 2px;font-weight:500}
+  label{display:flex;flex-direction:column;gap:5px}
+  .lab{display:flex;justify-content:space-between;align-items:baseline;color:var(--bone-faint);
+       text-transform:uppercase;letter-spacing:.16em;font-size:10px}
+  .lab b{color:var(--gold);font-weight:400;letter-spacing:.06em;font-size:12px}
+  input[type=range]{width:100%;accent-color:var(--gold);background:transparent}
+  input[type=color]{width:100%;height:34px;padding:0;border:1px solid var(--line);background:transparent}
+  .row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+  .presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+  .sw{aspect-ratio:4/3;border:1px solid var(--line);position:relative;cursor:pointer;padding:0;
+      display:block;transition:border-color .25s}
+  .sw:hover,.sw[aria-pressed=true]{border-color:var(--gold)}
+  .sw span{position:absolute;left:7px;bottom:6px;font-size:9.5px;letter-spacing:.1em;
+           color:var(--bone-soft);text-shadow:0 1px 3px #000}
+  .sw i{position:absolute;right:7px;bottom:6px;font-style:normal;font-size:9.5px;color:var(--gold)}
+
+  pre{margin:0;padding:14px;border:1px solid var(--line);background:#131215;color:var(--bone-soft);
+      font-size:11.5px;line-height:1.65;white-space:pre-wrap;word-break:break-all;max-height:290px;overflow:auto}
+  .hint{color:var(--bone-faint);line-height:1.6}
+  button.copy{font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+    background:transparent;border:1px solid var(--line);color:var(--bone-soft);padding:9px 14px;cursor:pointer}
+  button.copy:hover{border-color:var(--gold);color:var(--gold)}
+  /* the generic `label` rule above is flex-direction: column — reset it, or the
+     checkbox stacks on top of its own text */
+  .toggle{display:flex;flex-direction:row;gap:9px;align-items:center;color:var(--bone-faint);
+          text-transform:uppercase;letter-spacing:.14em;font-size:10px;cursor:pointer}
+  .toggle input{width:14px;height:14px;accent-color:var(--gold);flex:none}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Grain lab</h1>
+  <p>The piece pages paint this ground twice — on the page and on the hero plate — and they must match
+     exactly or the plate reappears as a rectangle. Dial it here against the real piece, then paste the
+     block at the bottom into <b>both</b> p1.html and p2.html. Outline the plate to check the two agree.</p>
+</header>
+
+<div class="wrap">
+  <div class="stage" id="stage">
+    <div class="plate" id="plate">
+      <img class="piece" id="piece" src="assets/p2/lacrimosa-hero-poster.webp" alt="">
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:18px">
+    <div class="panel">
+      <h2>Ground</h2>
+      <label><span class="lab">Base colour <b id="vBase">#1b1a1c</b></span>
+        <input type="color" id="base" value="#1b1a1c"></label>
+      <label><span class="lab">Grain opacity <b id="vOp">0.07</b></span>
+        <input type="range" id="op" min="0" max="0.30" step="0.005" value="0.07"></label>
+      <label><span class="lab">Frequency — fine ← → coarse <b id="vFreq">0.60</b></span>
+        <input type="range" id="freq" min="0.08" max="1.60" step="0.01" value="0.60"></label>
+      <label><span class="lab">Tile size <b id="vTile">300px</b></span>
+        <input type="range" id="tile" min="120" max="900" step="10" value="300"></label>
+      <label><span class="lab">Octaves <b id="vOct">2</b></span>
+        <input type="range" id="oct" min="1" max="4" step="1" value="2"></label>
+    </div>
+
+    <div class="panel">
+      <h2>Grain colour</h2>
+      <p class="hint" style="margin:0">The noise is greyscale by default. These scale its red, green and
+        blue before it is screened onto the base, so the texture itself can run warm or cold
+        independently of the ground colour.</p>
+      <div class="row">
+        <label><span class="lab">R <b id="vR">1.00</b></span><input type="range" id="r" min="0" max="2" step="0.02" value="1"></label>
+        <label><span class="lab">G <b id="vG">1.00</b></span><input type="range" id="g" min="0" max="2" step="0.02" value="1"></label>
+        <label><span class="lab">B <b id="vB">1.00</b></span><input type="range" id="b" min="0" max="2" step="0.02" value="1"></label>
+      </div>
+      <label class="toggle"><input type="checkbox" id="outline"> Outline the plate</label>
+    </div>
+
+    <div class="panel">
+      <h2>Presets</h2>
+      <div class="presets" id="presets"></div>
+    </div>
+  </div>
+</div>
+
+<div style="padding:0 clamp(20px,4vw,48px) 72px;display:flex;flex-direction:column;gap:12px">
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+    <h2 style="font-family:var(--f-display);font-size:.95rem;letter-spacing:.12em;color:var(--bone);margin:0;font-weight:500">CSS to paste</h2>
+    <button class="copy" id="copy">Copy</button>
+    <span class="hint">Goes in <b>both</b> p1.html and p2.html — <code>--plate</code> / <code>--grain</code> in <code>:root</code>, and the three rules that use them.</span>
+  </div>
+  <pre id="out"></pre>
+</div>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  // The noise sprite. feColorMatrix scales each channel of the turbulence AFTER
+  // it is generated, which is what lets the grain carry a tint; stitchTiles is
+  // what lets it repeat without a seam at the tile edge.
+  function grain({freq, oct, op, r, g, b}) {
+    const svg =
+      "<svg viewBox='0 0 280 280' xmlns='http://www.w3.org/2000/svg'>" +
+        "<filter id='n'>" +
+          `<feTurbulence type='fractalNoise' baseFrequency='${freq}' numOctaves='${oct}' stitchTiles='stitch'/>` +
+          `<feColorMatrix type='matrix' values='${r} 0 0 0 0  0 ${g} 0 0 0  0 0 ${b} 0 0  0 0 0 1 0'/>` +
+        "</filter>" +
+        `<rect width='100%' height='100%' filter='url(%23n)' opacity='${op}'/>` +
+      "</svg>";
+    return 'url("data:image/svg+xml,' + svg.replace(/#/g, '%23').replace(/"/g, "'").replace(/</g,'%3C').replace(/>/g,'%3E').replace(/\s{2,}/g,' ') + '")';
+  }
+
+  const state = () => ({
+    base: $('base').value,
+    op:   (+$('op').value).toFixed(3),
+    freq: (+$('freq').value).toFixed(2),
+    tile: +$('tile').value,
+    oct:  +$('oct').value,
+    r: (+$('r').value).toFixed(2), g: (+$('g').value).toFixed(2), b: (+$('b').value).toFixed(2),
+  });
+
+  function paint() {
+    const s = state();
+    const url = grain(s);
+    // The page and the plate get the SAME declaration — that is the invariant
+    // the real pages depend on, so the lab has to honour it too.
+    for (const el of [$('stage'), $('plate')]) {
+      el.style.backgroundColor = s.base;
+      el.style.backgroundImage = url;
+      el.style.backgroundBlendMode = 'screen';
+      el.style.backgroundSize = s.tile + 'px ' + s.tile + 'px';
+      el.style.backgroundRepeat = 'repeat';
+    }
+    $('plate').classList.toggle('outlined', $('outline').checked);
+    $('vBase').textContent = s.base; $('vOp').textContent = s.op;
+    $('vFreq').textContent = s.freq; $('vTile').textContent = s.tile + 'px';
+    $('vOct').textContent = s.oct;
+    $('vR').textContent = s.r; $('vG').textContent = s.g; $('vB').textContent = s.b;
+
+    $('out').textContent =
+`/* :root */
+--plate: ${s.base};
+--grain: ${url};
+
+/* the page ground — mobile */
+.stack .panel {
+  background-color: var(--plate);
+  background-image: var(--grain);
+  background-blend-mode: screen;
+  background-size: ${s.tile}px ${s.tile}px;
+  background-repeat: repeat;
+}
+
+/* the page ground — desktop */
+@media (min-width: 1024px) {
+  .hpanels {
+    background-color: var(--plate);
+    background-image: var(--grain);
+    background-blend-mode: screen;
+    background-size: ${s.tile}px ${s.tile}px;
+    background-repeat: repeat;
+  }
+}
+
+/* the hero plate — identical, so its edge does not exist */
+.hero-media {
+  background-color: var(--plate);
+  background-image: var(--grain);
+  background-blend-mode: screen;
+  background-size: ${s.tile}px ${s.tile}px;
+  background-repeat: repeat;
+  overflow: hidden;
+}`;
+  }
+
+  const PRESETS = [
+    {n:'Shipping now',  base:'#1b1a1c', op:0.07, freq:0.60, tile:300, oct:2, r:1,    g:1,    b:1   },
+    {n:'Warm ash',      base:'#1c1a17', op:0.08, freq:0.55, tile:320, oct:2, r:1.25, g:1.05, b:0.75},
+    {n:'Cold slate',    base:'#191A1D', op:0.07, freq:0.60, tile:300, oct:2, r:0.80, g:0.95, b:1.30},
+    {n:'Gold dust',     base:'#1b1a1c', op:0.09, freq:0.45, tile:380, oct:2, r:1.40, g:1.15, b:0.55},
+    {n:'Fine silver',   base:'#1a1a1c', op:0.05, freq:1.10, tile:220, oct:1, r:1,    g:1,    b:1.05},
+    {n:'Coarse linen',  base:'#1c1b19', op:0.11, freq:0.28, tile:520, oct:3, r:1.10, g:1.02, b:0.88},
+    {n:'Near clean',    base:'#1b1a1c', op:0.03, freq:0.70, tile:300, oct:2, r:1,    g:1,    b:1   },
+    {n:'Television',    base:'#1b1a1c', op:0.22, freq:0.85, tile:240, oct:2, r:1,    g:1,    b:1   },
+  ];
+
+  const host = $('presets');
+  PRESETS.forEach((p, i) => {
+    const b = document.createElement('button');
+    b.className = 'sw'; b.type = 'button'; b.setAttribute('aria-pressed', i === 0);
+    b.style.backgroundColor = p.base;
+    b.style.backgroundImage = grain({freq:p.freq, oct:p.oct, op:p.op, r:p.r, g:p.g, b:p.b});
+    b.style.backgroundBlendMode = 'screen';
+    b.style.backgroundSize = p.tile + 'px ' + p.tile + 'px';
+    b.innerHTML = `<span>${p.n}</span><i>${p.op}</i>`;
+    b.addEventListener('click', () => {
+      $('base').value = p.base; $('op').value = p.op; $('freq').value = p.freq;
+      $('tile').value = p.tile; $('oct').value = p.oct;
+      $('r').value = p.r; $('g').value = p.g; $('b').value = p.b;
+      host.querySelectorAll('.sw').forEach(x => x.setAttribute('aria-pressed', 'false'));
+      b.setAttribute('aria-pressed', 'true');
+      paint();
+    });
+    host.appendChild(b);
+  });
+
+  document.querySelectorAll('input').forEach(i => i.addEventListener('input', paint));
+  $('copy').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText($('out').textContent); $('copy').textContent = 'Copied'; }
+    catch { $('copy').textContent = 'Select it manually'; }
+    setTimeout(() => ($('copy').textContent = 'Copy'), 1600);
+  });
+  paint();
+</script>
+</body>
+</html>

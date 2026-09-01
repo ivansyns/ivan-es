@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Accent lab — Aromazla</title>
+<!--
+  EXPERIMENTAL. Unlinked, noindex. Nothing depends on it.
+
+  Deciding the accent that replaces --gold (#C9A84C), and with it the grain tint.
+  The fragments below are the REAL uses, copied out of the live pages — eyebrow,
+  ENTER cue, piece sub-line, certificate mark, nav underline, stone chip. Judging
+  an accent on a swatch is how you end up with a colour that only works as a
+  square; these are the shapes it actually has to hold.
+
+  The measurement that started this: --gold is hue 44 deg and the yellow sapphire
+  is hue 40 deg. The interface accent and the hero product are the same colour,
+  so the stone has nothing to be distinct against. Any candidate is checked here
+  against every stone the site sells.
+-->
+  <link rel="stylesheet" href="assets/fonts.css" />
+<style>
+  :root{
+    --ink:#0A0A0A; --plate:#1b1a1c;
+    --bone:#F5F0E8; --bone-soft:#C9C3B8; --bone-faint:#7A756D;
+    --line:rgba(245,240,232,.14);
+    --accent:#7FA6D9;
+    --f-mono:'JetBrains Mono',monospace; --f-display:'Cinzel',Georgia,serif;
+    --f-serif:'Cormorant Garamond',Georgia,serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ink);color:var(--bone-soft);font-family:var(--f-mono);font-size:13px}
+  header{padding:26px clamp(20px,4vw,44px) 0}
+  h1{font-family:var(--f-display);font-weight:500;font-size:1.5rem;letter-spacing:.14em;color:var(--bone);margin:0 0 8px}
+  header p{margin:0;color:var(--bone-faint);max-width:76ch;line-height:1.65}
+  b.hl{color:var(--accent);font-weight:400}
+
+  .wrap{display:grid;grid-template-columns:1fr 330px;gap:26px;padding:24px clamp(20px,4vw,44px) 70px;align-items:start}
+  @media (max-width:960px){.wrap{grid-template-columns:1fr}}
+
+  .stage{border:1px solid var(--line);padding:0;overflow:hidden}
+  .ground{padding:30px 34px;display:flex;flex-direction:column;gap:26px}
+  .ground.on-plate{background:var(--plate)}
+  .gl{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--bone-faint);
+      padding:9px 34px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
+
+  /* ── the real fragments ───────────────────────────────────────────────── */
+  .eyebrow{display:flex;align-items:center;gap:14px;font-size:.66rem;letter-spacing:.32em;
+           text-transform:uppercase;color:var(--accent)}
+  .eyebrow::before{content:'';width:34px;height:1px;background:var(--accent)}
+  .ptitle{font-family:var(--f-display);font-size:2.6rem;letter-spacing:.1em;color:var(--bone);line-height:1}
+  .psub{font-family:var(--f-serif);font-style:italic;font-size:1.15rem;color:var(--accent)}
+  .plede{font-family:var(--f-serif);font-size:1.1rem;line-height:1.6;color:var(--bone-soft);max-width:46ch}
+  .enter{display:inline-flex;align-items:center;gap:12px;font-size:.62rem;letter-spacing:.42em;
+         text-transform:uppercase;color:var(--accent)}
+  .enter::before{content:'';width:30px;height:1px;background:var(--accent)}
+  .cert{font-size:.66rem;letter-spacing:.32em;text-transform:uppercase;color:var(--accent)}
+  .chip{display:inline-flex;align-items:center;gap:10px;padding:8px 14px;border-radius:9999px;
+        background:rgba(0,0,0,.62);font-size:.82rem;letter-spacing:.2em;text-transform:uppercase;color:var(--bone)}
+  .chip i{font-style:normal;color:var(--accent);letter-spacing:.24em}
+  .chip s{width:18px;height:1px;background:rgba(245,240,232,.45);text-decoration:none}
+  .nav{display:flex;gap:30px;font-size:.74rem;letter-spacing:.22em;text-transform:uppercase}
+  .nav a{color:var(--bone-soft);text-decoration:none;padding-bottom:5px;border-bottom:1px solid transparent}
+  .nav a.on{color:var(--bone);border-bottom-color:var(--accent)}
+  .btn{display:inline-flex;align-items:center;gap:10px;padding:11px 20px;border:1px solid var(--accent);
+       color:var(--accent);font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;width:max-content}
+
+  /* ── controls ─────────────────────────────────────────────────────────── */
+  .panel{border:1px solid var(--line);padding:16px;display:flex;flex-direction:column;gap:14px}
+  .panel h2{font-family:var(--f-display);font-size:.92rem;letter-spacing:.12em;color:var(--bone);margin:0;font-weight:500}
+  .sw{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .sw button{display:flex;align-items:center;gap:9px;padding:9px 10px;background:transparent;cursor:pointer;
+             border:1px solid var(--line);color:var(--bone-soft);font:10.5px/1.25 var(--f-mono);
+             letter-spacing:.09em;text-transform:uppercase;text-align:left}
+  .sw button:hover,.sw button[aria-pressed=true]{border-color:var(--bone-soft);color:var(--bone)}
+  .sw span{width:16px;height:16px;flex:none;border:1px solid rgba(255,255,255,.22)}
+  label{display:flex;flex-direction:column;gap:5px;font-size:10px;letter-spacing:.16em;
+        text-transform:uppercase;color:var(--bone-faint)}
+  input[type=color]{width:100%;height:34px;padding:0;border:1px solid var(--line);background:transparent}
+  table{border-collapse:collapse;width:100%;font-size:11px}
+  td{padding:4px 0;vertical-align:top}
+  td:last-child{text-align:right;color:var(--bone)}
+  .ok{color:#7BD88F}.warn{color:#E8C36A}.bad{color:#E8796A}
+  pre{margin:0;padding:12px;border:1px solid var(--line);background:#131215;font-size:11px;
+      line-height:1.6;white-space:pre-wrap;color:var(--bone-soft)}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Accent lab</h1>
+  <p>Replacing <code>--gold #C9A84C</code>. It is <b class="hl">hue 44°</b> and the yellow sapphire is
+     <b class="hl">hue 40°</b> — the interface accent and the hero product are the same colour, which is
+     what makes it read flat. Every candidate is checked below against each stone the site actually
+     sells, and against small-type contrast on both grounds. The fragments are the real ones.</p>
+</header>
+
+<div class="wrap">
+  <div class="stage">
+    <div class="gl">On the index ground · #0A0A0A</div>
+    <div class="ground">
+      <nav class="nav"><a class="on" href="#">Aromazla</a><a href="#">Visuanza</a><a href="#">Contact</a></nav>
+      <span class="enter">Enter ↗</span>
+      <span class="chip"><i>GIA</i><s></s>Ruby<s></s>1.02 ct</span>
+    </div>
+    <div class="gl">On the piece-page ground · #1b1a1c</div>
+    <div class="ground on-plate">
+      <span class="eyebrow">No. 001 · Pendant</span>
+      <div class="ptitle">EQUINOCCIO</div>
+      <div class="psub">Yellow Sapphire · 2.08 ct · Sri Lanka · GIA</div>
+      <p class="plede">A natural yellow sapphire of 2.08 carats, set in 18k white gold and finished in rhodium.</p>
+      <span class="cert">GIA · 2.08 ct</span>
+      <span class="btn">Enquire →</span>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div class="panel">
+      <h2>Candidates</h2>
+      <div class="sw" id="sw"></div>
+      <label>Or pick freely<input type="color" id="pick" value="#7FA6D9"></label>
+    </div>
+    <div class="panel">
+      <h2>Checks</h2>
+      <table id="checks"></table>
+      <p style="margin:0;color:var(--bone-faint);line-height:1.6;font-size:11px">
+        Hue distance is to the nearest stone. Under ~25° the accent starts reading as
+        <em>the same colour as</em> that stone rather than beside it — which is the fault being
+        fixed. Contrast is WCAG on the darker of the two grounds; the eyebrows are 0.66rem mono,
+        so they need <b>4.5:1</b>.</p>
+    </div>
+    <div class="panel">
+      <h2>Then the grain</h2>
+      <p style="margin:0;color:var(--bone-faint);line-height:1.6;font-size:11px">
+        The grain tint should lean the same way as the accent but far weaker, so the ground agrees
+        with it instead of arguing. These are the R/G/B multipliers for the grain lab.</p>
+      <pre id="grain"></pre>
+    </div>
+  </div>
+</div>
+
+<script>
+const $=(i)=>document.getElementById(i);
+// hue of each stone, measured from the site's own photographs. Aquamarine needed
+// the skin excluded — 86% of that photo's chromatic pixels are the hand holding it.
+const STONES=[['yellow sapphire',40],['ruby',333],['aquamarine',182]];
+const CAND=[
+  ['gold — current','#C9A84C'],['platinum','#C9C3B8'],
+  ['sapphire blue','#5B8DEF'],['cobalt (fog tint)','#0047AB'],
+  ['steel blue — SHIPPED','#7FA6D9'],['violet','#8B6FD1'],
+  ['crimson','#C0392B'],['deep crimson','#B3123B'],
+];
+
+const hex2rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)/255);
+function hue(h){const [r,g,b]=hex2rgb(h),mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;
+  if(!d) return null;
+  let x = mx===r ? ((g-b)/d)%6 : mx===g ? (b-r)/d+2 : (r-g)/d+4;
+  return (x*60+360)%360;}
+function sat(h){const [r,g,b]=hex2rgb(h),mx=Math.max(r,g,b),mn=Math.min(r,g,b);return mx?(mx-mn)/mx:0;}
+function lum(h){return hex2rgb(h).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4)
+  .reduce((a,c,i)=>a+c*[.2126,.7152,.0722][i],0);}
+function ratio(a,b){const [x,y]=[lum(a),lum(b)].sort((p,q)=>q-p);return (x+.05)/(y+.05);}
+
+function apply(hex){
+  document.documentElement.style.setProperty('--accent',hex);
+  $('pick').value=hex;
+  [...$('sw').children].forEach(b=>b.setAttribute('aria-pressed', b.dataset.hex.toLowerCase()===hex.toLowerCase()));
+
+  const h=hue(hex), s=sat(hex);
+  const c1=ratio(hex,'#0A0A0A'), c2=ratio(hex,'#1b1a1c'), c=Math.min(c1,c2);
+  let near='—', dist='n/a';
+  if(h!==null && s>0.12){
+    let best=null;
+    for(const [n,sh] of STONES){ let d=Math.abs(h-sh); d=Math.min(d,360-d); if(!best||d<best[1]) best=[n,d]; }
+    near=best[0]; dist=best[1].toFixed(0)+'°';
+  } else { near='none — achromatic'; dist='—'; }
+
+  const cls=v=>v>=4.5?'ok':v>=3?'warn':'bad';
+  const dnum = (h!==null&&s>0.12) ? parseFloat(dist) : 999;
+  $('checks').innerHTML=`
+    <tr><td>hue</td><td>${h===null||s<=0.12?'achromatic':h.toFixed(0)+'°'}</td></tr>
+    <tr><td>nearest stone</td><td>${near}</td></tr>
+    <tr><td>hue distance</td><td class="${dnum>=45?'ok':dnum>=25?'warn':'bad'}">${dist}</td></tr>
+    <tr><td>on #0A0A0A</td><td class="${cls(c1)}">${c1.toFixed(2)} : 1</td></tr>
+    <tr><td>on #1b1a1c</td><td class="${cls(c2)}">${c2.toFixed(2)} : 1</td></tr>
+    <tr><td>small text AA</td><td class="${cls(c)}">${c>=4.5?'passes':c>=3?'large text only':'fails'}</td></tr>`;
+
+  // grain tint: same lean as the accent, pulled most of the way back to neutral
+  const [r,g,b]=hex2rgb(hex), mean=(r+g+b)/3 || 1, k=0.30;
+  const m=v=>(1+((v/mean)-1)*k).toFixed(2);
+  $('grain').textContent =
+`--accent: ${hex.toUpperCase()};
+
+grain tint  R ${m(r)}   G ${m(g)}   B ${m(b)}
+(base #1b1a1c · opacity 0.07 · freq 0.60 · 300px)`;
+}
+
+CAND.forEach(([n,h])=>{
+  const b=document.createElement('button');
+  b.type='button'; b.dataset.hex=h;
+  b.innerHTML=`<span style="background:${h}"></span>${n}`;
+  b.addEventListener('click',()=>apply(h));
+  $('sw').appendChild(b);
+});
+$('pick').addEventListener('input',e=>apply(e.target.value));
+apply('#7FA6D9');   // the shipped accent — keep in step with --accent in the pages
+</script>
+</body>
+</html>
