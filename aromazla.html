@@ -576,7 +576,7 @@
       position: absolute;
       top: clamp(14px, 2.2vw, 22px);
       left: clamp(14px, 2.2vw, 22px);
-      right: 78px;
+      right: 92px;   /* 66px mark + 14px inset + 12px of air */
       z-index: 3;
       display: flex;
       flex-direction: column;
@@ -1422,13 +1422,31 @@
         grid-template-columns: 1fr;
         max-width: none;
       }
-      .gallery--stones .gallery-grid { grid-template-columns: 1fr; }
+      .gallery--stones .gallery-grid {
+        grid-template-columns: 1fr;
+        max-width: none;
+      }
       .piece.span-2 { grid-column: span 1; aspect-ratio: 4/5; }
     }
     @media (max-width: 768px) {
       .nav-links { display: none; }
       .nav-card { display: inline-flex; }
       .lang-switcher { display: none; }
+    }
+    @media (max-width: 1023px) {
+      /* One column means a stone card is narrower than it is on desktop while
+         the pill's text stays the same length — long stone names (AQUAMARINE)
+         then ran under the certification mark in the opposite corner. The pill
+         steps down a size and takes a hard right bound clear of the mark. */
+      .piece-top-label {
+        max-width: calc(100% - 20px - 92px);
+        gap: 8px;
+        padding: 7px 12px;
+      }
+      .piece-top-label__name  { font-size: 0.8rem; }
+      .piece-top-label__carat { font-size: 0.8rem; }
+      .piece-top-label__cert  { font-size: 0.7rem; letter-spacing: 0.18em; }
+      .piece-top-label__sep   { width: 12px; }
     }
     @media (max-width: 540px) {
       .piece.span-2 { aspect-ratio: 4/5; }
