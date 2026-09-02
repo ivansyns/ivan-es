@@ -76,6 +76,17 @@
                       0 2px 3px rgba(0, 0, 0, 0.40);
       --accent-lift: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55));
       --accent-soft:  rgba(255, 222, 50, 0.88);
+      /* ⚠ These two were missing on this page while every other page declared
+         them, so `var(--accent-line)` resolved to an invalid value and any
+         border using it fell back to currentColor — white instead of the
+         accent. Same bug class as work.html's, found 2026-09-02. */
+      --accent-line:  rgba(255, 222, 50, .28);
+      /* Web work is the one nav item that leads off the jewellery side of the
+         site, so it is marked in a colour the pieces never use: a lighter, less
+         saturated steel blue than the retired accent (#7FA6D9) — same hue,
+         higher value, so it reads as a signal, not a second brand colour.
+         10.4:1 on the ink ground. */
+      --nav-featured: #9DBFE8;
 
       --f-display: 'Cinzel', 'Trajan Pro', Georgia, serif;
       --f-body: 'Work Sans', system-ui, sans-serif;
@@ -253,9 +264,9 @@
     }
     /* The featured item is the one a visitor who came for jewellery would not
        think to look for, so its rule is always drawn rather than on hover. */
-    .nav-links a.is-featured { color: var(--accent); }
-    .nav-links a.is-featured::after { background: var(--accent); transform: scaleX(1); }
-    .menu-sheet a.is-featured { color: var(--accent); }
+    .nav-links a.is-featured { color: var(--nav-featured); }
+    .nav-links a.is-featured::after { background: var(--nav-featured); transform: scaleX(1); }
+    .menu-sheet a.is-featured { color: var(--nav-featured); }
     .nav-links a:hover { color: var(--bone); }
     .nav-links a:hover::after { transform: scaleX(1); }
 

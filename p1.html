@@ -94,7 +94,7 @@
       --accent-raise: 0 -1px 0 rgba(255, 255, 255, 0.16),
                       0 1px 0 rgba(0, 0, 0, 0.62),
                       0 2px 3px rgba(0, 0, 0, 0.40);
-      --accent-lift: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55)); --accent-soft: rgba(255, 222, 50, 0.88); --accent-line: rgba(255, 222, 50, .28);
+      --accent-lift: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55)); --accent-soft: rgba(255, 222, 50, 0.88); --accent-line: rgba(255, 222, 50, .28); --nav-featured: #9DBFE8;
       --f-display: 'Cinzel','Trajan Pro',Georgia,serif;
       --f-body: 'Work Sans', system-ui, sans-serif;
       --f-mono: 'JetBrains Mono',ui-monospace,monospace;
@@ -142,9 +142,9 @@
     }
     /* The featured item is the one a visitor who came for jewellery would not
        think to look for, so its rule is always drawn rather than on hover. */
-    .nav-links a.is-featured { color: var(--accent); }
-    .nav-links a.is-featured::after { background: var(--accent); transform: scaleX(1); }
-    .menu-sheet a.is-featured { color: var(--accent); }
+    .nav-links a.is-featured { color: var(--nav-featured); }
+    .nav-links a.is-featured::after { background: var(--nav-featured); transform: scaleX(1); }
+    .menu-sheet a.is-featured { color: var(--nav-featured); }
     .nav-links a:hover { color: var(--bone); }
     .nav-links a:hover::after { transform: scaleX(1); }
     .nav-links a.active { color: var(--bone); }
@@ -592,11 +592,28 @@
        it has to paint anything at all. No border and no gradient of its own, so
        there is nothing to mark its edge; the piece reads as sitting on the page. */
     .hero-media {
+      /* ⚠ THE GRAIN PHASE IS SET IN JS, and both halves of this are load-bearing.
+         Measured on an iPhone 13 mini, all three states:
+           grain, unaligned  -> 0.60/255 step at the box edge. The tile is 406px
+             and this box is ~299px wide on a phone, so it painted a DIFFERENT
+             PORTION of the same noise field than the panel behind it. That is
+             the hairline Ivan saw, and only one edge showed it because the size
+             of the step depends on local noise.
+           no background      -> mix-blend-mode: lighten lost its backdrop and the
+             piece rendered inside a BLACK RECTANGLE. The blend only reaches paint
+             inside this element; the panel's is not in its group.
+           plate, no grain    -> 8.0/255 step, far worse than the hairline. The
+             grain is screen-blended, so it LIGHTENS the plate by ~8; a box
+             without it is a visibly darker rectangle.
+         So: keep the paint (the blend needs it), keep the grain (the panel's
+         mean depends on it), and align the tile phase so the two fields are one
+         continuous field. */
       background-color: var(--plate);
       background-image: var(--grain);
       background-blend-mode: screen;
       background-size: 406px 406px;
       background-repeat: repeat;
+      /* Phase set by alignHeroGrain() below — see there for why. */
       overflow: hidden;
     }
     .hero-media video { mix-blend-mode: lighten; }
@@ -842,6 +859,21 @@
       border: 0;
       display: block;
     }
+    /* Exactly one of these shows at a time — see the note on .cert-img in the
+       markup for why mobile gets an image instead of the PDF.
+       ⚠ These must sit AFTER `.cert-frame iframe` above and be scoped to
+       .cert-frame: a bare `.cert-iframe` (0,1,0) loses to it (0,1,1) no matter
+       where it appears, which is exactly how the first attempt silently failed. */
+    .cert-frame .cert-img { display: none; }
+    @media (max-width: 900px) {
+      .cert-frame .cert-iframe { display: none; }
+      .cert-frame .cert-img {
+        display: block;
+        position: absolute; inset: 0;
+        width: 100%; height: 100%;
+        object-fit: contain;
+      }
+    }
     .cert-fallback-link {
       position: absolute; inset: 0;
       display: grid; place-items: center;
@@ -868,6 +900,17 @@
       font-weight: 500;
     }
     .cert-link:hover { color: var(--accent); }
+    @media (max-width: 900px) {
+      /* Mobile shows a flat image of the certificate, so this link is the only
+         way to the actual PDF — where the report number can be selected and
+         copied. 18px tall was not a tap target. */
+      .cert-link {
+        min-height: 44px;
+        padding: 12px 18px;
+        border: 1px solid var(--accent-line);
+        justify-content: center;
+      }
+    }
     .cert-link svg {
       width: 14px; height: 14px;
       stroke: currentColor; stroke-width: 1.6; fill: none;
@@ -1206,23 +1249,10 @@
         </div>
       </section>
 
-      <!-- PANEL 2 — STORY -->
-      <section class="panel hpanel panel--story">
-        <div class="panel-inner">
-          <span class="eyebrow reveal" data-i18n="p1.story.eyebrow">Story</span>
-          <p class="story-body reveal" data-i18n-html="p1.story.line1">
-            Winter dies for days of spring —<br>
-            and what stands between is held.
-          </p>
-          <p class="story-body reveal" data-i18n-html="p1.story.line2">
-            A cradle of white gold petals, in the line of art nouveau, holds the paradox.<br>
-            Named <em>Equinoccio</em> for the threshold of the rebirth of nature — what was crystallized, now beginning to flow.
-          </p>
-          <p class="story-body reveal" data-i18n-html="p1.story.line3"><em>Made once.</em></p>
-        </div>
-      </section>
-
-      <!-- PANEL 3 — SPECS + CERTIFICATE -->
+      <!-- PANEL 2 — CERTIFICATE. Sits immediately after the hero's spec table
+           on purpose: the table makes the claims, this is where they are checked.
+           Moved ahead of the story 2026-09-02. The desktop track counts .hpanel
+           and targets .panel--cta by class, so panel order is free to change. -->
       <section class="panel hpanel panel--specs">
         <div class="panel-inner">
           <div class="cert-col reveal">
@@ -1237,6 +1267,15 @@
                    bounding box once at first navigation and locks fit-zoom
                    to whatever size it sees then. Loading before GSAP pins
                    and lays out the panel = locked-small "zoomed out" page. -->
+              <!-- ⚠ MOBILE SHOWS THIS IMAGE, NOT THE PDF. iOS Safari renders a PDF in
+                   an iframe as a fixed, already-zoomed preview that cannot be pinched
+                   back out, so the certificate opened mid-page and could never be seen
+                   whole. A rendered page-1 image fits entirely by default and zooms
+                   like any other image. Desktop keeps the embed, where PDFium's
+                   toolbar is genuinely better. Regenerate with:
+                   pdftoppm -r 170 -png -singlefile "<pdf>" <out>  then encode to webp. -->
+              <img class="cert-img" src="assets/p1/yellow-sapphire---gia-cert.webp" alt="" aria-hidden="true"
+                   loading="lazy" decoding="async">
               <iframe class="cert-iframe"
                       data-src="assets/p1/yellow%20sapphire%20-%20GIA.pdf#view=FitH"
                       title="GIA report — Yellow Sapphire 2.08 ct"
@@ -1245,8 +1284,8 @@
             </div>
             <div class="cert-actions">
               <span class="cert-meta" data-i18n="p1.cert.meta">GIA · 2.08 ct</span>
-              <a class="cert-link" href="assets/p1/yellow%20sapphire%20-%20GIA.pdf" target="_blank" rel="noopener" download>
-                <span data-i18n="p1.cert.openDownload">Open / download</span>
+              <a class="cert-link" href="assets/p1/yellow%20sapphire%20-%20GIA.pdf" target="_blank" rel="noopener">
+                <span data-i18n="p1.cert.openDownload">Open PDF</span>
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                   <line x1="7" y1="17" x2="17" y2="7"/>
                   <polyline points="7 7 17 7 17 17"/>
@@ -1254,6 +1293,22 @@
               </a>
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- PANEL 3 — STORY -->
+      <section class="panel hpanel panel--story">
+        <div class="panel-inner">
+          <span class="eyebrow reveal" data-i18n="p1.story.eyebrow">Story</span>
+          <p class="story-body reveal" data-i18n-html="p1.story.line1">
+            Winter dies for days of spring —<br>
+            and what stands between is held.
+          </p>
+          <p class="story-body reveal" data-i18n-html="p1.story.line2">
+            A cradle of white gold petals, in the line of art nouveau, holds the paradox.<br>
+            Named <em>Equinoccio</em> for the threshold of the rebirth of nature — what was crystallized, now beginning to flow.
+          </p>
+          <p class="story-body reveal" data-i18n-html="p1.story.line3"><em>Made once.</em></p>
         </div>
       </section>
 
@@ -1371,6 +1426,9 @@
     (function () {
       const iframe = document.querySelector('.cert-iframe');
       if (!iframe || !iframe.dataset.src) return;
+      // Mobile shows .cert-img instead and the iframe is display:none, so
+      // promoting the src here would fetch a ~640KB PDF nobody ever sees.
+      if (!window.matchMedia('(min-width: 901px)').matches) return;
       if (!('IntersectionObserver' in window)) {
         iframe.src = iframe.dataset.src;
         return;
@@ -1441,6 +1499,22 @@
       if (equiShadowFlood) equiShadowFlood.setAttribute('flood-opacity', '0.92');
       if (equiLightFlood) equiLightFlood.setAttribute('flood-opacity', '0.42');
     }
+
+    /* Align this box's grain tile with the panel's so the two noise fields read
+       as one continuous field. CSS cannot express "start tiling where my parent
+       started" — background-position is relative to each element's own box — so
+       the offset is measured and applied. Cheap, runs on load and on resize. */
+    const alignHeroGrain = () => {
+      const media = document.querySelector('.hero-media');
+      const panel = media && media.closest('.panel');
+      if (!media || !panel) return;
+      const m = media.getBoundingClientRect();
+      const p = panel.getBoundingClientRect();
+      media.style.backgroundPosition = `${-(m.left - p.left)}px ${-(m.top - p.top)}px`;
+    };
+    alignHeroGrain();
+    addEventListener('resize', alignHeroGrain, { passive: true });
+    addEventListener('orientationchange', alignHeroGrain, { passive: true });
 
     // ─── Pendant video — mirrors the aromazla pieces card recipe ───
     // Single MP4 source baked into the <video> markup + mix-blend-mode:

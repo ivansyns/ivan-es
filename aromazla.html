@@ -72,6 +72,17 @@
                       0 2px 3px rgba(0, 0, 0, 0.40);
       --accent-lift: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55));
       --accent-soft:  rgba(255, 222, 50, 0.88);
+      /* ⚠ These two were missing on this page while every other page declared
+         them, so `var(--accent-line)` resolved to an invalid value and any
+         border using it fell back to currentColor — white instead of the
+         accent. Same bug class as work.html's, found 2026-09-02. */
+      --accent-line:  rgba(255, 222, 50, .28);
+      /* Web work is the one nav item that leads off the jewellery side of the
+         site, so it is marked in a colour the pieces never use: a lighter, less
+         saturated steel blue than the retired accent (#7FA6D9) — same hue,
+         higher value, so it reads as a signal, not a second brand colour.
+         10.4:1 on the ink ground. */
+      --nav-featured: #9DBFE8;
 
       --f-display: 'Cinzel', 'Trajan Pro', Georgia, serif;
       --f-body: 'Work Sans', system-ui, sans-serif;
@@ -238,9 +249,9 @@
     }
     /* The featured item is the one a visitor who came for jewellery would not
        think to look for, so its rule is always drawn rather than on hover. */
-    .nav-links a.is-featured { color: var(--accent); }
-    .nav-links a.is-featured::after { background: var(--accent); transform: scaleX(1); }
-    .menu-sheet a.is-featured { color: var(--accent); }
+    .nav-links a.is-featured { color: var(--nav-featured); }
+    .nav-links a.is-featured::after { background: var(--nav-featured); transform: scaleX(1); }
+    .menu-sheet a.is-featured { color: var(--nav-featured); }
     .nav-links a:hover { color: var(--bone); }
     .nav-links a:hover::after { transform: scaleX(1); }
     .nav-links a.active { color: var(--bone); }
@@ -1135,7 +1146,11 @@
       }
     }
     .lb-stage.is-ready .lightbox-pdf-frame { opacity: 1; }
+    /* object-fit: contain so the whole certificate is visible at rest; the
+       lightbox's own zoom control takes it from there. */
+    .lightbox-pdf-frame img { object-fit: contain; background: var(--bone); }
     .lightbox-pdf-frame iframe,
+    .lightbox-pdf-frame img,
     .lightbox-pdf-frame object {
       width: 100%; height: 100%;
       border: 0;
@@ -1948,12 +1963,12 @@
           { type: 'image', src: 'assets/s1/ru3.webp' },
           { type: 'image', src: 'assets/s1/ru4.webp' },
           { type: 'image', src: 'assets/s1/ru5.webp' },
-          { type: 'pdf',   src: 'assets/s1/Ruby%20-%20GIA.pdf', label: 'GIA Report · 1.02 ct', aspect: 612/792 },
+          { type: 'pdf',   src: 'assets/s1/Ruby%20-%20GIA.pdf', img: 'assets/s1/ruby---gia-cert.webp', label: 'GIA Report · 1.02 ct', aspect: 612/792 },
         ]},
         s2: { name: 'Aquamarine', cert: 'IGE', items: [
           { type: 'image', src: 'assets/s2/aq1.webp' },
           { type: 'video', srcs: ['assets/s2/aq.webm', 'assets/s2/aq.mp4'] },
-          { type: 'pdf',   src: 'assets/s2/Aquamarina_IGE.pdf', label: 'IGE Report · Aquamarine', aspect: 595.28/419.53 },
+          { type: 'pdf',   src: 'assets/s2/Aquamarina_IGE.pdf', img: 'assets/s2/aquamarina-ige-cert.webp', label: 'IGE Report · Aquamarine', aspect: 595.28/419.53 },
         ]},
         /* UNREFERENCED as of 2026-09-01 — the diamond card was removed from the
            Stones grid (Ivan: the stone now reads as part of Lacrimosa). Kept so
@@ -1964,7 +1979,7 @@
           { type: 'image', src: 'assets/s3/dia3.webp' },
           { type: 'image', src: 'assets/s3/dia4.webp' },
           { type: 'image', src: 'assets/s3/dia5.webp' },
-          { type: 'pdf',   src: 'assets/s3/Diamond_IGI_report_764657982.pdf', label: 'IGI Report · Diamond', aspect: 595.44/351.36 },
+          { type: 'pdf',   src: 'assets/s3/Diamond_IGI_report_764657982.pdf', img: 'assets/s3/diamond-igi-report-764657982-cert.webp', label: 'IGI Report · Diamond', aspect: 595.44/351.36 },
         ]},
       };
 
@@ -2137,9 +2152,26 @@
           //      ended, so PDFium reads the iframe's FINAL bounding box
           //      (not a transient mid-transition box) and locks fit-zoom
           //      against the right size.
-          const obj = document.createElement('iframe');
-          obj.setAttribute('title', `${stoneName} certificate`);
-          obj.setAttribute('aria-label', `${stoneName} certificate`);
+          // ⚠ NARROW VIEWPORTS GET THE RENDERED PAGE, NOT THE EMBED. iOS Safari
+          // renders a PDF inside an iframe as a fixed, already-zoomed preview
+          // that cannot be pinched back out — the certificate opened mid-page
+          // and could never be seen whole, which is exactly what Ivan hit on a
+          // 13 mini. An <img> of page 1 fits entirely by default and zooms with
+          // the existing zoomCtrl below. The "Open ↗" anchor still reaches the
+          // real PDF. Desktop keeps the embed: PDFium's toolbar is better there.
+          const useImage = item.img && !window.matchMedia('(min-width: 901px)').matches;
+          let obj;
+          if (useImage) {
+            obj = document.createElement('img');
+            obj.src = item.img;
+            obj.alt = `${stoneName} certificate`;
+            obj.decoding = 'async';
+            obj.className = 'lightbox-pdf-img';
+          } else {
+            obj = document.createElement('iframe');
+            obj.setAttribute('title', `${stoneName} certificate`);
+            obj.setAttribute('aria-label', `${stoneName} certificate`);
+          }
           frame.appendChild(obj);
           // Sibling "Open ↗" anchor — hard escape to the native viewer
           // (still essential on iOS, where Mobile Safari may render the
@@ -2166,9 +2198,11 @@
           // toggled from display:none in the same task).
           const navigate = () => {
             if (!obj.isConnected) return;
-            if (obj.src) return; // guard against double-fire
-            obj.src = item.src + '#view=FitH';
-            lbStage.classList.add('is-ready');
+            // The image path already carries a src, so an early return here
+            // would skip is-ready and leave the frame at opacity 0 forever.
+            // Set the src only if there isn't one; reveal either way.
+            if (!obj.src) obj.src = item.src + '#view=FitH';
+            lbStage.classList.add('is-ready');   // idempotent, safe on double-fire
           };
           if (lb.classList.contains('is-open')) {
             requestAnimationFrame(() => requestAnimationFrame(navigate));
