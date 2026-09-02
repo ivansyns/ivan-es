@@ -1097,42 +1097,79 @@
        by width. */
 
     /* ─── CERTIFICATE ZOOM ───
-       The certificate is a flat image now, so it needs its own way to be read
-       closely. Click/tap opens it full-screen; click again toggles a 2.6x zoom
-       centred on the point that was tapped, which is how you check a report
-       number without leaving the page. Esc or the backdrop closes it. The PDF
-       button beside it stays the route to the real document. */
+       The certificate is a flat image, so it needs its own way to be read
+       closely. Click/tap opens it full-screen; a second click zooms and the
+       overlay becomes SCROLLABLE.
+       ⚠ Zoom is a real size change, not `transform: scale()`. A scaled element
+       does not affect its container's scroll extent, so the first version could
+       be zoomed but not panned — the rest of the page was simply unreachable.
+       Setting the image's width in px makes the overlay overflow for real, and
+       then native scroll, wheel and touch-drag all work with no code. */
     .cert-frame { cursor: zoom-in; }
     .cert-zoom {
       position: fixed; inset: 0; z-index: 200;
-      display: none; place-items: center;
-      padding: clamp(16px, 3vw, 48px);
-      background: rgba(6, 6, 6, 0.94);
-      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      display: none;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
       overscroll-behavior: contain;
+      /* ⚠ NO backdrop-filter HERE. It creates a containing block for fixed
+         descendants, which silently turns the close button into an absolutely
+         positioned one — it scrolled off the top the moment the image was
+         panned, exactly when it is needed. The ground is opaque anyway. */
+      background: rgb(8, 8, 8);
+      --pad: clamp(16px, 3vw, 48px);
     }
-    .cert-zoom.is-open { display: grid; }
+    .cert-zoom.is-open { display: block; }
+    /* min-width/min-height keep the image centred while it fits, and let it
+       overflow honestly once it does not. */
+    /* ⚠ NOT `width: max-content` while it fits. That makes the stage size to
+       the image's NATURAL width, so the image's own `max-width: 100%` resolves
+       against itself and constrains nothing — the certificate opened at 1445px
+       wide inside a 1440px window. max-content is switched on only once zoomed,
+       which is the one time the stage really does need to exceed the viewport. */
+    .cert-zoom__stage {
+      min-width: 100%; min-height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      padding: var(--pad);
+      box-sizing: border-box;
+    }
     .cert-zoom__img {
-      max-width: 100%; max-height: 100%;
-      object-fit: contain;
+      display: block;
+      max-width: 100%;
+      max-height: calc(100dvh - var(--pad) * 2);
       background: var(--bone);
       cursor: zoom-in;
-      transition: transform 320ms var(--ease-out);
-      transform-origin: center center;
-      will-change: transform;
     }
-    .cert-zoom.is-zoomed .cert-zoom__img { cursor: zoom-out; transform: scale(2.6); }
+    .cert-zoom.is-zoomed .cert-zoom__stage { width: max-content; align-items: flex-start; }
+    .cert-zoom.is-zoomed .cert-zoom__img { max-width: none; max-height: none; cursor: zoom-out; }
+
+    /* ⚠ FIXED, not absolute: the overlay scrolls when zoomed, and an absolutely
+       positioned control scrolls away with it exactly when it is needed most. */
     .cert-zoom__close {
-      position: absolute; top: clamp(12px, 2vh, 24px); right: clamp(12px, 2vw, 28px);
-      width: 44px; height: 44px;
+      position: fixed;
+      top: clamp(14px, 2.4vh, 28px); right: clamp(14px, 2.4vw, 32px);
+      z-index: 2;
+      width: 60px; height: 60px;
       display: inline-flex; align-items: center; justify-content: center;
-      background: transparent; border: 1px solid var(--bone-line);
-      color: var(--bone); font-family: var(--f-mono); font-size: 1rem;
+      background: rgba(10, 10, 10, 0.86);
+      border: 1px solid var(--bone-soft);
+      color: var(--bone);
+      font-family: var(--f-mono); font-size: 1.6rem; line-height: 1;
       cursor: pointer;
-      transition: border-color 240ms var(--ease-out), color 240ms var(--ease-out);
+      transition: border-color 240ms var(--ease-out), color 240ms var(--ease-out), background 240ms var(--ease-out);
     }
-    .cert-zoom__close:hover { border-color: var(--accent); color: var(--accent); }
-    @media (prefers-reduced-motion: reduce) { .cert-zoom__img { transition: none; } }
+    .cert-zoom__close:hover,
+    .cert-zoom__close:focus-visible {
+      border-color: var(--accent); color: var(--accent);
+      background: rgba(10, 10, 10, 0.96);
+    }
+    .cert-zoom__hint {
+      position: fixed; left: 50%; transform: translateX(-50%);
+      bottom: clamp(14px, 2.4vh, 28px); z-index: 2;
+      font-family: var(--f-mono); font-size: .62rem;
+      letter-spacing: .28em; text-transform: uppercase;
+      color: var(--bone-faint); pointer-events: none;
+    }
 
   </style>
 </head>
@@ -2017,17 +2054,20 @@
       const src = document.querySelector('.cert-img');
       if (!frame || !src) return;
 
+      const ZOOM = 2.6;
       const overlay = document.createElement('div');
       overlay.className = 'cert-zoom';
       overlay.setAttribute('role', 'dialog');
       overlay.setAttribute('aria-modal', 'true');
       overlay.setAttribute('aria-label', src.getAttribute('alt') || 'Certificate');
-      overlay.hidden = false;
 
+      const stage = document.createElement('div');
+      stage.className = 'cert-zoom__stage';
       const big = document.createElement('img');
       big.className = 'cert-zoom__img';
       big.alt = src.getAttribute('alt') || '';
       big.decoding = 'async';
+      stage.appendChild(big);
 
       const close = document.createElement('button');
       close.type = 'button';
@@ -2035,21 +2075,34 @@
       close.setAttribute('aria-label', 'Close');
       close.textContent = '\u2715';
 
-      overlay.append(big, close);
+      const hint = document.createElement('p');
+      hint.className = 'cert-zoom__hint';
+      hint.textContent = 'tap to zoom';
+
+      overlay.append(stage, close, hint);
       document.body.appendChild(overlay);
 
       let lastFocus = null;
+
+      const unzoom = () => {
+        overlay.classList.remove('is-zoomed');
+        big.style.width = '';
+        big.style.height = '';
+        hint.textContent = 'tap to zoom';
+        overlay.scrollTo(0, 0);
+      };
+
       const open = () => {
-        // Same file the page already loaded, so this is warm in cache.
-        if (!big.src) big.src = src.currentSrc || src.src;
+        if (!big.src) big.src = src.currentSrc || src.src;   // already cached
         lastFocus = document.activeElement;
         overlay.classList.add('is-open');
         document.body.style.overflow = 'hidden';
+        unzoom();
         close.focus();
       };
       const shut = () => {
-        overlay.classList.remove('is-open', 'is-zoomed');
-        big.style.transformOrigin = 'center center';
+        overlay.classList.remove('is-open');
+        unzoom();
         document.body.style.overflow = '';
         if (lastFocus && lastFocus.focus) lastFocus.focus();
       };
@@ -2062,23 +2115,36 @@
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
       });
 
-      // Zoom toward the point that was clicked, not the centre — otherwise the
-      // detail you aimed at is the first thing to leave the screen.
       big.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (overlay.classList.contains('is-zoomed')) {
-          overlay.classList.remove('is-zoomed');
-          return;
-        }
+        if (overlay.classList.contains('is-zoomed')) { unzoom(); return; }
+
+        // Where in the image did they aim, as a 0-1 fraction, BEFORE resizing.
         const r = big.getBoundingClientRect();
-        const x = ((e.clientX - r.left) / r.width) * 100;
-        const y = ((e.clientY - r.top) / r.height) * 100;
-        big.style.transformOrigin = `${x}% ${y}%`;
+        const fx = (e.clientX - r.left) / r.width;
+        const fy = (e.clientY - r.top) / r.height;
+
+        // A real width, so the overlay genuinely overflows and can scroll.
+        // Zoom far enough to reach the image's NATIVE pixels where the screen
+        // allows it: on a 375px phone a flat 2.6x only reaches 62% of the
+        // render, so the report number stays soft at maximum zoom — which is
+        // the one thing this control exists for. Never below 2.6x, never past
+        // native (upscaling adds nothing but blur).
+        const dpr = window.devicePixelRatio || 1;
+        const w = Math.max(r.width * ZOOM, Math.min(big.naturalWidth, r.width * ZOOM * dpr));
+        big.style.width = w + 'px';
+        big.style.height = 'auto';
         overlay.classList.add('is-zoomed');
+        hint.textContent = 'drag to move · tap to fit';
+
+        // Put what they aimed at in the middle of the screen.
+        const nr = big.getBoundingClientRect();
+        overlay.scrollLeft = (big.offsetLeft + fx * nr.width) - overlay.clientWidth / 2;
+        overlay.scrollTop = (big.offsetTop + fy * nr.height) - overlay.clientHeight / 2;
       });
 
-      close.addEventListener('click', shut);
-      overlay.addEventListener('click', shut);
+      close.addEventListener('click', (e) => { e.stopPropagation(); shut(); });
+      overlay.addEventListener('click', (e) => { if (e.target === overlay || e.target === stage) shut(); });
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && overlay.classList.contains('is-open')) shut();
       });
