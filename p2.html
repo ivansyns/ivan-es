@@ -273,7 +273,7 @@
       padding: clamp(120px, 16vh, 200px) clamp(20px, 4vw, 48px) clamp(64px, 8vh, 96px);
       display: flex; align-items: center; justify-content: center;
     }
-    .panel-inner { width: 100%; max-width: 1180px; margin: 0 auto; }
+    .panel-inner { width: 100%; max-width: 1320px; margin: 0 auto; }
     @media (max-width: 1023px) {
       .hpanels, .hpanels-track { display: contents; }
     }
@@ -300,12 +300,24 @@
          desktop". The piece is the point of the page; the certificate being one
          panel away is the cheaper cost. The gap is closed by SCROLL DISTANCE
          instead — see the ScrollTrigger end below. */
+      /* ⚠ ONLY THE HERO IS A FULL VIEWPORT. Panels do not have to be the same
+         width, and making them uniform is what produced the huge voids: a
+         100vw panel holding ~540px of certificate leaves ~450px of nothing on
+         each side, and two of those meet at every seam. The hero keeps 100vw
+         because the pendant is the point of the page and shrinking it was
+         already tried and reverted. The rest are sized close to their content,
+         so the certificate sits near the spec table instead of a screen away.
+         Nothing in the JS assumes a width — the scroll distance is measured
+         from track.scrollWidth. */
       .hpanels .hpanel {
         position: relative !important;
         flex: 0 0 100vw;
         width: 100vw; height: 100vh; min-height: 100vh;
         overflow: hidden;
-        padding: clamp(96px, 14vh, 140px) clamp(40px, 6vw, 96px) clamp(48px, 6vh, 80px);
+        /* Horizontal padding was 96px a side at 1440. Each panel is a full
+           viewport and its content is centred, so that padding is paid TWICE at
+           every seam — see the max-widths below, raised for the same reason. */
+        padding: clamp(96px, 14vh, 140px) clamp(28px, 3vw, 48px) clamp(48px, 6vh, 80px);
       }
     }
 
@@ -331,7 +343,7 @@
     .panel--hero .panel-inner {
       display: flex; flex-direction: column;
       gap: clamp(20px, 3vh, 40px);
-      max-width: 1180px;
+      max-width: min(100%, 1560px);
       align-items: stretch;
     }
     .panel--hero .hero-grid {
@@ -753,7 +765,7 @@
 
     /* ─── PANEL 2 — STORY ─── */
     .panel--story .panel-inner {
-      max-width: 860px;
+      max-width: 1180px;
       display: flex; flex-direction: column;
       /* Gap scales with viewport — 32px on mobile, up to 52px on desktop. */
       gap: clamp(32px, 3.6vw, 52px);
@@ -854,8 +866,25 @@
       overflow: hidden;
     }
     @media (min-width: 1024px) {
+      /* Each non-hero panel is exactly as wide as its own content, so the void
+         beside it is one padding, not half a viewport. A fixed 1040px was tried
+         first and it is wrong for two panels out of three — the certificate
+         needs ~640px and the closing panel ~1300. */
+      .hpanels .hpanel:not(.panel--hero) {
+        flex: 0 0 auto;
+        width: auto;
+        max-width: 100vw;
+      }
+      .hpanels .hpanel:not(.panel--hero) .panel-inner { width: auto; }
+      /* ⚠ THE RHYTHM IS 2 AND 2, and this margin is the whole of it.
+         table—certificate  tight   : the table makes the claims, this checks them
+         certificate—story  OPEN    : the break between fact and voice
+         story—closing note tight   : the note belongs to the story
+         Everything else on this track is content-sized, so the ONLY deliberate
+         space between sections is here. Move it and the pairing moves. */
+      .hpanels .panel--specs { margin-right: clamp(200px, 20vw, 420px); }
       .hpanels .panel--specs {
-        padding: clamp(72px, 9vh, 96px) clamp(32px, 4vw, 64px) clamp(24px, 3vh, 40px);
+        padding: clamp(72px, 9vh, 96px) clamp(28px, 3vw, 48px) clamp(24px, 3vh, 40px);
       }
       .panel--specs .panel-inner {
         max-width: 1400px;
@@ -921,7 +950,7 @@
     /* ─── PANEL 4 — Closing signature: numero · hairline · note · CTAs (centered) ─── */
     .panel--cta { position: relative; }
     .panel--cta .panel-inner {
-      max-width: 920px;
+      max-width: 1260px;
       display: flex; flex-direction: column; gap: 18px;
       align-items: center;
       text-align: center;
