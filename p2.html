@@ -883,7 +883,15 @@
          at its box edge, so 43px was all the air there was — a third of what
          the eye reads on the left. This matches the right margin to what the
          left one LOOKS like, not to what it measures. */
-      .hpanels .panel--hero { padding-right: clamp(64px, 7.5vw, 170px); }
+      .hpanels .panel--hero { padding-right: clamp(88px, 9.2vw, 210px); }
+      /* ⚠ THE END OF THE TRACK NEEDS A SHOULDER. At maximum scroll the track's
+         right edge aligns with the viewport's, so the last panel's own padding
+         — 43px — was the only air between the closing note and the edge of the
+         page. The page opens with ~130px of margin on the hero and was closing
+         with 43. This is the same measurement at the other end, so the piece
+         pages begin and end with the same breathing room. */
+      .hpanels .hpanel:last-child { padding-right: clamp(88px, 9.2vw, 210px); }
+
       .hpanels .hpanel:not(.panel--hero) {
         flex: 0 0 auto;
         width: auto;
@@ -984,7 +992,11 @@
        sibling mark, not a stamp. */
     .cta-numero {
       position: absolute;
-      top: clamp(28px, 5vh, 64px);
+      /* ⚠ MUST CLEAR THE FIXED NAV. At clamp(28px, 5vh, 64px) this sat at y=45
+         and overlapped the nav bar by 106x25 and the language switcher by 62x5
+         on every desktop width — the numero and the flag were drawn on top of
+         each other. Pre-existing; measured against HEAD before changing it. */
+      top: clamp(96px, 12vh, 132px);
       right: clamp(20px, 4vw, 56px);
       font-family: var(--f-mono);
       font-style: italic;
@@ -1017,7 +1029,11 @@
       line-height: 1.45;
       letter-spacing: -0.005em;
       color: var(--bone);
-      max-width: 28ch;
+      /* Wide enough for the longest of the three sentences to sit on one line.
+         At 28ch the closing line broke as "A piece in its spirit can be /
+         commissioned." — a hard break above it does nothing if the line it
+         creates is still too long for its own box. */
+      max-width: 44ch;
     }
     .cta-note em { font-style: italic; color: var(--accent-soft);
       text-shadow: var(--accent-raise);
@@ -1471,7 +1487,7 @@
           <span class="cta-rule" aria-hidden="true"></span>
           <span class="eyebrow reveal" data-i18n="p2.cta.eyebrow">A note on this piece</span>
           <p class="cta-note reveal" data-i18n-html="p2.cta.note">
-            <em>My own ring.</em> Lacrimosa is not for sale.<br class="br-lg">A piece in its spirit can be commissioned.
+            <em>My own ring.</em><br>Lacrimosa is not for sale.<br>A piece in its spirit can be commissioned.
           </p>
           <div class="cta-row reveal">
             <a class="cta-btn cta-btn--primary"
