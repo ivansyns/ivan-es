@@ -287,8 +287,6 @@
         background-blend-mode: screen;
         background-size: 406px 406px;
         background-repeat: repeat;
-      background-size: 406px 406px;
-      background-repeat: repeat;
       }
       .hpanels-track {
         display: flex; flex-wrap: nowrap;
@@ -296,13 +294,20 @@
         will-change: transform;
       }
       .hpanels .panel { background: transparent; }
+      /* ⚠ HALF A VIEWPORT EACH, so two sections share the screen: the piece and
+         its certificate arrive together, then the story and the closing CTAs.
+         The point is the pairing — the spec table makes the claims and the
+         document that backs them is beside it, not a scroll away.
+         The track's scroll distance is derived from track.scrollWidth, NOT from
+         panel count × innerWidth, precisely so this width can change without
+         the JS having to know about it. */
       .hpanels .hpanel {
         position: relative !important;
-        flex: 0 0 100vw;
-        width: 100vw; height: 100vh; min-height: 100vh;
+        height: 100vh; min-height: 100vh;
         overflow: hidden;
-        padding: clamp(96px, 14vh, 140px) clamp(40px, 6vw, 96px) clamp(48px, 6vh, 80px);
+        padding: clamp(96px, 14vh, 140px) clamp(28px, 3vw, 52px) clamp(48px, 6vh, 80px);
       }
+      .hpanels .hpanel { flex: 0 0 100vw; width: 100vw; }
     }
 
     /* ─── EYEBROW + HEADINGS (shared) ─── */
@@ -851,42 +856,25 @@
     }
     @media (min-width: 1024px) {
       .hpanels .panel--specs {
-        padding: clamp(72px, 9vh, 96px) clamp(32px, 4vw, 64px) clamp(24px, 3vh, 40px);
+        padding: clamp(72px, 9vh, 96px) clamp(28px, 3vw, 52px) clamp(24px, 3vh, 40px);
       }
-      .panel--specs .panel-inner {
-        max-width: 1400px;
-      }
+      .panel--specs .panel-inner { max-width: none; }
       .cert-frame {
         /* Landscape: bound by WIDTH, not height — the opposite of p1, where a
            portrait page is bound by height. Height follows from the ratio. */
         width: 100%;
         max-width: 100%;
         height: auto;
-        max-height: calc(100vh - 130px);
+        max-height: calc(100vh - 230px);
         aspect-ratio: 595.44 / 351.36;
         margin-inline: auto;
       }
     }
-    .cert-frame object,
-    .cert-frame iframe {
-      width: 100%; height: 100%;
-      border: 0;
+    .cert-frame .cert-img {
       display: block;
-    }
-    /* Exactly one of these shows at a time — see the note on .cert-img in the
-       markup for why mobile gets an image instead of the PDF.
-       ⚠ These must sit AFTER `.cert-frame iframe` above and be scoped to
-       .cert-frame: a bare `.cert-iframe` (0,1,0) loses to it (0,1,1) no matter
-       where it appears, which is exactly how the first attempt silently failed. */
-    .cert-frame .cert-img { display: none; }
-    @media (max-width: 900px) {
-      .cert-frame .cert-iframe { display: none; }
-      .cert-frame .cert-img {
-        display: block;
-        position: absolute; inset: 0;
-        width: 100%; height: 100%;
-        object-fit: contain;
-      }
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: contain;
     }
     .cert-fallback-link {
       position: absolute; inset: 0;
@@ -894,10 +882,6 @@
       padding: 32px;
       font-family: var(--f-body); font-size: 1rem;
       color: var(--ink); text-align: center;
-    }
-    .cert-actions {
-      display: flex; gap: 12px; flex-wrap: wrap;
-      align-items: center; justify-content: space-between;
     }
     .cert-meta {
       font-family: var(--f-mono); font-size: .64rem;
@@ -913,18 +897,20 @@
       text-shadow: var(--accent-raise);
       font-weight: 500;
     }
-    .cert-link:hover { color: var(--accent); }
-    @media (max-width: 900px) {
-      /* Mobile shows a flat image of the certificate, so this link is the only
-         way to the actual PDF — where the report number can be selected and
-         copied. 18px tall was not a tap target. */
-      .cert-link {
-        min-height: 44px;
-        padding: 12px 18px;
-        border: 1px solid var(--accent-line);
-        justify-content: center;
-      }
+    .cert-link:hover { color: var(--accent); background: rgba(255, 222, 50, 0.08); }
+    .cert-head {
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
     }
+    .cert-head .cert-link { margin-left: auto; }
+    /* This is the only route to the real document — where the report number can
+       be selected and copied — so it is a button, not a footnote. */
+    .cert-link {
+      min-height: 40px;
+      padding: 10px 18px;
+      border: 1px solid var(--accent-line);
+      font-weight: 500;
+    }
+    @media (max-width: 900px) { .cert-link { min-height: 44px; } }
     .cert-link svg {
       width: 14px; height: 14px;
       stroke: currentColor; stroke-width: 1.6; fill: none;
@@ -1063,6 +1049,82 @@
     .legal-strip a:hover { color: var(--accent); }
     .legal-strip i { font-style: normal; opacity: .4; }
     @media (max-width: 560px) { .legal-strip { gap: 12px; font-size: 8.6px; letter-spacing: .12em; } }
+
+    /* ═══════════ DESKTOP PAIRING — MUST BE LAST ═══════════
+       Two sections share the screen: the piece and its certificate arrive
+       together, then the story and the closing CTAs. The spec table makes the
+       claims and the document backing them is beside it, not a scroll away.
+
+       ⚠ THIS BLOCK HAS TO SIT AFTER EVERY BASE RULE IT OVERRIDES. The first
+       attempt put it up with the .hpanels definitions, where
+       `.panel--hero .hero-grid` (same specificity, declared later) beat it and
+       the hero silently kept two columns inside a 720px panel — the media
+       collapsed to 0x0 and simply vanished. Nothing errored.
+
+       ⚠ .cert-frame needs a DEFINITE dimension in one axis. `height: auto` +
+       `width: auto` + `aspect-ratio` has nothing to resolve against and the
+       frame collapsed to 2x3px. Portrait pages are bound by height, landscape
+       by width. */
+    /* ⚠ GATED ON HEIGHT, NOT JUST WIDTH. Pairing halves the width available to
+       the hero, so its content stacks and needs vertical room it does not have
+       on a short desktop: at 1024x640 the text alone fills the panel and the
+       piece would have ~20px left. Below 760px tall the panels stay full-width
+       and the old one-per-screen layout returns, which is the correct layout
+       for that shape rather than a degraded version of this one. */
+    @media (min-width: 1024px) and (min-height: 760px) {
+      /* The two halves are NOT equal. Each pair is one screen (58 + 42 = 100vw)
+         and the wider share goes to the text: p2's spec table has nine fields
+         and its values wrap. The certificate is an image and reads fine
+         smaller. Any future pair must still sum to 100vw. */
+      .hpanels .hpanel:nth-child(odd)  { flex: 0 0 58vw; width: 58vw; }
+      .hpanels .hpanel:nth-child(even) { flex: 0 0 42vw; width: 42vw; }
+      .hpanels .panel--hero { padding-bottom: clamp(32px, 4vh, 56px); }
+      /* No scroll hint in the paired layout: it costs 32px of the exact budget
+         that was short, and the horizontal track already moves on its own. */
+      .panel--hero .scroll-cue { display: none; }
+      .panel--hero .hero-grid {
+        grid-template-columns: 1fr;
+        gap: clamp(20px, 3vh, 34px);
+        justify-items: center;
+      }
+      .panel--hero .hero-copy { align-items: center; text-align: center; }
+      /* The whole hero has to fit 900px of panel: top padding + media + copy +
+         spec table + availability. The spec values were wrapping to three lines
+         in a 317px column, which alone overflowed the panel — giving the copy
+         room to wrap in two shortens the column more than shrinking the media
+         does. Both were needed. */
+      .panel--hero .hero-copy {
+        width: 100%; max-width: 660px;
+        gap: 14px;                 /* was 22 — four gaps, so 32px back */
+      }
+      .panel--hero .hero-grid { gap: 18px; }
+      /* 126px of top padding is generous for a full-width panel and too much
+         for a half one. */
+      .hpanels .panel--hero { padding-top: clamp(64px, 8vh, 96px); }
+      .panel--hero .hero-media {
+        width: min(100%, 236px);
+        max-height: 19vh;
+        margin-inline: auto;
+      }
+      .panel--hero .hero-title svg { display: block; margin: 0 auto; }
+      .panel--hero .hero-title text { text-anchor: middle; transform: translateX(360px); }
+      /* Three columns, not two. The table was laying 9 fields into 2 columns —
+         5 rows, 289px — while using only 446px of the 660px available to it.
+         Three columns of ~200px fit the same width, cut it to 3 rows, and give
+         back ~129px, which is what the panel was short by at 1280x720. */
+      .hero-specs {
+        margin-inline: auto;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .cert-frame {
+        width: 100%;
+        height: auto;
+        max-height: calc(100vh - 250px);
+        aspect-ratio: 595.44 / 351.36;
+        margin-inline: auto;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1277,33 +1339,11 @@
       <section class="panel hpanel panel--specs">
         <div class="panel-inner">
           <div class="cert-col reveal">
-            <span class="eyebrow" data-i18n="p2.cert.eyebrow">Certificate</span>
-            <div class="cert-frame">
-              <!-- iframe (not object) so Chromium's PDFium shows its full
-                   toolbar with zoom controls. data-src is promoted to src
-                   only after IntersectionObserver fires — see lazy-load
-                   block in the script tag. Why deferred: this page is a
-                   horizontal-scroll track on desktop, so the cert-frame
-                   sits off-screen at page load. PDFium reads the embed's
-                   bounding box once at first navigation and locks fit-zoom
-                   to whatever size it sees then. Loading before GSAP pins
-                   and lays out the panel = locked-small "zoomed out" page. -->
-              <!-- ⚠ MOBILE SHOWS THIS IMAGE, NOT THE PDF. iOS Safari renders a PDF in
-                   an iframe as a fixed, already-zoomed preview that cannot be pinched
-                   back out, so the certificate opened mid-page and could never be seen
-                   whole. A rendered page-1 image fits entirely by default and zooms
-                   like any other image. Desktop keeps the embed, where PDFium's
-                   toolbar is genuinely better. Regenerate with:
-                   pdftoppm -r 170 -png -singlefile "<pdf>" <out>  then encode to webp. -->
-              <img class="cert-img" src="assets/s3/diamond-igi-report-764657982-cert.webp" alt="" aria-hidden="true"
-                   loading="lazy" decoding="async">
-              <iframe class="cert-iframe"
-                      data-src="assets/s3/Diamond_IGI_report_764657982.pdf#view=FitH"
-                      title="IGI report — Natural Diamond 0.90 ct"
-                      data-i18n-attr="title:p2.cert.aria"
-                      loading="lazy"></iframe>
-            </div>
-            <div class="cert-actions">
+            <!-- The PDF link sits ABOVE the certificate, hard right. Under it, at the
+                 foot of the column, the fixed legal strip crossed it on desktop and it
+                 read as a footnote rather than the way to the real document. -->
+            <div class="cert-head">
+              <span class="eyebrow" data-i18n="p2.cert.eyebrow">Certificate</span>
               <span class="cert-meta" data-i18n="p2.cert.meta">IGI · 0.90 ct</span>
               <a class="cert-link" href="assets/s3/Diamond_IGI_report_764657982.pdf" target="_blank" rel="noopener">
                 <span data-i18n="p2.cert.openDownload">Open PDF</span>
@@ -1312,6 +1352,21 @@
                   <polyline points="7 7 17 7 17 17"/>
                 </svg>
               </a>
+            </div>
+            <div class="cert-frame">
+              <!-- ⚠ THE CERTIFICATE IS AN IMAGE, NOT A PDF EMBED, AT EVERY WIDTH.
+                   iOS Safari renders a PDF in an iframe as a fixed, already-zoomed
+                   preview that cannot be pinched back out — the certificate opened
+                   mid-page and could never be seen whole. Desktop was no better for a
+                   different reason: PDFium drew the page at ~290x380 inside a 595x770
+                   frame, with its thumbnail sidebar and a large grey void around it.
+                   A rendered page-1 image fills the frame at both sizes, and the frame
+                   already carries this certificate's own page aspect so nothing
+                   letterboxes. The real PDF is one tap away in .cert-link below, which
+                   is where the report number can be selected and copied.
+                   Regenerate: pdftoppm -r 170 -png -singlefile "<pdf>" <out>, then webp. -->
+              <img class="cert-img" src="assets/s3/diamond-igi-report-764657982-cert.webp" alt="" aria-hidden="true"
+                   decoding="async">
             </div>
           </div>
         </div>
@@ -1433,35 +1488,6 @@
     }, { threshold: 0.18, rootMargin: '0px 0px -8% 0px' });
     document.querySelectorAll('.reveal').forEach((el) => obs.observe(el));
 
-    // ─── Cert-iframe lazy-load ───
-    // PDFium reads the iframe's bounding box once on first navigation and
-    // locks fit-zoom against that size. On this page panel--specs is panel 3
-    // of 4 in the GSAP-pinned horizontal track, off-screen at page load —
-    // setting src before the panel is laid out at its final dimensions
-    // makes the page render too small inside the bone frame. Promoting
-    // data-src → src only after the cert-frame intersects the viewport
-    // (threshold 0.5 = at least half visible) guarantees PDFium initialises
-    // against the settled size.
-    (function () {
-      const iframe = document.querySelector('.cert-iframe');
-      if (!iframe || !iframe.dataset.src) return;
-      // Mobile shows .cert-img instead and the iframe is display:none, so
-      // promoting the src here would fetch a ~640KB PDF nobody ever sees.
-      if (!window.matchMedia('(min-width: 901px)').matches) return;
-      if (!('IntersectionObserver' in window)) {
-        iframe.src = iframe.dataset.src;
-        return;
-      }
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            iframe.src = iframe.dataset.src;
-            io.disconnect();
-          }
-        });
-      }, { threshold: 0.5 });
-      io.observe(iframe);
-    })();
 
     // ─── EQUINOCCIO hero — same draw → fill → carve sequence as the AROMAZLA wordmark ───
     // SVG <text> doesn't expose getTotalLength(), so the dasharray uses a fixed
@@ -1587,7 +1613,12 @@
         if (!track || !wrapper) return;
         const panels = track.querySelectorAll('.hpanel');
         const slides = panels.length;
-        const distance = () => (slides - 1) * window.innerWidth;
+        // ⚠ MEASURE THE TRACK, don't compute from panel count. Panels are half a
+        // viewport wide now (two sections share the screen), so
+        // (slides - 1) * innerWidth over-scrolled by a full 2 viewports and left
+        // the track pinned on empty space at the end. scrollWidth is true
+        // whatever the panel width becomes later.
+        const distance = () => Math.max(0, track.scrollWidth - window.innerWidth);
         const horizontalTween = gsap.to(track, {
           x: () => -distance(),
           ease: 'none',
