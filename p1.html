@@ -874,21 +874,29 @@
          Everything else on this track is content-sized, so the ONLY deliberate
          space between sections is here. Move it and the pairing moves. */
       .hpanels .panel--specs { margin-right: clamp(200px, 20vw, 420px); }
+      /* ⚠ THIS PANEL STATES ITS OWN WIDTH. Every other non-hero panel is
+         shrink-to-fit, but shrink-to-fit could not resolve a width that comes
+         from the VIEWPORT HEIGHT — it kept sizing to the .cert-head row and the
+         certificate spilled up to 513px past its own panel edge. Panel width is
+         now the frame's width plus its two paddings, all from one variable, so
+         the two cannot disagree.
+         ⚠ The formula is PER PAGE. This one is a portrait GIA letter page
+         (0.77273); the other page's certificate is the opposite
+         orientation and needs different bounds. There is no shared size. */
       .hpanels .panel--specs {
-        padding: clamp(72px, 9vh, 96px) clamp(28px, 3vw, 48px) clamp(24px, 3vh, 40px);
+        --pad-x: clamp(28px, 3vw, 48px);
+        --cert-h: min(calc(100vh - 200px), calc(46vw / 0.77273), 900px);
+        padding: clamp(72px, 9vh, 96px) var(--pad-x) clamp(24px, 3vh, 40px);
+        flex: 0 0 auto;
+        width: calc(var(--cert-h) * 0.77273 + var(--pad-x) * 2);
       }
-      .panel--specs .panel-inner {
-        max-width: 1400px;
-      }
+      .panel--specs .panel-inner { max-width: none; width: 100%; }
       .cert-frame {
-        /* Definite HEIGHT, width from the ratio: a portrait page is bound by
-           height. 190px covers the panel padding plus the .cert-head row that
-           now sits above the frame. */
-        height: calc(100vh - 200px);   /* panel padding + the .cert-head row above */
+        height: var(--cert-h);
+        width: calc(var(--cert-h) * 0.77273);
         max-height: none;
-        width: auto;
-        max-width: 100%;
-        aspect-ratio: 8.5 / 11;
+        max-width: none;
+        aspect-ratio: auto;
         margin-inline: auto;
       }
     }
@@ -1087,6 +1095,15 @@
        `width: auto` + `aspect-ratio` has nothing to resolve against and the
        frame collapsed to 2x3px. Portrait pages are bound by height, landscape
        by width. */
+
+    /* A short desktop window (1366x768 and the like) leaves the hero about 25px
+       short once the spec table wraps. Tighten the vertical rhythm there only;
+       at normal heights nothing changes. */
+    @media (min-width: 1024px) and (max-height: 820px) {
+      .hpanels .panel--hero { padding-top: clamp(72px, 9vh, 104px); }
+      .panel--hero .hero-copy { gap: 16px; }
+      .panel--hero .hero-specs { row-gap: 10px; }
+    }
 
     /* ─── CERTIFICATE ZOOM ───
        The certificate is a flat image, so it needs its own way to be read
