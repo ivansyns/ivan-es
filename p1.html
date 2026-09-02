@@ -342,7 +342,17 @@
       .panel--hero .hero-media img { max-height: 60vh; }
     }
     @media (max-width: 900px) {
-      .panel--hero .hero-grid { grid-template-columns: 1fr; gap: 36px; }
+      /* The piece and the title share the first viewport: the carve animation
+         plays on load, so the title cannot start below the fold. Deriving the
+         media's height from the viewport rather than the column width is what
+         guarantees that on a short phone (13 mini is ~620px usable). The width
+         follows the height so the box keeps its 4:5 and stays centred. */
+      .panel--hero .hero-media {
+        max-height: 46dvh;
+        width: min(100%, calc(46dvh * 0.8));
+        margin-inline: auto;
+      }
+      .panel--hero .hero-grid { grid-template-columns: 1fr; gap: 24px; }
       .panel--hero .hero-copy { align-items: center; text-align: center; }
       .panel--hero .hero-title { margin-inline: auto; }
       .panel--hero .hero-title svg { display: block; margin: 0 auto; }
@@ -567,6 +577,7 @@
     }
     .hero-media video,
     .hero-media img {
+      position: absolute; inset: 0;
       width: 100%; height: 100%; object-fit: contain;
       padding: 7% 10%;
       box-sizing: border-box;
@@ -624,14 +635,6 @@
          with the precise length once the timeline starts. */
       stroke-dasharray: 9999;
       stroke-dashoffset: 9999;
-    }
-    .hero-sub {
-      font-family: var(--f-body);
-      font-size: clamp(1rem, 1.4vw, 1.15rem);
-      font-style: italic; font-weight: 500;
-      letter-spacing: .02em;
-      color: var(--accent-soft);
-      text-shadow: var(--accent-raise);
     }
     /* Cinzel is an inscriptional face: it has NO lowercase, so a lowercase
        letter is drawn as a small capital and "1.6 g" renders as "1.6 G". The
@@ -1167,7 +1170,6 @@
                       filter="url(#carvedEqui)">EQUINOCCIO</text>
               </svg>
             </h1>
-            <p class="hero-sub" data-i18n="p1.hero.sub">Yellow Sapphire · 2.08 ct · Sri Lanka · GIA</p>
             <dl class="hero-specs">
               <div class="spec"><dt data-i18n="spec.label.stone">Stone</dt><dd data-i18n-html="p1.spec.stone">Yellow sapphire</dd></div>
               <div class="spec"><dt data-i18n="spec.label.cut">Cut</dt><dd data-i18n-html="p1.spec.cut">Oval</dd></div>
@@ -1426,27 +1428,12 @@
       // ~620px usable). Gate the timeline on an IntersectionObserver of
       // the title so the carve sequence waits for the user to scroll it
       // into view rather than playing unseen.
-      const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
-      if (isDesktop) {
-        tl.play();
-      } else {
-        const heroTitle = document.querySelector('.hero-title');
-        if (heroTitle && 'IntersectionObserver' in window) {
-          const io = new IntersectionObserver((entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                tl.play();
-                io.disconnect();
-              }
-            });
-          }, { threshold: 0.1 });
-          io.observe(heroTitle);
-        } else {
-          // No IntersectionObserver support — play immediately rather
-          // than leaving the title invisible forever.
-          tl.play();
-        }
-      }
+      // Plays on load at every width. This was gated behind an
+      // IntersectionObserver on mobile because the oversized hero video pushed
+      // the title below the fold and the carve would have run unseen. The
+      // media is now capped to the viewport, so the title is in the first
+      // screen and the animation is the first thing the page does.
+      tl.play();
     } else if (equiText) {
       equiText.style.fillOpacity = 1;
       equiText.style.fill = '#FFFFFF';
