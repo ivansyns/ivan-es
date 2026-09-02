@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script>
     (function(){
+      // ?lang= first, so a QR that forces Spanish does not flash English while
+      // i18n.js loads. Mirrors the same precedence in assets/i18n.js.
+      try {
+        var q = new URLSearchParams(location.search).get('lang');
+        if (q === 'en' || q === 'es') {
+          document.documentElement.lang = q;
+          try { localStorage.setItem('ivanes.lang', q); } catch (e) {}
+          return;
+        }
+      } catch (e) {}
       try {
         var s = localStorage.getItem('ivanes.lang');
         if (s === 'en' || s === 'es') { document.documentElement.lang = s; return; }

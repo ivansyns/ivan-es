@@ -372,6 +372,18 @@
   /* ═══════════════════════ DETECT + APPLY ═══════════════════════ */
 
   function detectInitialLang() {
+    // ⚠ ?lang= WINS OVER EVERYTHING, including a previous manual choice. It is
+    // how a printed QR can land a Spanish-speaking reader on Spanish copy
+    // regardless of what their phone's browser is set to — the card is handed
+    // out in Madrid, the phone might be in any language. It is also remembered,
+    // so the rest of the visit stays in that language.
+    try {
+      const q = new URLSearchParams(location.search).get('lang');
+      if (q && SUPPORTED.indexOf(q) !== -1) {
+        try { localStorage.setItem(STORAGE_KEY, q); } catch (e) {}
+        return q;
+      }
+    } catch (e) {}
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored && SUPPORTED.indexOf(stored) !== -1) return stored;
