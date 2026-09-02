@@ -861,6 +861,16 @@
          beside it is one padding, not half a viewport. A fixed 1040px was tried
          first and it is wrong for two panels out of three — the certificate
          needs ~640px and the closing panel ~1300. */
+      /* ⚠ THE HERO'S TWO SIDES ARE DELIBERATELY NOT SYMMETRICAL. Measured at
+         1440 they were identical — 43px of padding each side — and it still
+         read as a text block jammed against the page edge. The reason is that
+         the left gap is the edge to the media BOX: the video then adds its own
+         10% padding and object-fit letterboxing before any of the piece is
+         painted, so the first ink lands at 132px. On the right the text paints
+         at its box edge, so 43px was all the air there was — a third of what
+         the eye reads on the left. This matches the right margin to what the
+         left one LOOKS like, not to what it measures. */
+      .hpanels .panel--hero { padding-right: clamp(64px, 7.5vw, 170px); }
       .hpanels .hpanel:not(.panel--hero) {
         flex: 0 0 auto;
         width: auto;
