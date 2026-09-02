@@ -82,11 +82,11 @@
          accent. Same bug class as work.html's, found 2026-09-02. */
       --accent-line:  rgba(255, 222, 50, .28);
       /* Web work is the one nav item that leads off the jewellery side of the
-         site, so it is marked in a colour the pieces never use: a lighter, less
-         saturated steel blue than the retired accent (#7FA6D9) — same hue,
-         higher value, so it reads as a signal, not a second brand colour.
-         10.4:1 on the ink ground. */
-      --nav-featured: #9DBFE8;
+         site, so it is marked in a colour the pieces never use. Very light
+         peach: 27° off the accent's hue but a third of its saturation, so it
+         reads as a quieter signal beside the yellow rather than a second
+         version of it. 15.0:1 on the ink ground. */
+      --nav-featured: #FFD9C2;
 
       --f-display: 'Cinzel', 'Trajan Pro', Georgia, serif;
       --f-body: 'Work Sans', system-ui, sans-serif;
@@ -1536,16 +1536,50 @@
      prefers-reduced-motion. */
   import { moireRays } from './assets/moire-rays.js';
   const c = document.getElementById('heroRays');
-  if (c && window.matchMedia('(min-width: 1024px)').matches) {
-    moireRays(c, {
-      ink: '#FFFFFF',
-      sets: [
-        { count: 270, alpha: .032, width: 1 },
-        { count: 270, alpha: .032, width: 1, orbit: .03, spin: .14 },
-      ],
-      origin: [.5, .46],
-      core: .34,
-    });
+  if (c) {
+    const mq = window.matchMedia('(min-width: 1024px)');
+    let destroy = () => {};
+
+    /* ⚠ ORIGIN IS MEASURED ON MOBILE, NOT GUESSED. Desktop puts the convergence
+       at [.5, .46] — slightly above centre, clear of the wordmark. Mobile stacks
+       the hero into one column with the bust partway down it, so a hard-coded
+       fraction would put the sunburst somewhere arbitrary. The canvas is
+       inset: 0 on .hero and .hero is the whole page here, so measuring the
+       bust's centre against the canvas's own box gives an origin that is right
+       at any height, and the rays run from the mark out to every edge — bottom
+       of the page included.
+       Re-measured on resize and rotate: the bust's position moves with the
+       layout, and moireRays takes its origin once at construction, so the part
+       is destroyed and rebuilt rather than nudged. */
+    const originForBust = () => {
+      const box = c.getBoundingClientRect();
+      const bust = document.querySelector('.hero-statue');
+      if (!bust || !box.width || !box.height) return [.5, .46];
+      const b = bust.getBoundingClientRect();
+      return [
+        (b.left + b.width / 2 - box.left) / box.width,
+        (b.top + b.height / 2 - box.top) / box.height,
+      ];
+    };
+
+    const build = () => {
+      destroy();
+      destroy = moireRays(c, {
+        ink: '#FFFFFF',
+        sets: [
+          { count: 270, alpha: .032, width: 1 },
+          { count: 270, alpha: .032, width: 1, orbit: .03, spin: .14 },
+        ],
+        origin: mq.matches ? [.5, .46] : originForBust(),
+        core: .34,
+      });
+    };
+
+    build();
+    let t = 0;
+    const rebuild = () => { clearTimeout(t); t = setTimeout(build, 180); };
+    addEventListener('resize', rebuild, { passive: true });
+    addEventListener('orientationchange', rebuild, { passive: true });
   }
 </script>
   <!-- ⚠ aviso-legal.html and privacidad.html are NOT in this deploy. They were

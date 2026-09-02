@@ -140,7 +140,7 @@
       'p1.scroll.cue': 'scroll',
       'p1.story.eyebrow': 'Story',
       'p1.story.line1': 'Winter dies for days of spring —<br>and what stands between is held.',
-      'p1.story.line2': 'A cradle of white gold petals, in the line of art nouveau, holds the paradox.<br>Named <em>Equinoccio</em> for the threshold of the rebirth of nature — what was crystallized, now beginning to flow.',
+      'p1.story.line2': 'A cradle of white gold petals, in the line of art nouveau,<br class="br-lg">holds the paradox.<br>Named <em>Equinoccio</em> for the threshold of the rebirth of nature —<br class="br-lg">what was crystallized, now beginning to flow.',
       'p1.story.line3': '<em>Made once.</em>',
       'p1.specs.eyebrow': 'Specifications',
       'p1.specs.heading': 'Equinoccio',
@@ -313,7 +313,7 @@
       // "morirá" (will die) gives Spanish prophetic weight that the literal
       // present tense "muere" would flatten.
       'p1.story.line1': 'El invierno morirá por días de primavera —<br>y lo que está entre medio queda sostenido.',
-      'p1.story.line2': 'Un cáliz de pétalos de oro blanco, en la línea del art nouveau, sostiene la paradoja.<br>Llamado <em>Equinoccio</em> por el umbral del renacer de la naturaleza — lo que fue cristal, ahora comienza a fluir.',
+      'p1.story.line2': 'Un cáliz de pétalos de oro blanco, en la línea del art nouveau,<br class="br-lg">sostiene la paradoja.<br>Llamado <em>Equinoccio</em> por el umbral del renacer de la naturaleza —<br class="br-lg">lo que fue cristal, ahora comienza a fluir.',
       'p1.story.line3': '<em>Pieza única.</em>',
       'p1.specs.eyebrow': 'Especificaciones',
       'p1.specs.heading': 'Equinoccio',

@@ -94,7 +94,7 @@
       --accent-raise: 0 -1px 0 rgba(255, 255, 255, 0.16),
                       0 1px 0 rgba(0, 0, 0, 0.62),
                       0 2px 3px rgba(0, 0, 0, 0.40);
-      --accent-lift: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55)); --accent-soft: rgba(255, 222, 50, 0.88); --accent-line: rgba(255, 222, 50, .28); --nav-featured: #9DBFE8;
+      --accent-lift: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.55)); --accent-soft: rgba(255, 222, 50, 0.88); --accent-line: rgba(255, 222, 50, .28); --nav-featured: #FFD9C2;
       --f-display: 'Cinzel','Trajan Pro',Georgia,serif;
       --f-body: 'Work Sans', system-ui, sans-serif;
       --f-mono: 'JetBrains Mono',ui-monospace,monospace;
@@ -294,20 +294,19 @@
         will-change: transform;
       }
       .hpanels .panel { background: transparent; }
-      /* ⚠ HALF A VIEWPORT EACH, so two sections share the screen: the piece and
-         its certificate arrive together, then the story and the closing CTAs.
-         The point is the pairing — the spec table makes the claims and the
-         document that backs them is beside it, not a scroll away.
-         The track's scroll distance is derived from track.scrollWidth, NOT from
-         panel count × innerWidth, precisely so this width can change without
-         the JS having to know about it. */
+      /* One section per screen. A paired 58/42 layout was tried and reverted:
+         halving the hero's width forced it to stack, and the pendant had to
+         shrink to ~236px to fit — Ivan: "the pendant cannot be this small in
+         desktop". The piece is the point of the page; the certificate being one
+         panel away is the cheaper cost. The gap is closed by SCROLL DISTANCE
+         instead — see the ScrollTrigger end below. */
       .hpanels .hpanel {
         position: relative !important;
-        height: 100vh; min-height: 100vh;
+        flex: 0 0 100vw;
+        width: 100vw; height: 100vh; min-height: 100vh;
         overflow: hidden;
-        padding: clamp(96px, 14vh, 140px) clamp(28px, 3vw, 52px) clamp(48px, 6vh, 80px);
+        padding: clamp(96px, 14vh, 140px) clamp(40px, 6vw, 96px) clamp(48px, 6vh, 80px);
       }
-      .hpanels .hpanel { flex: 0 0 100vw; width: 100vw; }
     }
 
     /* ─── EYEBROW + HEADINGS (shared) ─── */
@@ -856,9 +855,11 @@
     }
     @media (min-width: 1024px) {
       .hpanels .panel--specs {
-        padding: clamp(72px, 9vh, 96px) clamp(28px, 3vw, 52px) clamp(24px, 3vh, 40px);
+        padding: clamp(72px, 9vh, 96px) clamp(32px, 4vw, 64px) clamp(24px, 3vh, 40px);
       }
-      .panel--specs .panel-inner { max-width: none; }
+      .panel--specs .panel-inner {
+        max-width: 1400px;
+      }
       .cert-frame {
         /* Landscape: bound by WIDTH, not height — the opposite of p1, where a
            portrait page is bound by height. Height follows from the ratio. */
@@ -1065,65 +1066,44 @@
        `width: auto` + `aspect-ratio` has nothing to resolve against and the
        frame collapsed to 2x3px. Portrait pages are bound by height, landscape
        by width. */
-    /* ⚠ GATED ON HEIGHT, NOT JUST WIDTH. Pairing halves the width available to
-       the hero, so its content stacks and needs vertical room it does not have
-       on a short desktop: at 1024x640 the text alone fills the panel and the
-       piece would have ~20px left. Below 760px tall the panels stay full-width
-       and the old one-per-screen layout returns, which is the correct layout
-       for that shape rather than a degraded version of this one. */
-    @media (min-width: 1024px) and (min-height: 760px) {
-      /* The two halves are NOT equal. Each pair is one screen (58 + 42 = 100vw)
-         and the wider share goes to the text: p2's spec table has nine fields
-         and its values wrap. The certificate is an image and reads fine
-         smaller. Any future pair must still sum to 100vw. */
-      .hpanels .hpanel:nth-child(odd)  { flex: 0 0 58vw; width: 58vw; }
-      .hpanels .hpanel:nth-child(even) { flex: 0 0 42vw; width: 42vw; }
-      .hpanels .panel--hero { padding-bottom: clamp(32px, 4vh, 56px); }
-      /* No scroll hint in the paired layout: it costs 32px of the exact budget
-         that was short, and the horizontal track already moves on its own. */
-      .panel--hero .scroll-cue { display: none; }
-      .panel--hero .hero-grid {
-        grid-template-columns: 1fr;
-        gap: clamp(20px, 3vh, 34px);
-        justify-items: center;
-      }
-      .panel--hero .hero-copy { align-items: center; text-align: center; }
-      /* The whole hero has to fit 900px of panel: top padding + media + copy +
-         spec table + availability. The spec values were wrapping to three lines
-         in a 317px column, which alone overflowed the panel — giving the copy
-         room to wrap in two shortens the column more than shrinking the media
-         does. Both were needed. */
-      .panel--hero .hero-copy {
-        width: 100%; max-width: 660px;
-        gap: 14px;                 /* was 22 — four gaps, so 32px back */
-      }
-      .panel--hero .hero-grid { gap: 18px; }
-      /* 126px of top padding is generous for a full-width panel and too much
-         for a half one. */
-      .hpanels .panel--hero { padding-top: clamp(64px, 8vh, 96px); }
-      .panel--hero .hero-media {
-        width: min(100%, 236px);
-        max-height: 19vh;
-        margin-inline: auto;
-      }
-      .panel--hero .hero-title svg { display: block; margin: 0 auto; }
-      .panel--hero .hero-title text { text-anchor: middle; transform: translateX(360px); }
-      /* Three columns, not two. The table was laying 9 fields into 2 columns —
-         5 rows, 289px — while using only 446px of the 660px available to it.
-         Three columns of ~200px fit the same width, cut it to 3 rows, and give
-         back ~129px, which is what the panel was short by at 1280x720. */
-      .hero-specs {
-        margin-inline: auto;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-      .cert-frame {
-        width: 100%;
-        height: auto;
-        max-height: calc(100vh - 250px);
-        aspect-ratio: 595.44 / 351.36;
-        margin-inline: auto;
-      }
+
+    /* ─── CERTIFICATE ZOOM ───
+       The certificate is a flat image now, so it needs its own way to be read
+       closely. Click/tap opens it full-screen; click again toggles a 2.6x zoom
+       centred on the point that was tapped, which is how you check a report
+       number without leaving the page. Esc or the backdrop closes it. The PDF
+       button beside it stays the route to the real document. */
+    .cert-frame { cursor: zoom-in; }
+    .cert-zoom {
+      position: fixed; inset: 0; z-index: 200;
+      display: none; place-items: center;
+      padding: clamp(16px, 3vw, 48px);
+      background: rgba(6, 6, 6, 0.94);
+      backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+      overscroll-behavior: contain;
     }
+    .cert-zoom.is-open { display: grid; }
+    .cert-zoom__img {
+      max-width: 100%; max-height: 100%;
+      object-fit: contain;
+      background: var(--bone);
+      cursor: zoom-in;
+      transition: transform 320ms var(--ease-out);
+      transform-origin: center center;
+      will-change: transform;
+    }
+    .cert-zoom.is-zoomed .cert-zoom__img { cursor: zoom-out; transform: scale(2.6); }
+    .cert-zoom__close {
+      position: absolute; top: clamp(12px, 2vh, 24px); right: clamp(12px, 2vw, 28px);
+      width: 44px; height: 44px;
+      display: inline-flex; align-items: center; justify-content: center;
+      background: transparent; border: 1px solid var(--bone-line);
+      color: var(--bone); font-family: var(--f-mono); font-size: 1rem;
+      cursor: pointer;
+      transition: border-color 240ms var(--ease-out), color 240ms var(--ease-out);
+    }
+    .cert-zoom__close:hover { border-color: var(--accent); color: var(--accent); }
+    @media (prefers-reduced-motion: reduce) { .cert-zoom__img { transition: none; } }
 
   </style>
 </head>
@@ -1619,13 +1599,21 @@
         // the track pinned on empty space at the end. scrollWidth is true
         // whatever the panel width becomes later.
         const distance = () => Math.max(0, track.scrollWidth - window.innerWidth);
+        /* How much page-scroll it takes to travel that distance. 1.0 means a
+           full viewport of scrolling per panel; 0.62 means the next panel — the
+           certificate right after the spec table — arrives in about two thirds
+           of that. This is how the sections were brought closer together after
+           the 58/42 paired layout was reverted for shrinking the pendant.
+           It changes the PACE, not the geometry, so nothing has to fit in less
+           room. */
+        const SCROLL_PACE = 0.62;
         const horizontalTween = gsap.to(track, {
           x: () => -distance(),
           ease: 'none',
           scrollTrigger: {
             trigger: wrapper,
             start: 'top top',
-            end: () => '+=' + distance(),
+            end: () => '+=' + distance() * SCROLL_PACE,
             pin: true,
             scrub: 0.4,
             anticipatePin: 1,
@@ -1993,6 +1981,80 @@
         touchStartX = null;
       }, { passive: true });
     })();
+  
+    /* ─── Certificate zoom ─── */
+    (function () {
+      const frame = document.querySelector('.cert-frame');
+      const src = document.querySelector('.cert-img');
+      if (!frame || !src) return;
+
+      const overlay = document.createElement('div');
+      overlay.className = 'cert-zoom';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', src.getAttribute('alt') || 'Certificate');
+      overlay.hidden = false;
+
+      const big = document.createElement('img');
+      big.className = 'cert-zoom__img';
+      big.alt = src.getAttribute('alt') || '';
+      big.decoding = 'async';
+
+      const close = document.createElement('button');
+      close.type = 'button';
+      close.className = 'cert-zoom__close';
+      close.setAttribute('aria-label', 'Close');
+      close.textContent = '\u2715';
+
+      overlay.append(big, close);
+      document.body.appendChild(overlay);
+
+      let lastFocus = null;
+      const open = () => {
+        // Same file the page already loaded, so this is warm in cache.
+        if (!big.src) big.src = src.currentSrc || src.src;
+        lastFocus = document.activeElement;
+        overlay.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+        close.focus();
+      };
+      const shut = () => {
+        overlay.classList.remove('is-open', 'is-zoomed');
+        big.style.transformOrigin = 'center center';
+        document.body.style.overflow = '';
+        if (lastFocus && lastFocus.focus) lastFocus.focus();
+      };
+
+      frame.addEventListener('click', open);
+      frame.setAttribute('tabindex', '0');
+      frame.setAttribute('role', 'button');
+      frame.setAttribute('aria-label', 'Open the certificate larger');
+      frame.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+      });
+
+      // Zoom toward the point that was clicked, not the centre — otherwise the
+      // detail you aimed at is the first thing to leave the screen.
+      big.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (overlay.classList.contains('is-zoomed')) {
+          overlay.classList.remove('is-zoomed');
+          return;
+        }
+        const r = big.getBoundingClientRect();
+        const x = ((e.clientX - r.left) / r.width) * 100;
+        const y = ((e.clientY - r.top) / r.height) * 100;
+        big.style.transformOrigin = `${x}% ${y}%`;
+        overlay.classList.add('is-zoomed');
+      });
+
+      close.addEventListener('click', shut);
+      overlay.addEventListener('click', shut);
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.classList.contains('is-open')) shut();
+      });
+    })();
+
   </script>
   <!-- ⚠ aviso-legal.html and privacidad.html are NOT in this deploy. They were
        written but the LSSI art.10 fields (legal name, NIF, registered address)
