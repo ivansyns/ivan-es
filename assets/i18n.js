@@ -276,6 +276,7 @@
       'contact.card.directReply': 'Respuesta directa',
 
       // ─── p1 (Equinoccio) ───
+      'spec.label.metalweight': 'Peso del metal',
       'spec.label.stone': 'Piedra',
       'spec.label.cut': 'Talla',
       'spec.label.weight': 'Peso',
@@ -285,6 +286,7 @@
       'spec.label.cert': 'Certificado',
       'spec.label.metal': 'Metal',
       'spec.label.finish': 'Acabado',
+      'p1.spec.metalweight': '1,6&nbsp;<span class="unit">g</span>',
       'p1.spec.stone': 'Sin tratamiento<br>Zafiro amarillo',
       'p1.spec.cut': 'Ovalada',
       'p1.spec.weight': '2,08 ct',
@@ -292,6 +294,7 @@
       'p1.spec.cert': 'GIA',
       'p1.spec.metal': 'Oro blanco de 18k',
       'p1.spec.finish': 'Rodiado',
+      'p2.spec.metalweight': '10,5&nbsp;<span class="unit">g</span>',
       'p2.spec.stone': 'Diamante natural',
       'p2.spec.cut': 'Pera brillante modificada',
       'p2.spec.weight': '0,90 ct',
