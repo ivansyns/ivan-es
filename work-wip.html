@@ -28,9 +28,9 @@
        but without needing the npm package + a build step. The endpoint is
        served by Vercel's edge when Web Analytics is enabled. -->
   <script defer src="/_vercel/insights/script.js"></script>
-  <title>Web work — Iván Alzamora</title>
+  <title>WIP · Web work — Iván Alzamora</title>
   <meta name="description" content="Websites taken from brief to launch — design, build and deploy, by Iván Alzamora. Trilingual, Madrid." data-i18n-content="contact.meta.description" />
-  <meta name="robots" content="noindex" /><!-- PENDIENTE: volver a «index, follow» al publicar la página real -->
+  <meta name="robots" content="noindex" /><!-- versión de trabajo, sin enlazar -->
   <meta name="theme-color" content="#0A0A0A" />
 
   <meta property="og:title" content="Web work — Iván Alzamora" data-i18n-content="contact.meta.ogTitle" />
@@ -747,17 +747,93 @@
     </div>
   </div>
 
-  <!-- ⚠ PÁGINA EN OBRAS. La versión real —la escena fija con las cuatro
-       tarjetas— está terminada en work-wip.html, esperando las cuatro
-       imágenes. Cuando lleguen: se pasa a ésta y se borra el aviso.
-       NO es un 404 a propósito: «Web work» está en la navegación de TODAS las
-       páginas, así que un 404 rompería un enlace en todo el sitio. Con
-       `noindex` Google no la indexa mientras tanto, que es lo que importa. -->
   <main class="contact work">
     <div class="contact-head reveal">
-      <h1 class="contact-title" data-i18n="work.wip.h">Web work</h1>
-      <p class="contact-lede" data-i18n="work.wip.p">This page is being rebuilt. In the meantime, tell me what you need and I will answer directly.</p>
-      <a class="contact-btn" href="contact.html" data-i18n="work.cta.btn">Get in touch</a>
+      <h1 class="contact-title" data-i18n="work.title">Sites, end to end</h1>
+      <p class="contact-lede" data-i18n-html="work.lede">
+        From what a client asks for to a site that is <em>live and working</em> — design, build, deploy.
+      </p>
+    </div>
+
+    <!-- ⚠ ESCENA FIJA, un punto a la vez. El scroll VERTICAL de la página es
+         lo que releva una tarjeta con la siguiente: se descubre solo al bajar,
+         no secuestra la rueda y no esconde nada detrás de un gesto que nadie
+         sepa que existe. El relevo es SECUENCIAL —la que sale llega a 0 antes
+         de que la que entra despegue— porque con las dos a media opacidad se
+         leen los dos textos superpuestos.
+         Sin numerales: estos cuatro son ATRIBUTOS del servicio, no una
+         secuencia, así que el orden no le dice nada al lector. Lo que hay es un
+         raíl de progreso, que informa de la posición sin afirmar un orden. -->
+    <div class="wscene" data-wscene>
+      <div class="wscene__pin">
+        <ul class="wscene__stack">
+          <li class="wcard" aria-label="1 of 4">
+            <div class="wcard__text">
+              <h2 data-i18n="work.a.h">Design and build</h2>
+              <p data-i18n="work.a.p">Hand-written HTML, CSS and JavaScript. No page builder, no template — nothing to keep updated, and nothing that breaks when a plugin is abandoned.</p>
+            </div>
+            <!-- ⚠ HUECO DE IMAGEN — pendiente de que Ivan pase las cuatro.
+                 Marcado como hueco a propósito, no disimulado: un marco vacío
+                 dice «falta una foto», y un placeholder bonito dice «esto ya
+                 está», que es mentira. -->
+            <div class="wcard__shot" aria-hidden="true"><span>image 1</span></div>
+          </li>
+          <li class="wcard" aria-label="2 of 4">
+            <div class="wcard__text">
+              <h2 data-i18n="work.b.h">Fast, and private by default</h2>
+              <p data-i18n="work.b.p">Self-hosted fonts, no cookies, no third-party requests — so there is nothing to consent to. This site is built that way.</p>
+            </div>
+            <!-- ⚠ HUECO DE IMAGEN — pendiente de que Ivan pase las cuatro.
+                 Marcado como hueco a propósito, no disimulado: un marco vacío
+                 dice «falta una foto», y un placeholder bonito dice «esto ya
+                 está», que es mentira. -->
+            <div class="wcard__shot" aria-hidden="true"><span>image 2</span></div>
+          </li>
+          <li class="wcard" aria-label="3 of 4">
+            <div class="wcard__text">
+              <h2 data-i18n="work.c.h">Three languages</h2>
+              <p data-i18n="work.c.p">Spanish, English and Swedish, written rather than machine-translated.</p>
+            </div>
+            <!-- ⚠ HUECO DE IMAGEN — pendiente de que Ivan pase las cuatro.
+                 Marcado como hueco a propósito, no disimulado: un marco vacío
+                 dice «falta una foto», y un placeholder bonito dice «esto ya
+                 está», que es mentira. -->
+            <div class="wcard__shot" aria-hidden="true"><span>image 3</span></div>
+          </li>
+          <li class="wcard" aria-label="4 of 4">
+            <div class="wcard__text">
+              <h2 data-i18n="work.d.h">Found, not just built</h2>
+              <p data-i18n="work.d.p">Google Business Profile, structured data and the technical groundwork a small business is usually missing.</p>
+            </div>
+            <!-- ⚠ HUECO DE IMAGEN — pendiente de que Ivan pase las cuatro.
+                 Marcado como hueco a propósito, no disimulado: un marco vacío
+                 dice «falta una foto», y un placeholder bonito dice «esto ya
+                 está», que es mentira. -->
+            <div class="wcard__shot" aria-hidden="true"><span>image 4</span></div>
+          </li>
+        </ul>
+        <div class="wrail" aria-hidden="true"><span></span></div>
+      </div>
+    </div>
+
+    <!-- ⚠ SELECTED WORK GOES HERE, AND IS DELIBERATELY EMPTY.
+         I will not list client sites I cannot verify are live and cleared to show.
+         Ivan: send project name + live URL + whether it can be named publicly, and
+         this becomes a grid the same shape as the aromazla piece cards. -->
+
+    <div class="contact-head reveal" style="margin-top:clamp(48px,7vh,90px)">
+      <p class="contact-lede" data-i18n-html="work.cta">
+        Working on something? <em>Tell me about it.</em>
+      </p>
+      <div class="cta-row">
+        <a class="cta-btn cta-btn--primary" href="contact.html">
+          <span data-i18n="work.cta.btn">Get in touch</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </a>
+      </div>
     </div>
   </main>
 
