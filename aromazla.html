@@ -565,6 +565,10 @@
       transition: opacity 420ms ease-out;
     }
     .piece-video.ready { opacity: 1; }
+    /* mientras el vídeo se ve, el still se retira: si no, el `lighten` del
+       vídeo se compone contra él y se ven las dos capas a la vez */
+    .piece-emblem.is-playing .piece-still { opacity: 0; }
+    .piece-still { transition: opacity 420ms ease-out; }
 
     /* Top-left card label — Cinzel, mirrors the p1.html hero title font.
        Sized down for the card-corner placement, kept above the video
@@ -1947,7 +1951,16 @@
             if (entry.isIntersecting && !reducedMotion) {
               const p = v.play();
               if (p && typeof p.then === 'function') {
-                p.then(() => v.classList.add('ready'))
+                p.then(function () {
+                     v.classList.add('ready');
+                     /* ⚠ Y SE APAGA EL STILL. El vídeo lleva
+                        `mix-blend-mode: lighten`, así que mientras el still
+                        siga debajo el resultado es lighten(vídeo, still): las
+                        dos imágenes superpuestas, la pieza fantasmeada. El
+                        still sólo tiene que estar mientras el vídeo NO se vea. */
+                     var em = v.parentElement;
+                     if (em) em.classList.add('is-playing');
+                   })
                  .catch(() => swapToPoster(v));
               }
             } else {
