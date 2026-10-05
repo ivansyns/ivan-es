@@ -650,7 +650,18 @@
       /* Phase set by alignHeroGrain() below — see there for why. */
       overflow: hidden;
     }
-    .hero-media video { mix-blend-mode: lighten; }
+    /* ⚠ EL SELECTOR CUBRE LOS DOS, y por eso no es `video` a secas. El relevo
+       de Low Power Mode sustituye el <video> por un <img> (swapToWebpFallback,
+       más abajo): con un selector de ELEMENTO la regla deja de casar en el
+       instante del cambio, el blend se cae, y como
+       `equinoccio-hero-poster.webp` es RGB sin alfa con las cuatro esquinas a
+       (0,0,0), lo que queda en pantalla es el matte: un rectángulo negro
+       alrededor del colgante. Exactamente el fallo contra el que avisa el
+       comentario de `swapToWebpFallback` en index.html — allí se arregló
+       poniendo el blend en línea y aquí no se hizo. Atado al id, que es lo
+       único que el relevo conserva, cubre el vídeo y el relevo a la vez. */
+    .hero-media video,
+    .hero-media #pieceVideo { mix-blend-mode: lighten; }
     .hero-copy { display: flex; flex-direction: column; gap: 22px; }
     /* The H1 wraps the carved-text SVG; the visible glyphs come from <text> below.
        Same recipe as the AROMAZLA wordmark on aromazla.html. */
